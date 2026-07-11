@@ -1,4 +1,5 @@
 """Token manager - specialized for authentication and token lifecycle handling"""
+import asyncio
 import logging
 from typing import Optional, Dict, Any
 from datetime import datetime, timedelta
@@ -37,7 +38,10 @@ class TokenManager:
         self._cp_token: Optional[str] = None
         self._token_expires_at: Optional[datetime] = None
         self._last_login_time: Optional[datetime] = None
-        
+
+        # Serializes login/refresh so concurrent callers don't overlap
+        self._auth_lock = asyncio.Lock()
+
         # Statistics information
         self._login_count = 0
         self._refresh_count = 0
@@ -92,60 +96,62 @@ class TokenManager:
         Raises:
             PanasonicLoginFailed: Login failed
         """
-        # Check if recently logged in (avoid too frequent logins)
-        if self._last_login_time:
-            time_since_last_login = datetime.now() - self._last_login_time
-            if time_since_last_login.total_seconds() < 30:  # Don't repeat login within 30 seconds
-                if self.is_authenticated:
-                    _LOGGER.info("Recently logged in, using existing token")
-                    return {
-                        "refresh_token": self._refresh_token,
-                        "cp_token": self._cp_token,
-                    }
-        
-        _LOGGER.debug("Attempting login...")
+        async with self._auth_lock:
+            # Check if recently logged in (avoid too frequent logins). Under the
+            # lock this also double-checks work done by a concurrent caller.
+            if self._last_login_time:
+                time_since_last_login = datetime.now() - self._last_login_time
+                if time_since_last_login.total_seconds() < 30:  # Don't repeat login within 30 seconds
+                    if self.is_authenticated:
+                        _LOGGER.info("Recently logged in, using existing token")
+                        return {
+                            "refresh_token": self._refresh_token,
+                            "cp_token": self._cp_token,
+                        }
 
-        try:
-            data = {
-                "MemId": self._account,
-                "PW": self._password,
-                "AppToken": APP_TOKEN
-            }
-            
-            response = await self._api_client.request(
-                method="POST",
-                endpoint=API_ENDPOINTS["login"],
-                headers={},
-                data=data,
-                log=False  # Don't log sensitive information
-            )
-            
-            # Validate response
-            if not ErrorHandler.validate_response(response, ["RefreshToken", "CPToken"], "login response"):
-                raise PanasonicLoginFailed("Login response format error")
-            
-            # Update Token status
-            self._refresh_token = response["RefreshToken"]
-            self._cp_token = response["CPToken"]
-            self._last_login_time = datetime.now()
-            self._token_expires_at = datetime.now() + timedelta(hours=1)  # Assume 1 hour expiration
-            self._login_count += 1
+            _LOGGER.debug("Attempting login...")
 
-            _LOGGER.debug("Login successful")
-            ErrorHandler.log_device_status("authentication system", "login_success", f"Login #{self._login_count}")
-            
-            return {
-                "refresh_token": self._refresh_token,
-                "cp_token": self._cp_token,
-            }
-            
-        except (PanasonicLoginFailed, PanasonicExceedRateLimit, PanasonicTokenExpired) as e:
-            # These are expected exceptions from lower layers, re-raise without additional logging
-            raise
-        except Exception as e:
-            # Unexpected errors
-            _LOGGER.error(f"Unexpected error during login: {e}")
-            raise PanasonicLoginFailed(f"Login failed: {str(e)}")
+            try:
+                data = {
+                    "MemId": self._account,
+                    "PW": self._password,
+                    "AppToken": APP_TOKEN
+                }
+
+                response = await self._api_client.request(
+                    method="POST",
+                    endpoint=API_ENDPOINTS["login"],
+                    headers={},
+                    data=data,
+                    log=False  # Don't log sensitive information
+                )
+
+                # Validate response
+                if not ErrorHandler.validate_response(response, ["RefreshToken", "CPToken"], "login response"):
+                    raise PanasonicLoginFailed("Login response format error")
+
+                # Update Token status
+                self._refresh_token = response["RefreshToken"]
+                self._cp_token = response["CPToken"]
+                self._last_login_time = datetime.now()
+                self._token_expires_at = datetime.now() + timedelta(hours=1)  # Assume 1 hour expiration
+                self._login_count += 1
+
+                _LOGGER.debug("Login successful")
+                ErrorHandler.log_device_status("authentication system", "login_success", f"Login #{self._login_count}")
+
+                return {
+                    "refresh_token": self._refresh_token,
+                    "cp_token": self._cp_token,
+                }
+
+            except (PanasonicLoginFailed, PanasonicExceedRateLimit, PanasonicTokenExpired) as e:
+                # These are expected exceptions from lower layers, re-raise without additional logging
+                raise
+            except Exception as e:
+                # Unexpected errors
+                _LOGGER.error("Unexpected error during login: %s", e)
+                raise PanasonicLoginFailed(f"Login failed: {str(e)}")
     
     async def refresh_token(self) -> Dict[str, str]:
         """
@@ -159,44 +165,57 @@ class TokenManager:
             PanasonicTokenExpired: Token expired
         """
         _LOGGER.info("Attempting to refresh Token...")
-        
+
         if self._refresh_token is None:
             raise PanasonicRefreshTokenNotFound("Refresh Token not found, re-login required")
-        
-        try:
-            data = {"RefreshToken": self._refresh_token}
-            
-            response = await self._api_client.request(
-                method="POST",
-                endpoint=API_ENDPOINTS["refresh_token"],
-                headers={},
-                data=data
-            )
-            
-            # Validate response
-            if not ErrorHandler.validate_response(response, ["RefreshToken", "CPToken"], "Token refresh response"):
-                raise PanasonicTokenExpired("Token refresh response format error")
-            
-            # Update Token status
-            self._refresh_token = response["RefreshToken"]
-            self._cp_token = response["CPToken"]
-            self._token_expires_at = datetime.now() + timedelta(hours=1)
-            self._refresh_count += 1
-            
-            _LOGGER.info("Token refresh successful")
-            ErrorHandler.log_device_status("authentication system", "token_refreshed", f"Refresh #{self._refresh_count}")
-            
-            return {
-                "refresh_token": self._refresh_token,
-                "cp_token": self._cp_token,
-            }
-            
-        except Exception as e:
-            error_result = ErrorHandler.handle_api_error(e, "Token refresh")
-            if error_result["status"] in ["token_expired", "login_failed"]:
-                raise PanasonicTokenExpired(f"Token refresh failed: {str(e)}")
-            else:
-                raise
+
+        # Snapshot before contending for the lock so a concurrent refresh is detectable
+        expiry_before_lock = self._token_expires_at
+
+        async with self._auth_lock:
+            # Double-check: another coroutine may have refreshed while we waited
+            if self._token_expires_at != expiry_before_lock and not self.is_token_expired:
+                _LOGGER.debug("Token already refreshed by another task, skipping")
+                return {
+                    "refresh_token": self._refresh_token,
+                    "cp_token": self._cp_token,
+                }
+
+            try:
+                data = {"RefreshToken": self._refresh_token}
+
+                response = await self._api_client.request(
+                    method="POST",
+                    endpoint=API_ENDPOINTS["refresh_token"],
+                    headers={},
+                    data=data,
+                    log=False  # Don't log sensitive information
+                )
+
+                # Validate response
+                if not ErrorHandler.validate_response(response, ["RefreshToken", "CPToken"], "Token refresh response"):
+                    raise PanasonicTokenExpired("Token refresh response format error")
+
+                # Update Token status
+                self._refresh_token = response["RefreshToken"]
+                self._cp_token = response["CPToken"]
+                self._token_expires_at = datetime.now() + timedelta(hours=1)
+                self._refresh_count += 1
+
+                _LOGGER.info("Token refresh successful")
+                ErrorHandler.log_device_status("authentication system", "token_refreshed", f"Refresh #{self._refresh_count}")
+
+                return {
+                    "refresh_token": self._refresh_token,
+                    "cp_token": self._cp_token,
+                }
+
+            except Exception as e:
+                error_result = ErrorHandler.handle_api_error(e, "Token refresh")
+                if error_result["status"] in ["token_expired", "login_failed"]:
+                    raise PanasonicTokenExpired(f"Token refresh failed: {str(e)}")
+                else:
+                    raise
     
     def logout(self) -> None:
         """Logout, clear all Token information"""

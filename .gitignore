@@ -201,3 +201,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Project-local scratch / capture data (root-anchored so tests/integration/ is kept)
+/integration/
