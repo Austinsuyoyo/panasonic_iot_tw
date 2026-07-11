@@ -34,27 +34,27 @@ class ErrorHandler:
 
         if isinstance(e, PanasonicDeviceOffline):
             if log_offline:
-                _LOGGER.debug(f"Device{device_info} is offline in {context}: {e}")
+                _LOGGER.debug("Device%s is offline in %s: %s", device_info, context, e)
             return {"status": "offline", "data": {}, "message": str(e)}
         
         elif isinstance(e, PanasonicExceedRateLimit):
-            _LOGGER.error(f"Rate limit exceeded in {context}{device_info}")
+            _LOGGER.error("Rate limit exceeded in %s%s", context, device_info)
             return {"status": "rate_limited", "data": {}, "should_retry": True}
         
         elif isinstance(e, PanasonicTokenExpired):
-            _LOGGER.warning(f"Token expired in {context}{device_info}")
+            _LOGGER.warning("Token expired in %s%s", context, device_info)
             return {"status": "token_expired", "data": {}, "should_retry": True}
         
         elif isinstance(e, PanasonicLoginFailed):
-            _LOGGER.warning(f"Login failed in {context}{device_info}: {e}")
+            _LOGGER.warning("Login failed in %s%s: %s", context, device_info, e)
             return {"status": "login_failed", "data": {}, "should_retry": False}
         
         elif isinstance(e, PanasonicBaseException):
-            _LOGGER.error(f"Panasonic API error in {context}{device_info}: {e}")
+            _LOGGER.error("Panasonic API error in %s%s: %s", context, device_info, e)
             return {"status": "api_error", "data": {}, "should_retry": True}
         
         else:
-            _LOGGER.exception(f"Unexpected error in {context}{device_info}")
+            _LOGGER.exception("Unexpected error in %s%s", context, device_info)
             return {"status": "unknown_error", "data": {}, "should_retry": False}
     
     @staticmethod
@@ -93,7 +93,7 @@ class ErrorHandler:
         try:
             return func()
         except Exception as e:
-            _LOGGER.warning(f"Safe execution failed in {context}: {e}")
+            _LOGGER.warning("Safe execution failed in %s: %s", context, e)
             return default_value
     
     @staticmethod
@@ -110,12 +110,12 @@ class ErrorHandler:
             Whether validation passed
         """
         if not isinstance(response, dict):
-            _LOGGER.error(f"Invalid response format in {context}: not a dictionary")
+            _LOGGER.error("Invalid response format in %s: not a dictionary", context)
             return False
         
         missing_keys = [key for key in required_keys if key not in response]
         if missing_keys:
-            _LOGGER.error(f"Missing required keys in {context}: {missing_keys}")
+            _LOGGER.error("Missing required keys in %s: %s", context, missing_keys)
             return False
         
         return True

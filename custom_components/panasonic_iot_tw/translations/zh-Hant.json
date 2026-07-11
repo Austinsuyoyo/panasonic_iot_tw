@@ -10,6 +10,13 @@
           "proxy": "代理伺服器 (選填)",
           "update_interval": "更新間隔 (秒)"
         }
+      },
+      "reauth_confirm": {
+        "title": "重新驗證 Panasonic IoT TW",
+        "description": "{username} 的登入憑證已失效，請重新輸入密碼。",
+        "data": {
+          "password": "密碼"
+        }
       }
     },
     "error": {
@@ -18,7 +25,8 @@
       "unknown": "發生未知錯誤"
     },
     "abort": {
-      "already_configured": "設備已經設定過了"
+      "already_configured": "設備已經設定過了",
+      "reauth_successful": "重新驗證成功"
     }
   },
   "options": {
@@ -89,10 +97,46 @@
         "name": "預約殘時間"
       },
       "dryer_operation_status": {
-        "name": "運轉情報"
+        "name": "運轉情報",
+        "state": {
+          "not_displayed": "不顯示",
+          "standby": "待機中",
+          "running": "動作中",
+          "reserved": "預約中",
+          "finished": "終了",
+          "error": "異常"
+        }
       },
       "dryer_cycle_message": {
-        "name": "行程別訊息"
+        "name": "行程別訊息",
+        "state": {
+          "cotton_linen": "棉麻行程",
+          "large_items": "大件行程",
+          "custom": "自選行程",
+          "premium_clothing": "高級衣物行程",
+          "wool": "羊毛行程",
+          "sportswear": "運動服行程",
+          "down_jacket": "羽绒衣行程",
+          "antibacterial_dry": "抑菌烘行程",
+          "nanoex_antibacterial": "nanoe™X-抑菌行程",
+          "nanoex_deodorize": "nanoe™X-除臭行程",
+          "nanoex_dust_mite": "nanoe™X-除蟎行程",
+          "nanoex_dewrinkle": "nanoe™X-除皺行程",
+          "nanoex_softening": "nanoe™X-鬆柔行程",
+          "nanoex_fur_care": "nanoe™X-皮草保養行程",
+          "quick_dry": "快烘行程",
+          "baby_clothes": "嬰兒衣物行程",
+          "thin_quilt": "薄被行程",
+          "synthetic_fiber": "合成纖維行程",
+          "shirts": "襯衫行程",
+          "mixed": "混合行程",
+          "functional_wear": "機能衣行程",
+          "denim": "牛仔行程",
+          "bath_towel": "浴巾行程",
+          "cool_air_refresh": "冷風清新行程",
+          "work_school_uniform": "工作/校服行程",
+          "warm_air": "溫風暖衣行程"
+        }
       },
       "washing_machine_washing_remaining_time": {
         "name": "洗衣殘時間"
@@ -101,10 +145,38 @@
         "name": "預約殘時間"
       },
       "washing_machine_operation_status": {
-        "name": "運轉情報"
+        "name": "運轉情報",
+        "state": {
+          "not_displayed": "不顯示",
+          "standby": "待機中",
+          "running": "動作中",
+          "reserved": "預約中",
+          "finished": "終了",
+          "error": "異常"
+        }
       },
       "washing_machine_cycle_message": {
-        "name": "行程別訊息"
+        "name": "行程別訊息",
+        "state": {
+          "standard": "標準",
+          "soak": "浸泡",
+          "quick_wash": "快洗",
+          "tub_clean": "槽洗淨",
+          "large_items": "大件行程",
+          "dust_mite_removal": "除蟎",
+          "custom": "自選",
+          "premium_clothing": "高級衣物",
+          "wool": "羊毛",
+          "sportswear": "運動服",
+          "down_jacket": "羽绒衣",
+          "high_temp_antibacterial": "高溫抑菌",
+          "eco_wash": "節能洗",
+          "spin": "脫水",
+          "synthetic_fiber": "合成纖維",
+          "shirts": "襯衫",
+          "mixed": "混合洗",
+          "denim": "牛仔"
+        }
       }
     },
     "binary_sensor": {
@@ -197,25 +269,67 @@
     },
     "select": {
       "refrigerator_freezer_temperature_setting": {
-        "name": "冷凍庫溫度設定"
+        "name": "冷凍庫溫度設定",
+        "state": {
+          "low": "弱",
+          "medium": "中",
+          "high": "強"
+        }
       },
       "refrigerator_refrigerator_temperature_setting": {
-        "name": "冷藏庫溫度設定"
+        "name": "冷藏庫溫度設定",
+        "state": {
+          "low": "弱",
+          "medium": "中",
+          "high": "強"
+        }
       },
       "refrigerator_partial_freezing_temperature_setting": {
-        "name": "微凍結室溫設定"
+        "name": "微凍結室溫設定",
+        "state": {
+          "low": "弱",
+          "medium": "中",
+          "high": "強"
+        }
       },
       "erv_operation_mode": {
-        "name": "運轉模式"
+        "name": "運轉模式",
+        "state": {
+          "stop": "停止",
+          "auto": "自動",
+          "low": "低速",
+          "medium": "中速",
+          "high": "高速",
+          "ventilation": "換氣"
+        }
       },
       "erv_fan_level": {
-        "name": "風量設定"
+        "name": "風量設定",
+        "state": {
+          "stop": "停止",
+          "low": "低速",
+          "medium": "中速",
+          "high": "高速"
+        }
       },
       "dehumidifier_operation_mode": {
-        "name": "運轉模式"
+        "name": "運轉模式",
+        "state": {
+          "auto": "自動",
+          "continuous": "連續除濕",
+          "clothes_drying": "衣物乾燥",
+          "purify": "清淨"
+        }
       },
       "dehumidifier_fan_direction": {
-        "name": "風向設定"
+        "name": "風向設定",
+        "state": {
+          "stop": "停止",
+          "swing": "上下擺動",
+          "horizontal": "水平",
+          "up": "向上",
+          "down": "向下"
+        }
       },
       "air_conditioner_fan_mode": {
         "name": "風量設定"
@@ -259,7 +373,17 @@
     },
     "humidifier": {
       "dehumidifier_control": {
-        "name": "除濕控制"
+        "name": "除濕控制",
+        "state_attributes": {
+          "mode": {
+            "state": {
+              "auto": "自動",
+              "continuous": "連續除濕",
+              "clothes_drying": "衣物乾燥",
+              "purify": "清淨"
+            }
+          }
+        }
       }
     }
   }

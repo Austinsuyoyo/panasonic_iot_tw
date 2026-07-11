@@ -5,6 +5,7 @@ from typing import Any, Dict, Optional, Callable
 from homeassistant.components.button import ButtonEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .base import PanasonicEntity, PlatformSetupHelper
@@ -28,7 +29,7 @@ class PanasonicButton(PanasonicEntity, ButtonEntity):
     def __init__(
         self,
         coordinator,
-        device_index: int,
+        device_key: str,
         device_data: Dict[str, Any],
         command_type: str,
         name: str,
@@ -44,7 +45,7 @@ class PanasonicButton(PanasonicEntity, ButtonEntity):
         
         Args:
             coordinator: Data update coordinator
-            device_index: Index of device in coordinator data
+            device_key: Index of device in coordinator data
             device_data: Device information dictionary
             command_type: Command type for button press
             name: Display name for button (fallback when translation not available)
@@ -57,7 +58,7 @@ class PanasonicButton(PanasonicEntity, ButtonEntity):
             **kwargs: Additional attributes to set on entity
         """
         super().__init__(
-            coordinator, device_index, device_data,
+            coordinator, device_key, device_data,
             button_key, name, translation_key, icon, **kwargs
         )
 
@@ -68,105 +69,87 @@ class PanasonicButton(PanasonicEntity, ButtonEntity):
     
     def get_device_status(self) -> Dict[str, Any]:
         """Get current device status."""
-        return self.coordinator.data[self._device_index].get("status", {})
+        return self._current_device.get("status", {})
     
     def get_smart_app(self):
         """Get SmartApp instance from coordinator."""
         return getattr(self.coordinator, "smart_app", None)
     
     async def async_press(self) -> None:
-        """Handle the button press."""
+        """Handle the button press.
+
+        Errors are allowed to propagate (as HomeAssistantError) so they surface
+        in the UI instead of being silently swallowed.
+        """
         if self._press_action:
             # Use custom press action if provided
-            try:
-                await self._press_action(self)
-            except Exception as e:
-                _LOGGER.error(f"Custom press action failed for {self._attr_name}: {e}")
+            await self._press_action(self)
         else:
             # Use standard command sending
-            try:
-                processed_value = self._command_processor(self._command_value)
-                success = await self._send_command(self._command_type, processed_value)
-                if success:
-                    _LOGGER.info(
-                        f"Button {self._attr_name} pressed successfully "
-                        f"(entity_id: {self._attr_unique_id})"
-                    )
-            except Exception as e:
-                _LOGGER.error(
-                    f"Failed to press button {self._attr_name} "
-                    f"(entity_id: {self._attr_unique_id}): {e}"
-                )
+            processed_value = self._command_processor(self._command_value)
+            await self._send_command(self._command_type, processed_value)
 
 # Button Action Functions
+async def _run_commands(button_entity, commands: list) -> None:
+    """Send a list of (command_type, value) commands, surfacing failures.
+
+    Raises HomeAssistantError if the SmartApp is unavailable or a command fails.
+    """
+    smart_app = button_entity.get_smart_app()
+    if smart_app is None:
+        raise HomeAssistantError(
+            f"Cannot run action for {button_entity._attr_unique_id}: "
+            "device connection is not available"
+        )
+
+    for command_type, value in commands:
+        try:
+            success = await smart_app.set_device_command(
+                button_entity._device_key, command_type, value
+            )
+        except Exception as err:
+            raise HomeAssistantError(
+                f"Action failed for {button_entity._attr_unique_id}: {err}"
+            ) from err
+        if not success:
+            raise HomeAssistantError(
+                f"Command {command_type}={value} for "
+                f"{button_entity._attr_unique_id} was rejected by the device"
+            )
+
+    await button_entity.coordinator.async_request_refresh()
+
+
 def create_toggle_action(power_command: str, on_value: Any = 1, off_value: Any = 0):
     """Create a toggle action for power buttons."""
     async def toggle_action(button_entity):
-        try:
-            # Get current power state using public method
-            device_status = button_entity.get_device_status()
-            current_power = device_status.get(power_command, 0)
-            
-            # Toggle the power state
-            new_value = off_value if int(current_power) else on_value
-            
-            # Use public method to get smart_app
-            smart_app = button_entity.get_smart_app()
-            if smart_app:
-                await smart_app.set_device_command(
-                    button_entity._device_index, power_command, new_value
-                )
-                await button_entity.coordinator.async_request_refresh()
-        except Exception as e:
-            _LOGGER.error(
-                f"Toggle action failed for {button_entity._attr_unique_id}: {e}"
-            )
-    
+        device_status = button_entity.get_device_status()
+        current_power = device_status.get(power_command, 0)
+        new_value = off_value if int(current_power) else on_value
+        await _run_commands(button_entity, [(power_command, new_value)])
+
     return toggle_action
 
 def create_sequence_action(commands: list):
     """Create a sequence action that sends multiple commands."""
     async def sequence_action(button_entity):
-        smart_app = button_entity.get_smart_app()
-        if not smart_app:
-            return
-            
-        try:
-            for command_type, value in commands:
-                await smart_app.set_device_command(
-                    button_entity._device_index, command_type, value
-                )
-            await button_entity.coordinator.async_request_refresh()
-        except Exception as e:
-            _LOGGER.error(
-                f"Sequence action failed for {button_entity._attr_unique_id}: {e}"
-            )
-    
+        await _run_commands(button_entity, list(commands))
+
     return sequence_action
 
-def create_conditional_action(condition_command: str, condition_value: Any, 
+def create_conditional_action(condition_command: str, condition_value: Any,
                             true_action: tuple, false_action: tuple):
     """Create a conditional action based on device state."""
     async def conditional_action(button_entity):
-        try:
-            device_status = button_entity.get_device_status()
-            current_value = device_status.get(condition_command)
-            
-            if current_value == condition_value:
-                command_type, value = true_action
-            else:
-                command_type, value = false_action
-            
-            smart_app = button_entity.get_smart_app()
-            if smart_app:
-                await smart_app.set_device_command(
-                    button_entity._device_index, command_type, value
-                )
-                await button_entity.coordinator.async_request_refresh()
-        except Exception as e:
-            _LOGGER.error(
-                f"Conditional action failed for {button_entity._attr_unique_id}: {e}"
-            )
-    
+        device_status = button_entity.get_device_status()
+        current_value = device_status.get(condition_command)
+
+        if current_value == condition_value:
+            command_type, value = true_action
+        else:
+            command_type, value = false_action
+
+        await _run_commands(button_entity, [(command_type, value)])
+
     return conditional_action
 

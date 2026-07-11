@@ -261,7 +261,7 @@ class RefrigeratorDevice(BaseDevice):
         
         # Check if this device type supports special sensors
         if DEVICE_TYPE_REFRIGERATOR not in SPECIAL_SENSOR_SUPPORTED_DEVICES:
-            _LOGGER.debug(f"Device type {DEVICE_TYPE_REFRIGERATOR} does not support special sensors")
+            _LOGGER.debug("Device type %s does not support special sensors", DEVICE_TYPE_REFRIGERATOR)
             return special_sensors
         
         # Get device GWID for data lookup
@@ -278,7 +278,7 @@ class RefrigeratorDevice(BaseDevice):
                 return special_sensors
             
             # Create special sensors - they will show unavailable until data is fetched
-            _LOGGER.info(f"Creating special sensors for device {device_gwid}")
+            _LOGGER.info("Creating special sensors for device %s", device_gwid)
             
             # Energy consumption sensor
             special_sensors.append(self._create_sensor(
@@ -321,12 +321,12 @@ class RefrigeratorDevice(BaseDevice):
             ))
             
             if special_sensors:
-                _LOGGER.info(f"Created {len(special_sensors)} special sensors for refrigerator {device_gwid}")
+                _LOGGER.info("Created %s special sensors for refrigerator %s", len(special_sensors), device_gwid)
             else:
-                _LOGGER.info(f"No special sensor data available for refrigerator {device_gwid}")
+                _LOGGER.info("No special sensor data available for refrigerator %s", device_gwid)
                 
         except Exception as e:
-            _LOGGER.error(f"Error creating special sensors for refrigerator: {e}")
+            _LOGGER.error("Error creating special sensors for refrigerator: %s", e)
         
         return special_sensors
     

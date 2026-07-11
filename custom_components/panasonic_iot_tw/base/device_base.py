@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional
 
 from .status_reader import StatusReader
+from ..const import DOMAIN, MANUFACTURER
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -11,17 +12,17 @@ _LOGGER = logging.getLogger(__name__)
 class BaseDevice(StatusReader, ABC):
     """Base class for all Panasonic devices."""
     
-    def __init__(self, coordinator, device_index: int, device_data: Dict[str, Any]):
+    def __init__(self, coordinator, device_key: str, device_data: Dict[str, Any]):
         """Initialize base device."""
         super().__init__(
             coordinator,
-            device_index,
-            device_data.get("nickname", f"Device {device_index}")
+            device_key,
+            device_data.get("nickname", f"Device {device_key}")
         )
         self._device_data = device_data
         self._device_type = device_data.get("device_type")
         self._model = device_data.get("model", "Unknown")
-        self._device_id = device_data.get("device_id", f"device_{device_index}")
+        self._device_id = device_data.get("device_id", f"device_{device_key}")
     
     @property
     def device_data(self) -> Dict[str, Any]:
@@ -62,9 +63,9 @@ class BaseDevice(StatusReader, ABC):
     def get_device_info(self) -> Dict[str, Any]:
         """Return device information for Home Assistant."""
         return {
-            "identifiers": {("panasonic_iot_tw", self._device_id)},
+            "identifiers": {(DOMAIN, self._device_id)},
             "name": self._device_data.get("nickname", f"Panasonic {self._model}"),
-            "manufacturer": "Panasonic",
+            "manufacturer": MANUFACTURER,
             "model": self._model,
             "sw_version": self._device_data.get("version"),
         }
@@ -107,7 +108,7 @@ class BaseDevice(StatusReader, ABC):
         """Helper to create sensor entity with common parameters."""
         from ..sensor import PanasonicSensor
         return PanasonicSensor(
-            coordinator, self.index, self.device_data,
+            coordinator, self.device_key, self.device_data,
             **kwargs
         )
 
@@ -115,7 +116,7 @@ class BaseDevice(StatusReader, ABC):
         """Helper to create binary sensor entity with common parameters."""
         from ..binary_sensor import PanasonicBinarySensor
         return PanasonicBinarySensor(
-            coordinator, self.index, self.device_data,
+            coordinator, self.device_key, self.device_data,
             **kwargs
         )
 
@@ -123,7 +124,7 @@ class BaseDevice(StatusReader, ABC):
         """Helper to create switch entity with common parameters."""
         from ..switch import PanasonicSwitch
         return PanasonicSwitch(
-            coordinator, self.index, self.device_data,
+            coordinator, self.device_key, self.device_data,
             **kwargs
         )
 
@@ -131,7 +132,7 @@ class BaseDevice(StatusReader, ABC):
         """Helper to create select entity with common parameters."""
         from ..select import PanasonicSelect
         return PanasonicSelect(
-            coordinator, self.index, self.device_data,
+            coordinator, self.device_key, self.device_data,
             **kwargs
         )
 
@@ -139,7 +140,7 @@ class BaseDevice(StatusReader, ABC):
         """Helper to create number entity with common parameters."""
         from ..number import PanasonicNumber
         return PanasonicNumber(
-            coordinator, self.index, self.device_data,
+            coordinator, self.device_key, self.device_data,
             **kwargs
         )
 
@@ -147,7 +148,7 @@ class BaseDevice(StatusReader, ABC):
         """Helper to create button entity with common parameters."""
         from ..button import PanasonicButton
         return PanasonicButton(
-            coordinator, self.index, self.device_data,
+            coordinator, self.device_key, self.device_data,
             **kwargs
         )
 
@@ -155,7 +156,7 @@ class BaseDevice(StatusReader, ABC):
         """Helper to create climate entity with common parameters."""
         from ..climate import PanasonicClimate
         return PanasonicClimate(
-            coordinator, self.index, self.device_data,
+            coordinator, self.device_key, self.device_data,
             **kwargs
         )
 
@@ -163,7 +164,7 @@ class BaseDevice(StatusReader, ABC):
         """Helper to create humidifier entity with common parameters."""
         from ..humidifier import PanasonicHumidifier
         return PanasonicHumidifier(
-            coordinator, self.index, self.device_data,
+            coordinator, self.device_key, self.device_data,
             **kwargs
         )
 

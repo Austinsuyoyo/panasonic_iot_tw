@@ -15,9 +15,9 @@ class ERVDevice(BaseDevice):
     OPERATION_MODE_COMMAND = "0x15"
     FAN_LEVEL_COMMAND = "0x56"
     
-    def __init__(self, coordinator, device_index: int, device_data: Dict[str, Any]):
+    def __init__(self, coordinator, device_key: str, device_data: Dict[str, Any]):
         """Initialize ERV device."""
-        super().__init__(coordinator, device_index, device_data)
+        super().__init__(coordinator, device_key, device_data)
     
     @property
     def is_on(self) -> bool:
@@ -38,18 +38,18 @@ class ERVDevice(BaseDevice):
     def get_select_entities(self, coordinator) -> List:
         """Return select entities for ERV."""
         operation_mode_options = {
-            0: "停止",
-            1: "自動",
-            2: "低速",
-            3: "中速",
-            4: "高速",
-            5: "換氣",
+            0: "stop",
+            1: "auto",
+            2: "low",
+            3: "medium",
+            4: "high",
+            5: "ventilation",
         }
         fan_level_options = {
-            0: "停止",
-            1: "低速",
-            2: "中速",
-            3: "高速",
+            0: "stop",
+            1: "low",
+            2: "medium",
+            3: "high",
         }
         
         return [

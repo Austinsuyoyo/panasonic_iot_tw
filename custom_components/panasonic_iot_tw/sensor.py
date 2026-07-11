@@ -34,7 +34,7 @@ class PanasonicSensor(PanasonicEntity, SensorEntity):
     def __init__(
         self,
         coordinator,
-        device_index: int,
+        device_key: str,
         device_data: Dict[str, Any],
         command_type: str,
         name: str,
@@ -53,7 +53,7 @@ class PanasonicSensor(PanasonicEntity, SensorEntity):
 
         Args:
             coordinator: Data update coordinator
-            device_index: Index of device in coordinator data
+            device_key: Index of device in coordinator data
             device_data: Device information dictionary
             command_type: Command type for status lookup
             name: Display name for sensor (fallback when translation not available)
@@ -70,7 +70,7 @@ class PanasonicSensor(PanasonicEntity, SensorEntity):
         """
         # Call parent with common initialization
         super().__init__(
-            coordinator, device_index, device_data,
+            coordinator, device_key, device_data,
             sensor_key, name, translation_key, icon, **kwargs
         )
 
@@ -103,13 +103,13 @@ class PanasonicSensor(PanasonicEntity, SensorEntity):
             # Get SmartApp instance from coordinator
             smart_app = getattr(self.coordinator, 'smart_app', None)
             if not smart_app:
-                _LOGGER.debug(f"SmartApp not available for special data source: {self._data_source}")
+                _LOGGER.debug("SmartApp not available for special data source: %s", self._data_source)
                 return None
             
             # Get device GWID
             device_gwid = self._device_data.get("gwid")
             if not device_gwid:
-                _LOGGER.warning(f"No GWID found for special sensor: {self._sensor_key}")
+                _LOGGER.warning("No GWID found for special sensor: %s", self._sensor_key)
                 return None
             
             # Get data based on source type
@@ -131,7 +131,7 @@ class PanasonicSensor(PanasonicEntity, SensorEntity):
             return None
             
         except (ValueError, TypeError, AttributeError) as e:
-            _LOGGER.debug(f"Error getting special data value for {self._sensor_key}: {e}")
+            _LOGGER.debug("Error getting special data value for %s: %s", self._sensor_key, e)
             return None
     
     @property
@@ -142,9 +142,11 @@ class PanasonicSensor(PanasonicEntity, SensorEntity):
             raw_value = self._get_special_data_value()
             return raw_value is not None
         
-        # For normal sensors, check if device is available
-        device_data = self.coordinator.data.get(self._device_index, {})
-        return device_data.get("available", False)
+        # For normal sensors, check if device is available (live data)
+        return (
+            self.coordinator.last_update_success and
+            self._current_device.get("available", False)
+        )
     
     @property
     def native_value(self) -> Any:

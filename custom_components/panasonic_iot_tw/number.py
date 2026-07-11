@@ -29,7 +29,7 @@ class PanasonicNumber(PanasonicEntity, NumberEntity):
     def __init__(
         self,
         coordinator,
-        device_index: int,
+        device_key: str,
         device_data: Dict[str, Any],
         command_type: str,
         name: str,
@@ -49,7 +49,7 @@ class PanasonicNumber(PanasonicEntity, NumberEntity):
         
         Args:
             coordinator: Data update coordinator
-            device_index: Index of device in coordinator data
+            device_key: Index of device in coordinator data
             device_data: Device information dictionary
             command_type: Command type for status lookup
             name: Display name for number (fallback when translation not available)
@@ -66,7 +66,7 @@ class PanasonicNumber(PanasonicEntity, NumberEntity):
             **kwargs: Additional attributes to set on entity
         """
         super().__init__(
-            coordinator, device_index, device_data,
+            coordinator, device_key, device_data,
             number_key, name, translation_key, icon,
             native_min_value=min_value,
             native_max_value=max_value,
@@ -102,7 +102,6 @@ class PanasonicNumber(PanasonicEntity, NumberEntity):
             await self._send_command(self._command_type, command_value)
         except (ValueError, TypeError) as e:
             _LOGGER.error(
-                f"Invalid value {value} for {self._attr_name} "
-                f"(entity_id: {self._attr_unique_id}): {e}"
+                "Invalid value %s for %s (entity_id: %s): %s", value, self._attr_name, self._attr_unique_id, e
             )
 

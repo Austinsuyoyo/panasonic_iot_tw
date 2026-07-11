@@ -39,7 +39,7 @@ class PanasonicClimate(PanasonicEntity, ClimateEntity):
     def __init__(
         self,
         coordinator,
-        device_index: int,
+        device_key: str,
         device_data: Dict[str, Any],
         name: str,
         climate_key: str,
@@ -70,7 +70,7 @@ class PanasonicClimate(PanasonicEntity, ClimateEntity):
         
         Args:
             coordinator: Data update coordinator
-            device_index: Index of device in coordinator data
+            device_key: Index of device in coordinator data
             device_data: Device information dictionary
             name: Display name for climate
             climate_key: Unique key for climate
@@ -99,7 +99,7 @@ class PanasonicClimate(PanasonicEntity, ClimateEntity):
         """
         # Call parent with common initialization
         super().__init__(
-            coordinator, device_index, device_data,
+            coordinator, device_key, device_data,
             climate_key, name, translation_key, icon, **kwargs
         )
         
@@ -161,14 +161,14 @@ class PanasonicClimate(PanasonicEntity, ClimateEntity):
         elif self._fan_mode_mapping:
             self._attr_fan_modes = list(self._fan_mode_mapping.values())
         else:
-            self._attr_fan_modes = ["自動"]
+            self._attr_fan_modes = ["Auto"]
             
         if swing_modes:
             self._attr_swing_modes = swing_modes
         elif self._swing_mode_mapping:
             self._attr_swing_modes = list(self._swing_mode_mapping.values())
         else:
-            self._attr_swing_modes = ["自動"]
+            self._attr_swing_modes = ["Auto"]
     
     @property
     def available(self) -> bool:
@@ -215,14 +215,14 @@ class PanasonicClimate(PanasonicEntity, ClimateEntity):
         """Return current fan mode."""
         if not self._fan_mode_command or not self._fan_mode_mapping:
             return None
-        return self._get_mapped_value(self._fan_mode_command, self._fan_mode_mapping, "自動")
+        return self._get_mapped_value(self._fan_mode_command, self._fan_mode_mapping)
     
     @property
     def swing_mode(self) -> Optional[str]:
         """Return current swing mode."""
         if not self._swing_mode_command or not self._swing_mode_mapping:
             return None
-        return self._get_mapped_value(self._swing_mode_command, self._swing_mode_mapping, "自動")
+        return self._get_mapped_value(self._swing_mode_command, self._swing_mode_mapping)
     
     async def async_set_temperature(self, **kwargs) -> None:
         """Set new target temperature."""
@@ -236,8 +236,7 @@ class PanasonicClimate(PanasonicEntity, ClimateEntity):
                 await self._send_command(self._target_temp_command, device_temp)
             except (ValueError, TypeError) as e:
                 _LOGGER.error(
-                    f"Invalid temperature {temp} for {self._attr_name} "
-                    f"(entity_id: {self._attr_unique_id}): {e}"
+                    "Invalid temperature %s for %s (entity_id: %s): %s", temp, self._attr_name, self._attr_unique_id, e
                 )
     
     async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:

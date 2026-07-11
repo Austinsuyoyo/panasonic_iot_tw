@@ -29,7 +29,7 @@ class PanasonicSwitch(PanasonicEntity, SwitchEntity):
     def __init__(
         self,
         coordinator,
-        device_index: int,
+        device_key: str,
         device_data: Dict[str, Any],
         command_type: str,
         name: str,
@@ -44,7 +44,7 @@ class PanasonicSwitch(PanasonicEntity, SwitchEntity):
         
         Args:
             coordinator: Data update coordinator
-            device_index: Index of device in coordinator data
+            device_key: Index of device in coordinator data
             device_data: Device information dictionary
             command_type: Command type for status lookup
             name: Display name for switch (fallback when translation not available)
@@ -56,7 +56,7 @@ class PanasonicSwitch(PanasonicEntity, SwitchEntity):
             **kwargs: Additional attributes to set on entity
         """
         super().__init__(
-            coordinator, device_index, device_data,
+            coordinator, device_key, device_data,
             switch_key, name, translation_key, icon, **kwargs
         )
 

@@ -6,6 +6,11 @@ from .api_client import ApiClient
 from .token_manager import TokenManager
 from ..api_constants import API_ENDPOINTS
 from ..base import ErrorHandler
+from ..exceptions import (
+    PanasonicLoginFailed,
+    PanasonicTokenExpired,
+    PanasonicRefreshTokenNotFound,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -53,9 +58,13 @@ class DeviceService:
             # Update API client's device cache
             self._api_client.set_devices_cache(devices)
 
-            _LOGGER.debug(f"Successfully retrieved {len(devices)} devices")
+            _LOGGER.debug("Successfully retrieved %s devices", len(devices))
             return devices
-            
+
+        except (PanasonicLoginFailed, PanasonicTokenExpired, PanasonicRefreshTokenNotFound):
+            # Authentication failures must propagate so the coordinator can
+            # trigger re-authentication instead of masking them as UpdateFailed.
+            raise
         except Exception as e:
             ErrorHandler.handle_coordinator_error(e, "get device list")
             return []
@@ -140,7 +149,7 @@ class DeviceService:
         device_id = device.get("Auth", "")
         device_name = device.get("NickName", "unknown device")
         
-        _LOGGER.info(f"Sending command to device {device_name}: {command_type} = {value}")
+        _LOGGER.debug("Sending command to device %s: %s = %s", device_name, command_type, value)
         
         try:
             # Ensure authenticated
@@ -167,7 +176,7 @@ class DeviceService:
                 params=params
             )
             
-            _LOGGER.info(f"Device {device_name} command sent successfully")
+            _LOGGER.debug("Device %s command sent successfully", device_name)
             return True
             
         except Exception as e:
@@ -204,7 +213,7 @@ class DeviceService:
                 data={}
             )
             
-            _LOGGER.debug(f"Device {device_name} detailed information retrieved successfully")
+            _LOGGER.debug("Device %s detailed information retrieved successfully", device_name)
             return response
             
         except Exception as e:

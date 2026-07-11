@@ -34,10 +34,10 @@ class DataProcessor:
                     if device_id:
                         self._device_cache[device_id] = processed_device
             except Exception as e:
-                _LOGGER.warning(f"Error occurred while processing device data: {e}")
+                _LOGGER.warning("Error occurred while processing device data: %s", e)
                 continue
         
-        _LOGGER.debug(f"Processing completed, total {len(processed_devices)} valid devices")
+        _LOGGER.debug("Processing completed, total %s valid devices", len(processed_devices))
         return processed_devices
     
     def _process_single_device(self, device: Dict[str, Any]) -> Optional[Dict[str, Any]]:
@@ -61,7 +61,7 @@ class DataProcessor:
         try:
             device_type = int(device_type_raw) if device_type_raw else 0
         except (ValueError, TypeError):
-            _LOGGER.warning(f"Unable to convert device type '{device_type_raw}' to integer, using default value 0")
+            _LOGGER.warning("Unable to convert device type '%s' to integer, using default value 0", device_type_raw)
             device_type = 0
         
         processed = {
@@ -112,7 +112,7 @@ class DataProcessor:
                 processed_status["available"] = False
             
         except Exception as e:
-            _LOGGER.error(f"Error occurred while processing device {device_id} status: {e}")
+            _LOGGER.error("Error occurred while processing device %s status: %s", device_id, e)
             processed_status["available"] = False
         
         return processed_status
@@ -210,7 +210,7 @@ class DataProcessor:
         
         for field in required_fields:
             if field not in device_data:
-                _LOGGER.warning(f"Device data missing required field: {field}")
+                _LOGGER.warning("Device data missing required field: %s", field)
                 return False
         
         return True

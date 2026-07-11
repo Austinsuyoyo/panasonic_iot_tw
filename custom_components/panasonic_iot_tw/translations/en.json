@@ -10,6 +10,13 @@
           "proxy": "Proxy (optional)",
           "update_interval": "Update Interval (seconds)"
         }
+      },
+      "reauth_confirm": {
+        "title": "Re-authenticate Panasonic IoT TW",
+        "description": "The credentials for {username} are no longer valid. Enter the password again.",
+        "data": {
+          "password": "Password"
+        }
       }
     },
     "error": {
@@ -18,7 +25,8 @@
       "unknown": "Unexpected error occurred"
     },
     "abort": {
-      "already_configured": "Device is already configured"
+      "already_configured": "Device is already configured",
+      "reauth_successful": "Re-authentication was successful"
     }
   },
   "options": {
@@ -89,10 +97,46 @@
         "name": "Schedule Remaining Time"
       },
       "dryer_operation_status": {
-        "name": "Operation Status"
+        "name": "Operation Status",
+        "state": {
+          "not_displayed": "Not Displayed",
+          "standby": "Standby",
+          "running": "Running",
+          "reserved": "Reserved",
+          "finished": "Finished",
+          "error": "Error"
+        }
       },
       "dryer_cycle_message": {
-        "name": "Cycle Message"
+        "name": "Cycle Message",
+        "state": {
+          "cotton_linen": "Cotton/Linen",
+          "large_items": "Large Items",
+          "custom": "Custom",
+          "premium_clothing": "Premium Clothing",
+          "wool": "Wool",
+          "sportswear": "Sportswear",
+          "down_jacket": "Down Jacket",
+          "antibacterial_dry": "Antibacterial Dry",
+          "nanoex_antibacterial": "nanoe™X Antibacterial",
+          "nanoex_deodorize": "nanoe™X Deodorize",
+          "nanoex_dust_mite": "nanoe™X Dust Mite",
+          "nanoex_dewrinkle": "nanoe™X De-wrinkle",
+          "nanoex_softening": "nanoe™X Softening",
+          "nanoex_fur_care": "nanoe™X Fur Care",
+          "quick_dry": "Quick Dry",
+          "baby_clothes": "Baby Clothes",
+          "thin_quilt": "Thin Quilt",
+          "synthetic_fiber": "Synthetic Fiber",
+          "shirts": "Shirts",
+          "mixed": "Mixed",
+          "functional_wear": "Functional Wear",
+          "denim": "Denim",
+          "bath_towel": "Bath Towel",
+          "cool_air_refresh": "Cool Air Refresh",
+          "work_school_uniform": "Work/School Uniform",
+          "warm_air": "Warm Air"
+        }
       },
       "washing_machine_washing_remaining_time": {
         "name": "Washing Remaining Time"
@@ -101,10 +145,38 @@
         "name": "Schedule Remaining Time"
       },
       "washing_machine_operation_status": {
-        "name": "Operation Status"
+        "name": "Operation Status",
+        "state": {
+          "not_displayed": "Not Displayed",
+          "standby": "Standby",
+          "running": "Running",
+          "reserved": "Reserved",
+          "finished": "Finished",
+          "error": "Error"
+        }
       },
       "washing_machine_cycle_message": {
-        "name": "Cycle Message"
+        "name": "Cycle Message",
+        "state": {
+          "standard": "Standard",
+          "soak": "Soak",
+          "quick_wash": "Quick Wash",
+          "tub_clean": "Tub Clean",
+          "large_items": "Large Items",
+          "dust_mite_removal": "Dust Mite Removal",
+          "custom": "Custom",
+          "premium_clothing": "Premium Clothing",
+          "wool": "Wool",
+          "sportswear": "Sportswear",
+          "down_jacket": "Down Jacket",
+          "high_temp_antibacterial": "High-temp Antibacterial",
+          "eco_wash": "Eco Wash",
+          "spin": "Spin",
+          "synthetic_fiber": "Synthetic Fiber",
+          "shirts": "Shirts",
+          "mixed": "Mixed",
+          "denim": "Denim"
+        }
       }
     },
     "binary_sensor": {
@@ -197,25 +269,67 @@
     },
     "select": {
       "refrigerator_freezer_temperature_setting": {
-        "name": "Freezer Temperature Setting"
+        "name": "Freezer Temperature Setting",
+        "state": {
+          "low": "Low",
+          "medium": "Medium",
+          "high": "High"
+        }
       },
       "refrigerator_refrigerator_temperature_setting": {
-        "name": "Refrigerator Temperature Setting"
+        "name": "Refrigerator Temperature Setting",
+        "state": {
+          "low": "Low",
+          "medium": "Medium",
+          "high": "High"
+        }
       },
       "refrigerator_partial_freezing_temperature_setting": {
-        "name": "Partial Freezing Temperature Setting"
+        "name": "Partial Freezing Temperature Setting",
+        "state": {
+          "low": "Low",
+          "medium": "Medium",
+          "high": "High"
+        }
       },
       "erv_operation_mode": {
-        "name": "Operation Mode"
+        "name": "Operation Mode",
+        "state": {
+          "stop": "Stop",
+          "auto": "Auto",
+          "low": "Low",
+          "medium": "Medium",
+          "high": "High",
+          "ventilation": "Ventilation"
+        }
       },
       "erv_fan_level": {
-        "name": "Fan Level"
+        "name": "Fan Level",
+        "state": {
+          "stop": "Stop",
+          "low": "Low",
+          "medium": "Medium",
+          "high": "High"
+        }
       },
       "dehumidifier_operation_mode": {
-        "name": "Operation Mode"
+        "name": "Operation Mode",
+        "state": {
+          "auto": "Auto",
+          "continuous": "Continuous",
+          "clothes_drying": "Clothes Drying",
+          "purify": "Purify"
+        }
       },
       "dehumidifier_fan_direction": {
-        "name": "Fan Direction"
+        "name": "Fan Direction",
+        "state": {
+          "stop": "Stop",
+          "swing": "Swing",
+          "horizontal": "Horizontal",
+          "up": "Up",
+          "down": "Down"
+        }
       },
       "air_conditioner_fan_mode": {
         "name": "Fan Mode"
@@ -259,7 +373,17 @@
     },
     "humidifier": {
       "dehumidifier_control": {
-        "name": "Dehumidifier Control"
+        "name": "Dehumidifier Control",
+        "state_attributes": {
+          "mode": {
+            "state": {
+              "auto": "Auto",
+              "continuous": "Continuous",
+              "clothes_drying": "Clothes Drying",
+              "purify": "Purify"
+            }
+          }
+        }
       }
     }
   }

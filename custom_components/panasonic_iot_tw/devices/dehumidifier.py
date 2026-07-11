@@ -44,9 +44,9 @@ class DehumidifierDevice(BaseDevice):
         0: 40, 1: 45, 2: 50, 3: 55, 4: 60, 5: 65, 6: 70
     }
     
-    def __init__(self, coordinator, device_index: int, device_data: Dict[str, Any]):
+    def __init__(self, coordinator, device_key: str, device_data: Dict[str, Any]):
         """Initialize dehumidifier device."""
-        super().__init__(coordinator, device_index, device_data)
+        super().__init__(coordinator, device_key, device_data)
     
     @property
     def is_on(self) -> bool:
@@ -202,17 +202,17 @@ class DehumidifierDevice(BaseDevice):
     def get_select_entities(self, coordinator) -> List:
         """Return select entities for dehumidifier."""
         operation_modes = {
-            0: "自動",
-            1: "連續除濕",
-            2: "衣物乾燥",
-            3: "清淨",
+            0: "auto",
+            1: "continuous",
+            2: "clothes_drying",
+            3: "purify",
         }
         fan_directions = {
-            0: "停止",
-            1: "上下擺動",
-            2: "水平",
-            3: "向上",
-            4: "向下"
+            0: "stop",
+            1: "swing",
+            2: "horizontal",
+            3: "up",
+            4: "down"
         }
         
         return [
