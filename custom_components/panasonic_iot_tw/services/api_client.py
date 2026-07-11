@@ -1,6 +1,8 @@
 """Pure HTTP API client - responsible only for HTTP request handling"""
 import logging
 import asyncio
+import json
+import re
 from typing import Literal, Optional, Dict, Any
 from http import HTTPStatus
 from aiohttp import ClientTimeout
@@ -25,6 +27,65 @@ from ..exceptions import (
 from ..base import ErrorHandler
 
 _LOGGER = logging.getLogger(__name__)
+
+# Keys whose values are credential material and must never appear in logs.
+# Covers the login payload (MemId/PW/AppToken), the refresh payload
+# (RefreshToken) and the token responses (CPToken/RefreshToken).
+_SENSITIVE_KEYS = frozenset({
+    "refreshtoken",
+    "cptoken",
+    "memid",
+    "pw",
+    "password",
+    "token",
+    "apptoken",
+})
+
+# Fallback matcher for masking sensitive values in a raw (unparseable) JSON body.
+_SENSITIVE_TEXT_RE = re.compile(
+    r'("[A-Za-z0-9_]*(?:token|password|memid|pw)[A-Za-z0-9_]*"\s*:\s*")([^"]*)(")',
+    re.IGNORECASE,
+)
+
+
+def _is_sensitive_key(key: Any) -> bool:
+    """Return True if a dict/JSON key holds credential material to mask."""
+    lowered = str(key).lower()
+    if lowered in _SENSITIVE_KEYS:
+        return True
+    return "token" in lowered or "password" in lowered
+
+
+def _mask_value(value: Any) -> str:
+    """Mask a sensitive value, keeping a short prefix so logs stay useful."""
+    text = str(value)
+    if len(text) <= 4:
+        return "****"
+    return text[:4] + "****"
+
+
+def _sanitize_data(data: Any) -> Any:
+    """Recursively copy a payload with sensitive values masked."""
+    if isinstance(data, dict):
+        return {
+            k: (_mask_value(v) if _is_sensitive_key(k) else _sanitize_data(v))
+            for k, v in data.items()
+        }
+    if isinstance(data, (list, tuple)):
+        return [_sanitize_data(item) for item in data]
+    return data
+
+
+def _sanitize_text(text: str) -> str:
+    """Mask sensitive keys inside a raw JSON response string before logging."""
+    try:
+        parsed = json.loads(text)
+    except (ValueError, TypeError):
+        return _SENSITIVE_TEXT_RE.sub(
+            lambda m: m.group(1) + _mask_value(m.group(2)) + m.group(3),
+            text,
+        )
+    return json.dumps(_sanitize_data(parsed), ensure_ascii=False)
 
 
 class ApiClient:
@@ -58,7 +119,7 @@ class ApiClient:
             enabled: Whether to enable initialization mode
         """
         self._initialization_mode = enabled
-        _LOGGER.debug(f"Initialization mode {'enabled' if enabled else 'disabled'}")
+        _LOGGER.debug("Initialization mode %s", 'enabled' if enabled else 'disabled')
     
     async def request(
         self,
@@ -99,7 +160,7 @@ class ApiClient:
             # Check if we're still under rate limiting
             if current_time < self._rate_limit_until:
                 remaining_wait = self._rate_limit_until - current_time
-                _LOGGER.warning(f"Rate limited: waiting {remaining_wait:.1f} seconds")
+                _LOGGER.warning("Rate limited: waiting %s seconds", remaining_wait)
                 await asyncio.sleep(remaining_wait)
                 
             # Minimal safety delay to be respectful to the API
@@ -112,7 +173,7 @@ class ApiClient:
                     
                 if time_since_last < min_delay:
                     wait_time = min_delay - time_since_last
-                    _LOGGER.debug(f"Safety delay: {wait_time:.1f}s ({'init' if self._initialization_mode else 'normal'} mode)")
+                    _LOGGER.debug("Safety delay: %ss (%s mode)", wait_time, 'init' if self._initialization_mode else 'normal')
                     await asyncio.sleep(wait_time)
             
             self._last_request_time = time.time()
@@ -126,11 +187,11 @@ class ApiClient:
         headers["user-agent"] = USER_AGENT
         
         if log:
-            # Detailed logging for debugging (sanitize sensitive tokens)
+            # Detailed logging for debugging (sanitize sensitive headers and body)
             sanitized_headers = {k: ('***' if k in ['cptoken', 'auth'] else v) for k, v in headers.items()}
             _LOGGER.debug(
-                f"Making #{request_id} request to {endpoint} with headers {sanitized_headers} "
-                f"and data {data}, proxy: {self._proxy}"
+                "Making #%s request to %s with headers %s and data %s, proxy: %s",
+                request_id, endpoint, sanitized_headers, _sanitize_data(data), self._proxy
             )
         
         try:
@@ -187,14 +248,15 @@ class ApiClient:
             response_text = await response.text()
             if log:
                 _LOGGER.debug(
-                    f"Succeed to access #{request_id} API. Returned {response.status}: {response_text}"
+                    "Succeed to access #%s API. Returned %s: %s",
+                    request_id, response.status, _sanitize_text(response_text)
                 )
             # Parse JSON from text
             import json
             resp_data = json.loads(response_text)
             return resp_data
         except Exception as e:
-            _LOGGER.warning(f"Failed to parse JSON response: {e}")
+            _LOGGER.warning("Failed to parse JSON response: %s", e)
             return {}
     
     async def _handle_expectation_failed(
@@ -209,7 +271,7 @@ class ApiClient:
             # Get raw response text for debugging
             try:
                 response_text = await response.text()
-                _LOGGER.debug(f"Non-JSON response received: {response_text[:200]}...")
+                _LOGGER.debug("Non-JSON response received: %s...", response_text[:200])
             except:
                 response_text = "Unable to get response text"
 
@@ -244,14 +306,15 @@ class ApiClient:
             raise PanasonicTokenExpired("Token expired, re-authentication required")
         
         else:
-            _LOGGER.error(f"API response error: {state_msg}")
+            _LOGGER.error("API response error: %s", state_msg)
             raise PanasonicLoginFailed(f"API response error: {state_msg}")
     
     async def _handle_error_response(self, response, request_id: int) -> None:
         """Handle error response"""
         response_text = await response.text()
         _LOGGER.error(
-            f"Failed to access #{request_id} API. Returned {response.status}: {response_text}"
+            "Failed to access #%s API. Returned %s: %s",
+            request_id, response.status, _sanitize_text(response_text)
         )
     
     def _handle_connection_error(self, error: Exception, headers: Dict[str, str]) -> Dict[str, Any]:
@@ -316,14 +379,14 @@ class ApiClient:
                     backoff_time = min(RATE_LIMIT_BACKOFF_BASE * (2 ** attempt), RATE_LIMIT_MAX_DELAY)
                     self._rate_limit_until = time.time() + backoff_time
                     
-                    _LOGGER.warning(f"Rate limited! Setting backoff period: {backoff_time}s (attempt {attempt + 1})")
+                    _LOGGER.warning("Rate limited! Setting backoff period: %ss (attempt %s)", backoff_time, attempt + 1)
                     await asyncio.sleep(backoff_time)
                 else:
                     break
             except PanasonicDeviceOffline as e:
                 last_exception = e
                 if attempt < max_retries:
-                    _LOGGER.warning(f"Device offline (attempt {attempt + 1}), retrying in {retry_delay}s")
+                    _LOGGER.warning("Device offline (attempt %s), retrying in %ss", attempt + 1, retry_delay)
                     await asyncio.sleep(retry_delay)
                     retry_delay *= 2  # Exponential backoff
                 else:
