@@ -142,7 +142,6 @@ class DehumidifierDevice(BaseDevice):
                 device_class=SensorDeviceClass.HUMIDITY,
                 state_class=SensorStateClass.MEASUREMENT,
                 unit=PERCENTAGE,
-                icon="mdi:water-percent",
                 value_processor=value_processors.safe_int,
                 translation_key="dehumidifier_humidity"
             ),
@@ -155,7 +154,6 @@ class DehumidifierDevice(BaseDevice):
                 device_class=SensorDeviceClass.PM25,
                 state_class=SensorStateClass.MEASUREMENT,
                 unit="μg/m³",
-                icon="mdi:air-filter",
                 value_processor=value_processors.safe_int,
                 translation_key="dehumidifier_pm25"
             )
@@ -171,7 +169,6 @@ class DehumidifierDevice(BaseDevice):
                 name="水箱滿水",
                 sensor_key="tank_full",
                 device_class=BinarySensorDeviceClass.PROBLEM,
-                icon="mdi:cup-water",
                 translation_key="dehumidifier_tank_full"
             )
         ]
@@ -185,7 +182,6 @@ class DehumidifierDevice(BaseDevice):
                 command_type=self.NANOE_COMMAND,
                 name="nanoe",
                 switch_key="nanoe",
-                icon="mdi:atom",
                 translation_key="dehumidifier_nanoe"
             ),
             # Buzzer
@@ -194,7 +190,6 @@ class DehumidifierDevice(BaseDevice):
                 command_type=self.BUZZER_COMMAND,
                 name="操作提示音",
                 switch_key="buzzer",
-                icon="mdi:volume-high",
                 translation_key="dehumidifier_buzzer"
             )
         ]
@@ -223,7 +218,6 @@ class DehumidifierDevice(BaseDevice):
                 name="運轉模式",
                 select_key="operation_mode",
                 options_dict=operation_modes,
-                icon="mdi:cog",
                 translation_key="dehumidifier_operation_mode"
             ),
             # Fan direction
@@ -233,7 +227,6 @@ class DehumidifierDevice(BaseDevice):
                 name="風向設定",
                 select_key="fan_direction",
                 options_dict=fan_directions,
-                icon="mdi:arrow-up-down",
                 translation_key="dehumidifier_fan_direction"
             )
         ]
@@ -253,7 +246,6 @@ class DehumidifierDevice(BaseDevice):
                 max_value=DEHUMIDIFIER_MAX_HUMD,
                 step=5,
                 unit="%",
-                icon="mdi:water-percent",
                 translation_key="dehumidifier_target_humidity"
             ),
             # On timer
@@ -266,7 +258,6 @@ class DehumidifierDevice(BaseDevice):
                 max_value=12,
                 step=1,
                 unit="小時",
-                icon="mdi:timer",
                 translation_key="dehumidifier_on_timer"
             ),
             # Off timer
@@ -279,7 +270,6 @@ class DehumidifierDevice(BaseDevice):
                 max_value=12,
                 step=1,
                 unit="小時",
-                icon="mdi:timer-off",
                 translation_key="dehumidifier_off_timer"
             )
         ]
@@ -293,7 +283,6 @@ class DehumidifierDevice(BaseDevice):
                 command_type="0xFF",
                 name="重置濾網",
                 button_key="reset_filter",
-                icon="mdi:air-filter",
                 translation_key="dehumidifier_reset_filter"
             )
         ]

@@ -393,12 +393,6 @@ DRYER_AVAILABLE_CYCLES = {
     87: "warm_air"
 }
 
-DRYER_ENGINEERING_INFO_MODES = {
-    8: "乾衣",
-    4: "送風",
-    2: "鬆柔冷卻"
-}
-
 # ============================================================================
 # Washing Machine Constants
 # ============================================================================
@@ -433,20 +427,6 @@ WASHING_MACHINE_AVAILABLE_STATUS = {
     8: "error"
 }
 
-WASHING_MACHINE_ENGINEERING_INFO_MODES = {
-    128: "預洗",
-    64: "洗衣",
-    32: "洗清",
-    16: "脫水"
-}
-
-WASHING_MACHINE_ENGINEERING_INFO_MODES_EXTENDED = {
-    1024: "預洗",
-    64: "洗衣",
-    32: "洗清",
-    16: "脫水"
-}
-
 # ============================================================================
 # Refrigerator Constants
 # ============================================================================
@@ -454,51 +434,6 @@ REFRIGERATOR_TEMPERATURE_SETTINGS = {
     0: "low",
     2: "medium",
     4: "high"
-}
-
-REFRIGERATOR_FRESH_FREEZING_MODES = {
-    0: "通常",
-    1: "冷卻",
-    2: "急冷",
-    3: "急凍"
-}
-
-REFRIGERATOR_WINTER_MODES = {
-    0: "未啟動",
-    1: "啟動中",
-    2: "可啟動"
-}
-
-REFRIGERATOR_SHOPPING_MODES = {
-    0: "未啟動",
-    1: "啟動中", 
-    2: "可啟動"
-}
-
-REFRIGERATOR_VACATION_MODES = {
-    0: "未啟動",
-    1: "啟動中",
-    2: "可啟動"
-}
-
-REFRIGERATOR_DEFROSTING_MODES = {
-    0: "通常",
-    1: "除霜中"
-}
-
-REFRIGERATOR_ICE_MAKING_MODES = {
-    0: "停止",
-    1: "啟動"
-}
-
-REFRIGERATOR_NANOE_MODES = {
-    0: "通常",
-    1: "運作中"
-}
-
-REFRIGERATOR_ECO_MODES = {
-    0: "通常",
-    1: "運作中"
 }
 
 # ============================================================================

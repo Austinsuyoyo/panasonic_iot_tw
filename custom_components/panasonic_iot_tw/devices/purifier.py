@@ -55,7 +55,6 @@ class PurifierDevice(BaseDevice):
                 device_class=SensorDeviceClass.PM25,
                 state_class=SensorStateClass.MEASUREMENT,
                 unit="μg/m³",
-                icon="mdi:air-filter",
                 value_processor=value_processors.safe_int,
                 translation_key="purifier_pm25"
             )
@@ -70,7 +69,6 @@ class PurifierDevice(BaseDevice):
                 command_type=self.NANOEX_COMMAND,
                 name="nanoeX",
                 switch_key="nanoex",
-                icon="mdi:air-filter",
                 translation_key="purifier_nanoex"
             )
         ]

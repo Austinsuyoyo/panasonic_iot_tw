@@ -60,7 +60,6 @@ class DryerDevice(BaseDevice):
                 device_class=SensorDeviceClass.DURATION,
                 state_class=SensorStateClass.MEASUREMENT,
                 unit=UnitOfTime.MINUTES,
-                icon="mdi:timer-outline",
                 value_processor=value_processors.safe_int,
                 extra_state_processor=value_processors.create_time_formatter("minutes"),
                 translation_key="dryer_drying_remaining_time"
@@ -73,7 +72,6 @@ class DryerDevice(BaseDevice):
                 device_class=SensorDeviceClass.DURATION,
                 state_class=SensorStateClass.MEASUREMENT,
                 unit=UnitOfTime.HOURS,
-                icon="mdi:timer-outline",
                 value_processor=value_processors.safe_int,
                 extra_state_processor=value_processors.create_time_formatter("hours"),
                 translation_key="dryer_schedule_remaining_time"
@@ -84,7 +82,6 @@ class DryerDevice(BaseDevice):
                 command_type=self.OPERATION_STATUS_COMMAND,
                 name="運轉情報",
                 sensor_key="operation_status",
-                icon="mdi:information",
                 device_class=SensorDeviceClass.ENUM,
                 options=list(dict.fromkeys(DRYER_AVAILABLE_STATUS.values())),
                 value_processor=value_processors.create_status_mapping_processor(DRYER_AVAILABLE_STATUS),
@@ -95,7 +92,6 @@ class DryerDevice(BaseDevice):
                 command_type=self.CYCLE_MESSAGE_COMMAND,
                 name="行程別訊息",
                 sensor_key="cycle_message",
-                icon="mdi:format-list-bulleted",
                 device_class=SensorDeviceClass.ENUM,
                 options=list(dict.fromkeys(DRYER_AVAILABLE_CYCLES.values())),
                 value_processor=value_processors.create_status_mapping_processor(DRYER_AVAILABLE_CYCLES),
@@ -144,7 +140,6 @@ class DryerDevice(BaseDevice):
                 name="遠端控制允許",
                 sensor_key="remote_control_allowed",
                 device_class=BinarySensorDeviceClass.CONNECTIVITY,
-                icon="mdi:remote",
                 translation_key="dryer_remote_control_allowed"
             )
         ]

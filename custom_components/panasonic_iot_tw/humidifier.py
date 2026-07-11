@@ -60,7 +60,7 @@ class PanasonicHumidifier(PanasonicEntity, HumidifierEntity):
         
         Args:
             coordinator: Data update coordinator
-            device_key: Index of device in coordinator data
+            device_key: Key of device in coordinator data (device_id)
             device_data: Device information dictionary
             name: Display name for humidifier
             humidifier_key: Unique key for humidifier

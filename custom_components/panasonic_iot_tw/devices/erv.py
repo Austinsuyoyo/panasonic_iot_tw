@@ -60,7 +60,6 @@ class ERVDevice(BaseDevice):
                 name="運轉模式",
                 select_key="operation_mode",
                 options_dict=operation_mode_options,
-                icon="mdi:fan-auto",
                 translation_key="erv_operation_mode"
             ),
             # Fan level select
@@ -70,7 +69,6 @@ class ERVDevice(BaseDevice):
                 name="風量設定",
                 select_key="fan_level",
                 options_dict=fan_level_options,
-                icon="mdi:fan",
                 translation_key="erv_fan_level"
             )
         ]

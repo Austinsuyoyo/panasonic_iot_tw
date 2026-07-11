@@ -1,0 +1,188 @@
+{
+  "entity": {
+    "sensor": {
+      "refrigerator_freezer_temperature": {
+        "default": "mdi:thermometer"
+      },
+      "refrigerator_refrigerator_temperature": {
+        "default": "mdi:thermometer"
+      },
+      "refrigerator_partial_freezing_temperature": {
+        "default": "mdi:thermometer"
+      },
+      "refrigerator_fresh_freezing_mode": {
+        "default": "mdi:snowflake-variant"
+      },
+      "refrigerator_winter_mode": {
+        "default": "mdi:weather-snowy"
+      },
+      "refrigerator_shopping_mode": {
+        "default": "mdi:shopping"
+      },
+      "refrigerator_vacation_mode": {
+        "default": "mdi:airplane"
+      },
+      "refrigerator_energy_consumption": {
+        "default": "mdi:lightning-bolt"
+      },
+      "refrigerator_co2_footprint": {
+        "default": "mdi:leaf"
+      },
+      "refrigerator_door_open_count": {
+        "default": "mdi:door-open"
+      },
+      "air_conditioner_current_temperature": {
+        "default": "mdi:thermometer"
+      },
+      "air_conditioner_outdoor_temperature": {
+        "default": "mdi:thermometer"
+      },
+      "air_conditioner_pm25": {
+        "default": "mdi:air-filter"
+      },
+      "dehumidifier_humidity": {
+        "default": "mdi:water-percent"
+      },
+      "dehumidifier_pm25": {
+        "default": "mdi:air-filter"
+      },
+      "dryer_drying_remaining_time": {
+        "default": "mdi:timer-outline"
+      },
+      "dryer_schedule_remaining_time": {
+        "default": "mdi:timer-outline"
+      },
+      "dryer_operation_status": {
+        "default": "mdi:information"
+      },
+      "dryer_cycle_message": {
+        "default": "mdi:format-list-bulleted"
+      },
+      "purifier_pm25": {
+        "default": "mdi:air-filter"
+      },
+      "washing_machine_washing_remaining_time": {
+        "default": "mdi:timer-outline"
+      },
+      "washing_machine_schedule_remaining_time": {
+        "default": "mdi:timer-outline"
+      },
+      "washing_machine_operation_status": {
+        "default": "mdi:information"
+      },
+      "washing_machine_cycle_message": {
+        "default": "mdi:format-list-bulleted"
+      }
+    },
+    "binary_sensor": {
+      "refrigerator_eco_mode": {
+        "default": "mdi:leaf"
+      },
+      "refrigerator_defrosting_status": {
+        "default": "mdi:car-defrost-rear"
+      },
+      "refrigerator_nanoe_status": {
+        "default": "mdi:air-filter"
+      },
+      "dehumidifier_tank_full": {
+        "default": "mdi:cup-water"
+      },
+      "dryer_remote_control_allowed": {
+        "default": "mdi:remote"
+      },
+      "washing_machine_remote_control_allowed": {
+        "default": "mdi:remote"
+      }
+    },
+    "switch": {
+      "refrigerator_stop_ice_making": {
+        "default": "mdi:snowflake-off"
+      },
+      "refrigerator_quick_ice_making": {
+        "default": "mdi:snowflake"
+      },
+      "air_conditioner_mold_prevention": {
+        "default": "mdi:weather-windy"
+      },
+      "air_conditioner_motion_detection": {
+        "default": "mdi:motion-sensor"
+      },
+      "air_conditioner_indicator_light": {
+        "default": "mdi:lightbulb-on-outline"
+      },
+      "dehumidifier_nanoe": {
+        "default": "mdi:atom"
+      },
+      "dehumidifier_buzzer": {
+        "default": "mdi:volume-high"
+      },
+      "purifier_nanoex": {
+        "default": "mdi:air-filter"
+      },
+      "smart_switch_power": {
+        "default": "mdi:power",
+        "state": {
+          "on": "mdi:power",
+          "off": "mdi:power-off"
+        }
+      }
+    },
+    "select": {
+      "refrigerator_freezer_temperature_setting": {
+        "default": "mdi:snowflake"
+      },
+      "refrigerator_refrigerator_temperature_setting": {
+        "default": "mdi:fridge"
+      },
+      "refrigerator_partial_freezing_temperature_setting": {
+        "default": "mdi:food-steak"
+      },
+      "air_conditioner_fan_mode": {
+        "default": "mdi:fan"
+      },
+      "air_conditioner_horizontal_swing": {
+        "default": "mdi:arrow-left-right"
+      },
+      "air_conditioner_vertical_swing": {
+        "default": "mdi:arrow-up-down"
+      },
+      "dehumidifier_operation_mode": {
+        "default": "mdi:cog"
+      },
+      "dehumidifier_fan_direction": {
+        "default": "mdi:arrow-up-down"
+      },
+      "erv_operation_mode": {
+        "default": "mdi:fan-auto"
+      },
+      "erv_fan_level": {
+        "default": "mdi:fan"
+      }
+    },
+    "number": {
+      "air_conditioner_on_timer": {
+        "default": "mdi:timer"
+      },
+      "air_conditioner_off_timer": {
+        "default": "mdi:timer-off"
+      },
+      "dehumidifier_target_humidity": {
+        "default": "mdi:water-percent"
+      },
+      "dehumidifier_on_timer": {
+        "default": "mdi:timer"
+      },
+      "dehumidifier_off_timer": {
+        "default": "mdi:timer-off"
+      }
+    },
+    "button": {
+      "air_conditioner_self_clean_button": {
+        "default": "mdi:broom"
+      },
+      "dehumidifier_reset_filter": {
+        "default": "mdi:air-filter"
+      }
+    }
+  }
+}
