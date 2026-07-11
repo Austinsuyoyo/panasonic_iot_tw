@@ -1,124 +1,95 @@
 """The Panasonic IoT TW integration."""
-import asyncio
-from datetime import timedelta
+from __future__ import annotations
+
 import logging
 
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
+from .const import CONF_PROXY, CONF_UPDATE_INTERVAL, PLATFORMS
+from .coordinator import PanasonicConfigEntry, PanasonicCoordinator
+from .exceptions import PanasonicLoginFailed
 from .services import SmartApp
-from .const import (
-    DATA_COORDINATOR,
-    DEFAULT_UPDATE_INTERVAL,
-    DOMAIN,
-    CONF_PROXY,
-    CONF_UPDATE_INTERVAL,
-    DEFAULT_NAME,
-    PLATFORMS,
-    DEVICE_STATUS_CODES,
-)
 
 _LOGGER = logging.getLogger(__name__)
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up Panasonic IoT TW from a config entry."""
-    if hass.data.get(DOMAIN) is None:
-        hass.data.setdefault(DOMAIN, {})
 
+async def async_setup_entry(hass: HomeAssistant, entry: PanasonicConfigEntry) -> bool:
+    """Set up Panasonic IoT TW from a config entry."""
     username = entry.data.get(CONF_USERNAME)
     password = entry.data.get(CONF_PASSWORD)
     proxy = entry.options.get(CONF_PROXY, "")
-    
+
     session = async_get_clientsession(hass)
-    
-    # Create SmartApp client
+
     smart_app = SmartApp(
         session=session,
         account=username,
         password=password,
-        proxy=proxy if proxy else None
+        proxy=proxy or None,
     )
-    
-    _LOGGER.info("Loading your Panasonic devices...")
+
+    _LOGGER.debug("Loading Panasonic devices...")
 
     try:
         # Enable initialization mode for faster setup
         smart_app.set_initialization_mode(True)
         await smart_app.login()
-    except Exception as e:
-        # Disable initialization mode even if login fails
+    except PanasonicLoginFailed as err:
         smart_app.set_initialization_mode(False)
-        _LOGGER.error(f"Failed to login to Panasonic service: {e}")
-        raise ConfigEntryNotReady from e
+        raise ConfigEntryAuthFailed(
+            "Login to Panasonic service failed"
+        ) from err
+    except Exception as err:
+        smart_app.set_initialization_mode(False)
+        _LOGGER.error("Failed to connect to Panasonic service: %s", err)
+        raise ConfigEntryNotReady from err
 
-    async def async_update_data():
-        """Fetch data from API endpoint."""
-        try:
-            _LOGGER.debug("Updating device info...")
-            data = await smart_app.get_device_with_info(DEVICE_STATUS_CODES)
-            _LOGGER.debug(f"Coordinator received data with {len(data)} devices")
-            for key, device in data.items():
-                device_name = device.get("nickname", "Unknown")
-                device_type = device.get("device_type", "Unknown")
-                available = device.get("available", False)
-                _LOGGER.debug(f"Device {key}: {device_name} (type={device_type}, available={available})")
-            return data
-        except Exception as exc:
-            _LOGGER.error(f"Failed while updating device status: {exc}")
-            raise UpdateFailed(f"Error communicating with API: {exc}") from exc
+    coordinator = PanasonicCoordinator(hass, entry, smart_app)
 
-    coordinator = DataUpdateCoordinator(
-        hass,
-        _LOGGER,
-        name=DEFAULT_NAME,
-        update_method=async_update_data,
-        update_interval=timedelta(
-            seconds=entry.options.get(CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL)
-        ),
-    )
+    try:
+        await coordinator.async_config_entry_first_refresh()
+    finally:
+        # Disable initialization mode after the first refresh completes
+        smart_app.set_initialization_mode(False)
 
-    # Store smart_app in coordinator for platform access
-    coordinator.smart_app = smart_app
+    entry.runtime_data = coordinator
 
-    # Initial data fetch with faster initialization mode
-    await coordinator.async_config_entry_first_refresh()
-    
-    # Disable initialization mode after setup is complete
-    smart_app.set_initialization_mode(False)
-
-    if not coordinator.last_update_success:
-        raise ConfigEntryNotReady
-
-    hass.data[DOMAIN][entry.entry_id] = {
-        DATA_COORDINATOR: coordinator,
-    }
-
-    # Forward the setup to the platforms
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
-    entry.add_update_listener(async_reload_entry)
+    entry.async_on_unload(entry.add_update_listener(_async_update_listener))
+
     return True
 
-async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+
+async def async_unload_entry(hass: HomeAssistant, entry: PanasonicConfigEntry) -> bool:
     """Unload a config entry."""
-    unloaded = all(
-        await asyncio.gather(
-            *[
-                hass.config_entries.async_forward_entry_unload(entry, platform)
-                for platform in PLATFORMS
-            ]
+    return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+
+
+async def _async_update_listener(
+    hass: HomeAssistant, entry: PanasonicConfigEntry
+) -> None:
+    """Reload the entry when its options are updated."""
+    await hass.config_entries.async_reload(entry.entry_id)
+
+
+async def async_migrate_entry(hass: HomeAssistant, entry: PanasonicConfigEntry) -> bool:
+    """Migrate old config entries to the current version."""
+    if entry.version == 1:
+        data = dict(entry.data)
+        options = dict(entry.options)
+
+        # Move proxy and update interval from data into options
+        for key in (CONF_PROXY, CONF_UPDATE_INTERVAL):
+            if key in data:
+                options.setdefault(key, data.pop(key))
+
+        hass.config_entries.async_update_entry(
+            entry, data=data, options=options, version=2
         )
-    )
-    if unloaded:
-        hass.data[DOMAIN].pop(entry.entry_id)
+        _LOGGER.debug("Migrated config entry to version 2")
 
-    return unloaded
-
-async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
-    """Reload config entry."""
-    await async_unload_entry(hass, entry)
-    await async_setup_entry(hass, entry)
+    return True

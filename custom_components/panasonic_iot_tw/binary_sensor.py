@@ -32,7 +32,7 @@ class PanasonicBinarySensor(PanasonicEntity, BinarySensorEntity):
     def __init__(
         self,
         coordinator,
-        device_index: int,
+        device_key: str,
         device_data: Dict[str, Any],
         command_type: str,
         name: str,
@@ -49,7 +49,7 @@ class PanasonicBinarySensor(PanasonicEntity, BinarySensorEntity):
 
         Args:
             coordinator: Data update coordinator
-            device_index: Index of device in coordinator data
+            device_key: Index of device in coordinator data
             device_data: Device information dictionary
             command_type: Command type for status lookup
             name: Display name for sensor (fallback when translation not available)
@@ -64,7 +64,7 @@ class PanasonicBinarySensor(PanasonicEntity, BinarySensorEntity):
         """
         # Call parent with common initialization
         super().__init__(
-            coordinator, device_index, device_data,
+            coordinator, device_key, device_data,
             sensor_key, name, translation_key, icon, **kwargs
         )
 
@@ -88,8 +88,8 @@ class PanasonicBinarySensor(PanasonicEntity, BinarySensorEntity):
             if self._data_source == "status":
                 return super()._get_raw_value(command_type)
             else:
-                # Direct data source
-                return self.coordinator.data[self._device_index].get(self._data_source)
+                # Direct data source (live data)
+                return self._current_device.get(self._data_source)
         except (KeyError, TypeError):
             return None
 

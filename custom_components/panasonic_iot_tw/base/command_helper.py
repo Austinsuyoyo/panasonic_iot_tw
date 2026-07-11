@@ -25,11 +25,11 @@ class CommandHelper:
                 if command.get("CommandType") == command_type:
                     return command.get("Parameters", [])
             
-            _LOGGER.warning(f"Command type {command_type} not found in commands")
+            _LOGGER.warning("Command type %s not found in commands", command_type)
             return []
             
         except (TypeError, KeyError) as e:
-            _LOGGER.exception(f"Error getting command parameters for {command_type}: {e}")
+            _LOGGER.exception("Error getting command parameters for %s: %s", command_type, e)
             return []
     
     @staticmethod
@@ -49,11 +49,11 @@ class CommandHelper:
                 if len(param) >= 2 and param[1] == value:
                     return (param[0], param[1])
             
-            _LOGGER.debug(f"Parameter with value {value} not found")
+            _LOGGER.debug("Parameter with value %s not found", value)
             return None
             
         except (TypeError, IndexError) as e:
-            _LOGGER.exception(f"Error finding parameter by value {value}: {e}")
+            _LOGGER.exception("Error finding parameter by value %s: %s", value, e)
             return None
     
     @staticmethod
@@ -73,11 +73,11 @@ class CommandHelper:
                 if len(param) >= 2 and param[0] == name:
                     return (param[0], param[1])
             
-            _LOGGER.debug(f"Parameter with name '{name}' not found")
+            _LOGGER.debug("Parameter with name '%s' not found", name)
             return None
             
         except (TypeError, IndexError) as e:
-            _LOGGER.exception(f"Error finding parameter by name '{name}': {e}")
+            _LOGGER.exception("Error finding parameter by name '%s': %s", name, e)
             return None
     
     @staticmethod
@@ -94,7 +94,7 @@ class CommandHelper:
         try:
             return [param[0] for param in parameters if len(param) >= 1]
         except (TypeError, IndexError) as e:
-            _LOGGER.exception(f"Error getting parameter names: {e}")
+            _LOGGER.exception("Error getting parameter names: %s", e)
             return []
     
     @staticmethod

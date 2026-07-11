@@ -29,7 +29,7 @@ class PanasonicSelect(PanasonicEntity, SelectEntity):
     def __init__(
         self,
         coordinator,
-        device_index: int,
+        device_key: str,
         device_data: Dict[str, Any],
         command_type: str,
         name: str,
@@ -45,7 +45,7 @@ class PanasonicSelect(PanasonicEntity, SelectEntity):
         
         Args:
             coordinator: Data update coordinator
-            device_index: Index of device in coordinator data
+            device_key: Index of device in coordinator data
             device_data: Device information dictionary
             command_type: Command type for status lookup
             name: Display name for select (fallback when translation not available)
@@ -58,7 +58,7 @@ class PanasonicSelect(PanasonicEntity, SelectEntity):
             **kwargs: Additional attributes to set on entity
         """
         super().__init__(
-            coordinator, device_index, device_data,
+            coordinator, device_key, device_data,
             select_key, name, translation_key, icon,
             options=list(options_dict.values()), **kwargs
         )
@@ -97,8 +97,7 @@ class PanasonicSelect(PanasonicEntity, SelectEntity):
             await self._send_command(self._command_type, option_key)
         else:
             _LOGGER.error(
-                f"Unknown option {option} for {self._attr_name} "
-                f"(entity_id: {self._attr_unique_id})"
+                "Unknown option %s for %s (entity_id: %s)", option, self._attr_name, self._attr_unique_id
             )
     
     def _get_command_from_option(self, option: str) -> int:

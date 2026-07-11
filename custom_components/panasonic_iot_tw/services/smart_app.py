@@ -72,7 +72,7 @@ class SmartApp:
             enabled: Whether to enable initialization mode
         """
         self._api_client.set_initialization_mode(enabled)
-        _LOGGER.debug(f"Initialization mode {'enabled' if enabled else 'disabled'}")
+        _LOGGER.debug("Initialization mode %s", 'enabled' if enabled else 'disabled')
     
     async def _fetch_special_data_for_devices(self, devices: List[Dict[str, Any]]) -> None:
         """
@@ -103,12 +103,12 @@ class SmartApp:
                 # Log cache status summary
                 cache_age = self._report_service.get_cache_age_hours()
                 if cache_age:
-                    _LOGGER.debug(f"Special sensor data ready (cached: {cache_age:.1f}h old)")
+                    _LOGGER.debug("Special sensor data ready (cached: %sh old)", cache_age)
             except Exception as e:
-                _LOGGER.warning(f"Failed to fetch some special sensor data: {e}")
+                _LOGGER.warning("Failed to fetch some special sensor data: %s", e)
                 
         except Exception as e:
-            _LOGGER.error(f"Error in special data fetch: {e}")
+            _LOGGER.error("Error in special data fetch: %s", e)
     
     async def force_refresh_special_data(self) -> bool:
         """
@@ -144,7 +144,7 @@ class SmartApp:
             self._report_service._last_co2_fetch = None
             self._report_service._last_door_fetch = None
             
-            _LOGGER.info(f"Force fetching special data for {len(supported_devices)} devices")
+            _LOGGER.info("Force fetching special data for %s devices", len(supported_devices))
             
             # Fetch all special data
             results = await asyncio.gather(
@@ -158,11 +158,11 @@ class SmartApp:
             success_count = sum(1 for result in results if not isinstance(result, Exception))
             total_count = len(results)
             
-            _LOGGER.info(f"Special data force refresh completed: {success_count}/{total_count} successful")
+            _LOGGER.info("Special data force refresh completed: %s/%s successful", success_count, total_count)
             return success_count > 0
             
         except Exception as e:
-            _LOGGER.error(f"Error in force refresh special data: {e}")
+            _LOGGER.error("Error in force refresh special data: %s", e)
             return False
     
     async def login(self) -> Dict[str, str]:
@@ -184,7 +184,7 @@ class SmartApp:
             # The specific error is already logged at lower level
             raise
         except Exception as e:
-            _LOGGER.error(f"Unexpected error during login: {e}")
+            _LOGGER.error("Unexpected error during login: %s", e)
             raise
     
     async def get_devices(self) -> List[Dict[str, Any]]:
@@ -209,133 +209,142 @@ class SmartApp:
             return processed_devices
             
         except Exception as e:
-            _LOGGER.error(f"Failed to get device list: {e}")
+            _LOGGER.error("Failed to get device list: %s", e)
             # Return cached device list (if available)
             return self._device_list_cache
     
     async def get_device_with_info(self, status_codes_dict: Dict[int, List[Union[str, Tuple[str, bool]]]]) -> Dict[str, Dict[str, Any]]:
         """
         Get devices and their status information
-        
+
         Args:
             status_codes_dict: Mapping from device type to status codes
-            
+
         Returns:
-            Device information dictionary {device_index: device_data}
+            Device information dictionary {device_id: device_data}
+
+        Raises:
+            Exceptions from the device-list fetch or authentication are allowed to
+            propagate so the coordinator can surface them. Per-device status
+            failures are tolerated: the affected device is marked unavailable.
         """
         _LOGGER.debug("Getting device detailed information...")
         self._operation_count += 1
-        
-        try:
-            # Get device list
-            devices = await self.get_devices()
-            
-            if not devices:
-                _LOGGER.warning("No devices found")
-                return {}
-            
-            # Get status of all devices
-            device_data = {}
-            for index, device in enumerate(devices):
-                device_type = device.get("device_type", 0)
-                status_codes_raw = status_codes_dict.get(device_type, [])
-                
-                # Extract enabled status codes from tuples
-                if status_codes_raw and isinstance(status_codes_raw[0], tuple):
-                    # New tuple format: (code, enabled)
-                    status_codes = [code for code, enabled in status_codes_raw if enabled]
-                else:
-                    # Legacy string format
-                    status_codes = status_codes_raw
-                
-                if not status_codes:
-                    _LOGGER.warning(f"Device type {device_type} has no enabled status codes, using basic status codes")
-                    # Use basic status codes to try to get device information
-                    status_codes = ["0x00", "0x50", "0x55"]
-                
-                # Get device status
+
+        # A failure to fetch the device list (or auth failure underneath) must
+        # propagate to the coordinator instead of being swallowed.
+        devices = await self._device_service.get_device_list()
+        processed_devices = self._data_processor.process_device_list(devices)
+        self._device_list_cache = processed_devices
+
+        if not processed_devices:
+            _LOGGER.warning("No devices found")
+            return {}
+
+        # Get status of all devices, keyed by device_id
+        device_data = {}
+        for index, device in enumerate(processed_devices):
+            device_id = device.get("device_id") or f"device_{index}"
+            device_type = device.get("device_type", 0)
+            status_codes_raw = status_codes_dict.get(device_type, [])
+
+            # Extract enabled status codes from tuples
+            if status_codes_raw and isinstance(status_codes_raw[0], tuple):
+                # New tuple format: (code, enabled)
+                status_codes = [code for code, enabled in status_codes_raw if enabled]
+            else:
+                # Legacy string format
+                status_codes = status_codes_raw
+
+            if not status_codes:
+                _LOGGER.warning("Device type %s has no enabled status codes, using basic status codes", device_type)
+                # Use basic status codes to try to get device information
+                status_codes = ["0x00", "0x50", "0x55"]
+
+            try:
+                # Get device status (per-device tolerance)
                 status = await self._device_service.get_device_status(
-                    device.get("raw_data", {}), 
+                    device.get("raw_data", {}),
                     status_codes
                 )
-                
+
                 # Process status data
                 processed_status = self._data_processor.process_device_status(
-                    device.get("device_id", ""), 
-                    status, 
+                    device_id,
+                    status,
                     status_codes
                 )
-                
+
                 # Merge device information and status
-                device_data[index] = {
+                device_data[device_id] = {
                     **device,
                     "status": processed_status.get("status", {}),
                     "available": processed_status.get("available", False),
                 }
-            
-            # Update cache
-            self._devices_cache = device_data
-            self._last_successful_update = asyncio.get_event_loop().time()
-            
-            # Fetch special sensor data for supported devices (async, non-blocking)
-            await self._fetch_special_data_for_devices(devices)
+            except Exception as exc:
+                # One device's status fetch failed; keep others and mark this one
+                # unavailable rather than aborting the whole update.
+                _LOGGER.warning("Failed to fetch status for device %s: %s", device_id, exc)
+                device_data[device_id] = {
+                    **device,
+                    "status": {},
+                    "available": False,
+                }
 
-            # Log summary of successful update
-            available_count = sum(1 for d in device_data.values() if d.get("available", False))
-            _LOGGER.debug(f"Updated {len(device_data)} devices ({available_count} available)")
-            return device_data
-            
-        except Exception as e:
-            _LOGGER.error(f"Failed to get device detailed information: {e}")
-            # Return cached device data (if available)
-            return self._devices_cache
+        # Update cache
+        self._devices_cache = device_data
+        self._last_successful_update = asyncio.get_event_loop().time()
+
+        # Fetch special sensor data for supported devices (async, non-blocking)
+        await self._fetch_special_data_for_devices(processed_devices)
+
+        # Log summary of successful update
+        available_count = sum(1 for d in device_data.values() if d.get("available", False))
+        _LOGGER.debug("Updated %d devices (%d available)", len(device_data), available_count)
+        return device_data
     
     async def set_device_command(
-        self, 
-        device_index: int, 
-        command_type: str, 
+        self,
+        device_id: str,
+        command_type: str,
         value: Any
     ) -> bool:
         """
         Set device command
-        
+
         Args:
-            device_index: Device index
+            device_id: Device identifier (key of the coordinator data)
             command_type: Command type
             value: Command value
-            
+
         Returns:
             Whether successful
         """
-        _LOGGER.info(f"Setting device {device_index} command: {command_type} = {value}")
+        _LOGGER.debug("Setting device %s command: %s = %s", device_id, command_type, value)
         self._operation_count += 1
-        
-        try:
-            # Get device information
-            if device_index not in self._devices_cache:
-                _LOGGER.error(f"Device index {device_index} does not exist")
-                return False
-            
-            device = self._devices_cache[device_index]
-            raw_device = device.get("raw_data", {})
-            
-            # Send command
-            success = await self._device_service.send_command(
-                raw_device, 
-                command_type, 
-                value
-            )
-            
-            if success:
-                _LOGGER.info(f"Device {device_index} command set successfully")
-            else:
-                _LOGGER.warning(f"Device {device_index} command set failed")
-            
-            return success
-            
-        except Exception as e:
-            _LOGGER.error(f"Failed to set device command: {e}")
+
+        # Resolve the device from the cache by device_id
+        device = self._devices_cache.get(device_id)
+        if device is None:
+            _LOGGER.error("Device %s does not exist", device_id)
             return False
+
+        raw_device = device.get("raw_data", {})
+
+        # Send command (let underlying exceptions propagate to the caller so
+        # the entity layer can surface failures to the UI).
+        success = await self._device_service.send_command(
+            raw_device,
+            command_type,
+            value
+        )
+
+        if success:
+            _LOGGER.debug("Device %s command set successfully", device_id)
+        else:
+            _LOGGER.warning("Device %s command set failed", device_id)
+
+        return success
     
     async def get_special_sensor_data(self, device_list: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Dict[str, Any]]:
         """
@@ -347,7 +356,7 @@ class SmartApp:
         Returns:
             Dictionary with energy, CO2, and door data for supported devices
         """
-        _LOGGER.info("Getting special sensor data...")
+        _LOGGER.debug("Getting special sensor data...")
         self._operation_count += 1
         
         try:
@@ -364,15 +373,12 @@ class SmartApp:
             # Update cache
             self._special_data_cache.update(special_data)
             
-            _LOGGER.info(f"Retrieved special sensor data: "
-                        f"energy={len(special_data.get('energy', {}))}, "
-                        f"co2={len(special_data.get('co2', {}))}, "
-                        f"door={len(special_data.get('door', {}))}")
+            _LOGGER.debug("Retrieved special sensor data: energy=%s, co2=%s, door=%s", len(special_data.get('energy', {})), len(special_data.get('co2', {})), len(special_data.get('door', {})))
             
             return special_data
             
         except Exception as e:
-            _LOGGER.error(f"Failed to get special sensor data: {e}")
+            _LOGGER.error("Failed to get special sensor data: %s", e)
             # Return cached data
             return self._special_data_cache
     
@@ -412,17 +418,17 @@ class SmartApp:
         """
         return self._report_service.get_cached_door_data(device_gwid)
     
-    def get_device_by_index(self, index: int) -> Optional[Dict[str, Any]]:
+    def get_device_by_id(self, device_id: str) -> Optional[Dict[str, Any]]:
         """
-        Get device information by index
-        
+        Get device information by device_id
+
         Args:
-            index: Device index
-            
+            device_id: Device identifier
+
         Returns:
             Device information
         """
-        return self._devices_cache.get(index)
+        return self._devices_cache.get(device_id)
     
     def get_all_devices(self) -> Dict[str, Dict[str, Any]]:
         """

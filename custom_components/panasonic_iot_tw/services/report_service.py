@@ -78,13 +78,13 @@ class ReportService:
         
         # Check if it's a different day (simple daily check)
         if last_fetch_time.date() != now.date():
-            _LOGGER.info(f"Special data daily update needed: last fetch was {last_fetch_time.date()}, now {now.date()}")
+            _LOGGER.debug("Special data daily update needed: last fetch was %s, now %s", last_fetch_time.date(), now.date())
             return True
             
         # Check if cache has expired (fallback safety)
         time_since_last = (now - last_fetch_time).total_seconds()
         if time_since_last > self.CACHE_DURATION:
-            _LOGGER.warning(f"Special data cache expired: {time_since_last/3600:.1f} hours since last fetch")
+            _LOGGER.warning("Special data cache expired: %s hours since last fetch", time_since_last / 3600)
             return True
 
         # Cache is fresh, no need to log (individual cache usage will be logged once)
@@ -126,19 +126,19 @@ class ReportService:
             
             info_url = API_ENDPOINTS.get("get_info", f"{API_ENDPOINTS['login'].replace('/userlogin1', '')}/UserGetInfo")
             
-            _LOGGER.debug(f"Requesting {report_name} data from {info_url}")
+            _LOGGER.debug("Requesting %s data from %s", report_name, info_url)
             
             response = await self.api_client.post(info_url, headers=headers, json=payload)
             
             if response and isinstance(response, dict):
-                _LOGGER.info(f"Successfully fetched {report_name} data")
+                _LOGGER.debug("Successfully fetched %s data", report_name)
                 return response
             else:
-                _LOGGER.warning(f"Invalid response format for {report_name}: {type(response)}")
+                _LOGGER.warning("Invalid response format for %s: %s", report_name, type(response))
                 return None
                 
         except Exception as e:
-            _LOGGER.error(f"Failed to fetch {report_name} data: {e}")
+            _LOGGER.error("Failed to fetch %s data: %s", report_name, e)
             return None
     
     def _has_supported_devices(self, device_list: List[Dict[str, Any]]) -> bool:
@@ -207,7 +207,7 @@ class ReportService:
             self._energy_cache = energy_data
             self._last_energy_fetch = datetime.now()
             
-            _LOGGER.info(f"Cached energy data for {len(energy_data)} devices")
+            _LOGGER.debug("Cached energy data for %s devices", len(energy_data))
             return energy_data
         
         return {}
@@ -249,7 +249,7 @@ class ReportService:
             self._co2_cache = co2_data
             self._last_co2_fetch = datetime.now()
             
-            _LOGGER.info(f"Cached CO2 data for {len(co2_data)} devices")
+            _LOGGER.debug("Cached CO2 data for %s devices", len(co2_data))
             return co2_data
         
         return {}
@@ -291,7 +291,7 @@ class ReportService:
             self._door_cache = door_data
             self._last_door_fetch = datetime.now()
             
-            _LOGGER.info(f"Cached door data for {len(door_data)} devices")
+            _LOGGER.debug("Cached door data for %s devices", len(door_data))
             return door_data
         
         return {}
@@ -312,7 +312,7 @@ class ReportService:
             return {"energy": {}, "co2": {}, "door": {}}
         
         # Fetch all data types in parallel for efficiency
-        _LOGGER.info("Fetching all special sensor data in parallel")
+        _LOGGER.debug("Fetching all special sensor data in parallel")
         
         energy_task = self.get_energy_data(device_list)
         co2_task = self.get_co2_data(device_list)
@@ -324,15 +324,15 @@ class ReportService:
         
         # Handle exceptions
         if isinstance(energy_data, Exception):
-            _LOGGER.error(f"Energy data fetch failed: {energy_data}")
+            _LOGGER.error("Energy data fetch failed: %s", energy_data)
             energy_data = {}
         
         if isinstance(co2_data, Exception):
-            _LOGGER.error(f"CO2 data fetch failed: {co2_data}")
+            _LOGGER.error("CO2 data fetch failed: %s", co2_data)
             co2_data = {}
         
         if isinstance(door_data, Exception):
-            _LOGGER.error(f"Door data fetch failed: {door_data}")
+            _LOGGER.error("Door data fetch failed: %s", door_data)
             door_data = {}
         
         return {

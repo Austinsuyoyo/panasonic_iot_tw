@@ -27,26 +27,26 @@ class DeviceFactory:
     def register_device_class(cls, device_type: int, device_class):
         """Register a device class for a device type."""
         cls._device_classes[device_type] = device_class
-        _LOGGER.debug(f"Registered device class {device_class.__name__} for type {device_type}")
+        _LOGGER.debug("Registered device class %s for type %s", device_class.__name__, device_type)
     
     @classmethod
-    def create_device(cls, coordinator, device_index: int, device_data: Dict[str, Any]) -> Optional[BaseDevice]:
+    def create_device(cls, coordinator, device_key: str, device_data: Dict[str, Any]) -> Optional[BaseDevice]:
         """Create a device instance based on device type."""
         device_type = device_data.get("device_type")
-        device_name = device_data.get("nickname", f"Device {device_index}")
+        device_name = device_data.get("nickname", f"Device {device_key}")
         
         if device_type not in cls._device_classes:
-            _LOGGER.warning(f"No device class registered for device type {device_type} ({device_name})")
+            _LOGGER.warning("No device class registered for device type %s (%s)", device_type, device_name)
             return None
         
         device_class = cls._device_classes[device_type]
         
         try:
-            device = device_class(coordinator, device_index, device_data)
-            _LOGGER.debug(f"Created {device_class.__name__} instance for {device_name}")
+            device = device_class(coordinator, device_key, device_data)
+            _LOGGER.debug("Created %s instance for %s", device_class.__name__, device_name)
             return device
         except Exception as e:
-            _LOGGER.error(f"Failed to create device instance for {device_name}: {e}")
+            _LOGGER.error("Failed to create device instance for %s: %s", device_name, e)
             return None
     
     @classmethod
@@ -79,6 +79,6 @@ def register_all_devices():
             DeviceFactory.register_device_class(device_type, device_class)
             registered_count += 1
         except (ImportError, AttributeError) as e:
-            _LOGGER.warning(f"Failed to import {class_name} from {module_name}: {e}")
+            _LOGGER.warning("Failed to import %s from %s: %s", class_name, module_name, e)
     
-    _LOGGER.info(f"Registered {registered_count}/{len(device_mappings)} device types")
+    _LOGGER.info("Registered %s/%s device types", registered_count, len(device_mappings))

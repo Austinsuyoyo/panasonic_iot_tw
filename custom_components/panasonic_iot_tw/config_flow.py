@@ -2,22 +2,23 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, Optional
+from collections.abc import Mapping
+from typing import Any
 
 import voluptuous as vol
 
 from homeassistant import config_entries
+from homeassistant.config_entries import ConfigFlowResult
 from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
 from homeassistant.core import HomeAssistant
-from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .const import (
-    DOMAIN,
     CONF_PROXY,
     CONF_UPDATE_INTERVAL,
     DEFAULT_UPDATE_INTERVAL,
+    DOMAIN,
 )
 from .exceptions import PanasonicLoginFailed
 
@@ -28,16 +29,24 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
         vol.Required(CONF_USERNAME): str,
         vol.Required(CONF_PASSWORD): str,
         vol.Optional(CONF_PROXY, default=""): str,
-        vol.Optional(CONF_UPDATE_INTERVAL, default=DEFAULT_UPDATE_INTERVAL): vol.All(vol.Coerce(int), vol.Range(min=60, max=3600)),
+        vol.Optional(CONF_UPDATE_INTERVAL, default=DEFAULT_UPDATE_INTERVAL): vol.All(
+            vol.Coerce(int), vol.Range(min=60, max=3600)
+        ),
     }
 )
 
-async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, Any]:
+STEP_REAUTH_DATA_SCHEMA = vol.Schema(
+    {
+        vol.Required(CONF_PASSWORD): str,
+    }
+)
+
+
+async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> None:
     """Validate the user input allows us to connect."""
     session = async_get_clientsession(hass)
 
     # Use lightweight validation: only create ApiClient and TokenManager
-    # This avoids creating unnecessary services (DeviceService, DataProcessor, ReportService)
     from .services.api_client import ApiClient
     from .services.token_manager import TokenManager
 
@@ -45,35 +54,35 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
     token_manager = TokenManager(api_client, data[CONF_USERNAME], data[CONF_PASSWORD])
 
     try:
-        # Only perform login validation, don't create full SmartApp
         await token_manager.login()
-        _LOGGER.info(f"Credential validation successful for {data[CONF_USERNAME]}")
-    except PanasonicLoginFailed as e:
-        _LOGGER.warning(f"Login failed for {data[CONF_USERNAME]}: {str(e)}")
-        raise InvalidAuth from e
-    except Exception as e:
-        _LOGGER.error(f"Unexpected error during login: {type(e).__name__}: {str(e)}")
-        raise CannotConnect from e
+        _LOGGER.debug("Credential validation successful")
+    except PanasonicLoginFailed as err:
+        _LOGGER.warning("Login failed: %s", err)
+        raise InvalidAuth from err
+    except Exception as err:
+        _LOGGER.error("Unexpected error during login: %s", type(err).__name__)
+        raise CannotConnect from err
     finally:
-        # Clean up token
         token_manager.logout()
 
-    # Return info that you want to store in the config entry.
-    return {"title": f"Panasonic IoT TW ({data[CONF_USERNAME]})"}
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Panasonic IoT TW."""
 
-    VERSION = 1
+    VERSION = 2
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Handle the initial step."""
         errors: dict[str, str] = {}
         if user_input is not None:
+            username = user_input[CONF_USERNAME]
+            await self.async_set_unique_id(username.lower())
+            self._abort_if_unique_id_configured()
+
             try:
-                info = await validate_input(self.hass, user_input)
+                await validate_input(self.hass, user_input)
             except CannotConnect:
                 errors["base"] = "cannot_connect"
             except InvalidAuth:
@@ -82,10 +91,66 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 _LOGGER.exception("Unexpected exception")
                 errors["base"] = "unknown"
             else:
-                return self.async_create_entry(title=info["title"], data=user_input)
+                return self.async_create_entry(
+                    title=f"Panasonic IoT TW ({username})",
+                    data={
+                        CONF_USERNAME: username,
+                        CONF_PASSWORD: user_input[CONF_PASSWORD],
+                    },
+                    options={
+                        CONF_PROXY: user_input.get(CONF_PROXY, ""),
+                        CONF_UPDATE_INTERVAL: user_input.get(
+                            CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL
+                        ),
+                    },
+                )
 
         return self.async_show_form(
             step_id="user", data_schema=STEP_USER_DATA_SCHEMA, errors=errors
+        )
+
+    async def async_step_reauth(
+        self, entry_data: Mapping[str, Any]
+    ) -> ConfigFlowResult:
+        """Handle re-authentication when credentials become invalid."""
+        return await self.async_step_reauth_confirm()
+
+    async def async_step_reauth_confirm(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Confirm re-authentication by re-prompting for the password."""
+        errors: dict[str, str] = {}
+        reauth_entry = self._get_reauth_entry()
+        username = reauth_entry.data[CONF_USERNAME]
+
+        if user_input is not None:
+            try:
+                await validate_input(
+                    self.hass,
+                    {
+                        CONF_USERNAME: username,
+                        CONF_PASSWORD: user_input[CONF_PASSWORD],
+                        CONF_PROXY: reauth_entry.options.get(CONF_PROXY, ""),
+                    },
+                )
+            except CannotConnect:
+                errors["base"] = "cannot_connect"
+            except InvalidAuth:
+                errors["base"] = "invalid_auth"
+            except Exception:  # pylint: disable=broad-except
+                _LOGGER.exception("Unexpected exception")
+                errors["base"] = "unknown"
+            else:
+                return self.async_update_reload_and_abort(
+                    reauth_entry,
+                    data_updates={CONF_PASSWORD: user_input[CONF_PASSWORD]},
+                )
+
+        return self.async_show_form(
+            step_id="reauth_confirm",
+            data_schema=STEP_REAUTH_DATA_SCHEMA,
+            errors=errors,
+            description_placeholders={CONF_USERNAME: username},
         )
 
     @staticmethod
@@ -93,14 +158,15 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         config_entry: config_entries.ConfigEntry,
     ) -> config_entries.OptionsFlow:
         """Create the options flow."""
-        return OptionsFlowHandler(config_entry)
+        return OptionsFlowHandler()
+
 
 class OptionsFlowHandler(config_entries.OptionsFlow):
     """Handle options flow for Panasonic IoT TW."""
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Manage the options."""
         if user_input is not None:
             return self.async_create_entry(title="", data=user_input)
@@ -123,8 +189,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             ),
         )
 
+
 class CannotConnect(HomeAssistantError):
     """Error to indicate we cannot connect."""
+
 
 class InvalidAuth(HomeAssistantError):
     """Error to indicate there is invalid auth."""

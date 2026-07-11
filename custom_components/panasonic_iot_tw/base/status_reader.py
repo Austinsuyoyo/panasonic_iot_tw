@@ -14,9 +14,9 @@ _LOGGER = logging.getLogger(__name__)
 class StatusReader:
     """Unified status reading base class to reduce code duplication"""
     
-    def __init__(self, coordinator, index: int, label: str):
+    def __init__(self, coordinator, device_key, label: str):
         self.coordinator = coordinator
-        self.index = index
+        self.device_key = device_key
         self.label = label
     
     def get_status_value(
@@ -39,7 +39,7 @@ class StatusReader:
             Processed status value
         """
         try:
-            status = self.coordinator.data[self.index]["status"]
+            status = self.coordinator.data[self.device_key]["status"]
             raw_value = status.get(command_type, default)
             
             if raw_value is None:
@@ -47,7 +47,7 @@ class StatusReader:
             
             # Validate value
             if validate and not validate(raw_value):
-                _LOGGER.warning(f"[{self.label}] Invalid value for {command_type}: {raw_value}")
+                _LOGGER.warning("[%s] Invalid value for %s: %s", self.label, command_type, raw_value)
                 return STATE_UNAVAILABLE
             
             # Convert value
@@ -55,14 +55,14 @@ class StatusReader:
                 try:
                     processed_value = transform(raw_value)
                 except (ValueError, TypeError) as e:
-                    _LOGGER.warning(f"[{self.label}] Transform error for {command_type}: {e}")
+                    _LOGGER.warning("[%s] Transform error for %s: %s", self.label, command_type, e)
                     return STATE_UNAVAILABLE
             else:
                 processed_value = raw_value
             return processed_value
             
         except (KeyError, IndexError) as e:
-            _LOGGER.exception(f"[{self.label}] Error getting status for {command_type}: {e}")
+            _LOGGER.exception("[%s] Error getting status for %s: %s", self.label, command_type, e)
             return STATE_UNAVAILABLE
     
     def get_boolean_status(self, command_type: str, default: bool = False) -> bool:
@@ -100,7 +100,7 @@ class StatusReader:
     def is_device_available(self, power_command: str = "0x00") -> bool:
         """Check if device is available"""
         try:
-            status = self.coordinator.data[self.index]["status"]
+            status = self.coordinator.data[self.device_key]["status"]
             return status.get(power_command) is not None
         except (KeyError, IndexError):
             return False

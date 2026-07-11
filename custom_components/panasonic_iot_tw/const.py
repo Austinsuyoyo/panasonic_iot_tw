@@ -34,9 +34,6 @@ DEVICE_TYPE_SWITCH = 17
 # ============================================================================
 # Configuration
 # ============================================================================
-DATA_CLIENT = "client"
-DATA_COORDINATOR = "coordinator"
-
 CONF_PROXY = "proxy"
 CONF_UPDATE_INTERVAL = "update_interval"
 
@@ -358,42 +355,42 @@ DEHUMIDIFIER_OFF_TIMER_MAX = 12
 # Dryer Constants
 # ============================================================================
 DRYER_AVAILABLE_STATUS = {
-    0: "不顯示",
-    1: "待機中", 
-    2: "動作中",
-    3: "預約中",
-    4: "預約中",
-    5: "終了",
-    8: "異常"
+    0: "not_displayed",
+    1: "standby",
+    2: "running",
+    3: "reserved",
+    4: "reserved",
+    5: "finished",
+    8: "error"
 }
 
 DRYER_AVAILABLE_CYCLES = {
-    0: "棉麻行程",
-    13: "大件行程",
-    18: "自選行程", 
-    52: "高級衣物行程",
-    64: "羊毛行程",
-    65: "運動服行程",
-    66: "羽绒衣行程",
-    67: "抑菌烘行程",
-    70: "nanoe™X-抑菌行程",
-    71: "nanoe™X-除臭行程",
-    72: "nanoe™X-除蟎行程",
-    73: "nanoe™X-除皺行程",
-    74: "nanoe™X-鬆柔行程",
-    75: "nanoe™X-皮草保養行程",
-    76: "快烘行程",
-    77: "嬰兒衣物行程",
-    78: "薄被行程",
-    79: "合成纖維行程",
-    80: "襯衫行程",
-    81: "混合行程",
-    82: "機能衣行程",
-    83: "牛仔行程",
-    84: "浴巾行程",
-    85: "冷風清新行程",
-    86: "工作/校服行程",
-    87: "溫風暖衣行程"
+    0: "cotton_linen",
+    13: "large_items",
+    18: "custom",
+    52: "premium_clothing",
+    64: "wool",
+    65: "sportswear",
+    66: "down_jacket",
+    67: "antibacterial_dry",
+    70: "nanoex_antibacterial",
+    71: "nanoex_deodorize",
+    72: "nanoex_dust_mite",
+    73: "nanoex_dewrinkle",
+    74: "nanoex_softening",
+    75: "nanoex_fur_care",
+    76: "quick_dry",
+    77: "baby_clothes",
+    78: "thin_quilt",
+    79: "synthetic_fiber",
+    80: "shirts",
+    81: "mixed",
+    82: "functional_wear",
+    83: "denim",
+    84: "bath_towel",
+    85: "cool_air_refresh",
+    86: "work_school_uniform",
+    87: "warm_air"
 }
 
 DRYER_ENGINEERING_INFO_MODES = {
@@ -406,34 +403,34 @@ DRYER_ENGINEERING_INFO_MODES = {
 # Washing Machine Constants
 # ============================================================================
 WASHING_MACHINE_AVAILABLE_CYCLES = {
-    0: "標準",
-    8: "浸泡",
-    10: "快洗",
-    11: "槽洗淨",
-    13: "大件行程",
-    15: "除蟎",
-    18: "自選",
-    52: "高級衣物",
-    64: "羊毛",
-    65: "運動服",
-    66: "羽绒衣",
-    67: "高溫抑菌",
-    68: "節能洗",
-    69: "脫水",
-    79: "合成纖維",
-    80: "襯衫",
-    81: "混合洗",
-    83: "牛仔"
+    0: "standard",
+    8: "soak",
+    10: "quick_wash",
+    11: "tub_clean",
+    13: "large_items",
+    15: "dust_mite_removal",
+    18: "custom",
+    52: "premium_clothing",
+    64: "wool",
+    65: "sportswear",
+    66: "down_jacket",
+    67: "high_temp_antibacterial",
+    68: "eco_wash",
+    69: "spin",
+    79: "synthetic_fiber",
+    80: "shirts",
+    81: "mixed",
+    83: "denim"
 }
 
 WASHING_MACHINE_AVAILABLE_STATUS = {
-    0: "不顯示",
-    1: "待機中",
-    2: "動作中", 
-    3: "預約中",
-    4: "預約中",
-    5: "終了",
-    8: "異常"
+    0: "not_displayed",
+    1: "standby",
+    2: "running",
+    3: "reserved",
+    4: "reserved",
+    5: "finished",
+    8: "error"
 }
 
 WASHING_MACHINE_ENGINEERING_INFO_MODES = {
@@ -454,9 +451,9 @@ WASHING_MACHINE_ENGINEERING_INFO_MODES_EXTENDED = {
 # Refrigerator Constants
 # ============================================================================
 REFRIGERATOR_TEMPERATURE_SETTINGS = {
-    0: "弱",
-    2: "中", 
-    4: "強"
+    0: "low",
+    2: "medium",
+    4: "high"
 }
 
 REFRIGERATOR_FRESH_FREEZING_MODES = {

@@ -18,9 +18,9 @@ class PurifierDevice(BaseDevice):
     NANOEX_COMMAND = "0x07"
     PM25_COMMAND = "0x50"
     
-    def __init__(self, coordinator, device_index: int, device_data: Dict[str, Any]):
+    def __init__(self, coordinator, device_key: str, device_data: Dict[str, Any]):
         """Initialize purifier device."""
-        super().__init__(coordinator, device_index, device_data)
+        super().__init__(coordinator, device_key, device_data)
     
     @property
     def is_on(self) -> bool:

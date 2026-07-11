@@ -1,5 +1,8 @@
 """Common value processing functions for all entities."""
-from typing import Any, Dict, Callable, List
+import logging
+from typing import Any, Dict, Callable, List, Optional
+
+_LOGGER = logging.getLogger(__name__)
 
 
 # ============================================================================
@@ -200,22 +203,29 @@ def process_boolean_switch(value: Any) -> bool:
 
 
 # Factory Functions
-def create_status_mapping_processor(status_mapping: Dict[int, str]) -> Callable[[Any], str]:
-    """Create a status processor with mapping."""
-    def processor(value: Any) -> str:
+def create_status_mapping_processor(status_mapping: Dict[int, str]) -> Callable[[Any], Optional[str]]:
+    """Create a status processor with mapping. Returns None for unmapped values."""
+    def processor(value: Any) -> Optional[str]:
         status_int = int(value)
-        return status_mapping.get(status_int, f"未知 ({status_int})")
+        slug = status_mapping.get(status_int)
+        if slug is None:
+            _LOGGER.debug("Unmapped status value: %s", status_int)
+        return slug
     return processor
 
 
-def create_options_processor(options_dict: Dict[int, str]) -> Callable[[Any], str]:
-    """Create a processor for select options mapping."""
-    def processor(value: Any) -> str:
+def create_options_processor(options_dict: Dict[int, str]) -> Callable[[Any], Optional[str]]:
+    """Create a processor for select options mapping. Returns None for unmapped values."""
+    def processor(value: Any) -> Optional[str]:
         try:
             option_key = int(value)
-            return options_dict.get(option_key, f"未知 ({value})")
         except (ValueError, TypeError):
-            return f"無效 ({value})"
+            _LOGGER.debug("Invalid option value: %s", value)
+            return None
+        slug = options_dict.get(option_key)
+        if slug is None:
+            _LOGGER.debug("Unmapped option value: %s", value)
+        return slug
     return processor
 
 
@@ -235,11 +245,14 @@ def create_humidity_mapping_processor(humidity_mapping: Dict[int, int]) -> Calla
     return processor
 
 
-def create_mode_processor(available_modes: Dict[int, str]) -> Callable[[Any], str]:
-    """Create a processor for mode values."""
-    def processor(value: Any) -> str:
+def create_mode_processor(available_modes: Dict[int, str]) -> Callable[[Any], Optional[str]]:
+    """Create a processor for mode values. Returns None for unmapped values."""
+    def processor(value: Any) -> Optional[str]:
         mode_int = int(value)
-        return available_modes.get(mode_int, "未知")
+        slug = available_modes.get(mode_int)
+        if slug is None:
+            _LOGGER.debug("Unmapped mode value: %s", mode_int)
+        return slug
     return processor
 
 

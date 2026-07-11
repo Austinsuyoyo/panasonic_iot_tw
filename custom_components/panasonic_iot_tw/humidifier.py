@@ -34,7 +34,7 @@ class PanasonicHumidifier(PanasonicEntity, HumidifierEntity):
     def __init__(
         self,
         coordinator,
-        device_index: int,
+        device_key: str,
         device_data: Dict[str, Any],
         name: str,
         humidifier_key: str,
@@ -60,7 +60,7 @@ class PanasonicHumidifier(PanasonicEntity, HumidifierEntity):
         
         Args:
             coordinator: Data update coordinator
-            device_index: Index of device in coordinator data
+            device_key: Index of device in coordinator data
             device_data: Device information dictionary
             name: Display name for humidifier
             humidifier_key: Unique key for humidifier
@@ -84,7 +84,7 @@ class PanasonicHumidifier(PanasonicEntity, HumidifierEntity):
         """
         # Call parent with common initialization
         super().__init__(
-            coordinator, device_index, device_data,
+            coordinator, device_key, device_data,
             humidifier_key, name, translation_key, icon, **kwargs
         )
         
@@ -102,10 +102,10 @@ class PanasonicHumidifier(PanasonicEntity, HumidifierEntity):
         
         # Mode and humidity mappings
         self._available_modes = available_modes or {
-            0: "自動",
-            1: "連續除濕",
-            2: "衣物乾燥",
-            3: "清淨",
+            0: "auto",
+            1: "continuous",
+            2: "clothes_drying",
+            3: "purify",
         }
         self._humidity_mapping = humidity_mapping or DEHUMIDIFIER_AVAILABLE_HUMIDITY
         
@@ -184,8 +184,7 @@ class PanasonicHumidifier(PanasonicEntity, HumidifierEntity):
             await self._send_command(self._target_humidity_command, device_value)
         except (ValueError, TypeError) as e:
             _LOGGER.error(
-                f"Invalid humidity {humidity} for {self._attr_name} "
-                f"(entity_id: {self._attr_unique_id}): {e}"
+                "Invalid humidity %s for %s (entity_id: %s): %s", humidity, self._attr_name, self._attr_unique_id, e
             )
     
     async def async_set_mode(self, mode: str) -> None:

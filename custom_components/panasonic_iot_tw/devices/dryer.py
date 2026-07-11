@@ -37,12 +37,12 @@ class DryerDevice(BaseDevice):
             # When operation status is 0, sensors should be unavailable
             if operation_status == 0:
                 data["available"] = False
-                _LOGGER.debug(f"Dryer device {self.index} sensors unavailable: operation status = 0")
+                _LOGGER.debug("Dryer device %s sensors unavailable: operation status = 0", self.device_key)
             else:
                 # Keep original availability status when operation status is not 0
                 data["available"] = self._device_data.get("available", False)
         except Exception as e:
-            _LOGGER.warning(f"Error checking dryer operation status: {e}")
+            _LOGGER.warning("Error checking dryer operation status: %s", e)
             # Fallback to original availability on error
             data["available"] = self._device_data.get("available", False)
 
@@ -85,6 +85,8 @@ class DryerDevice(BaseDevice):
                 name="運轉情報",
                 sensor_key="operation_status",
                 icon="mdi:information",
+                device_class=SensorDeviceClass.ENUM,
+                options=list(dict.fromkeys(DRYER_AVAILABLE_STATUS.values())),
                 value_processor=value_processors.create_status_mapping_processor(DRYER_AVAILABLE_STATUS),
                 translation_key="dryer_operation_status"
             ),
@@ -94,6 +96,8 @@ class DryerDevice(BaseDevice):
                 name="行程別訊息",
                 sensor_key="cycle_message",
                 icon="mdi:format-list-bulleted",
+                device_class=SensorDeviceClass.ENUM,
+                options=list(dict.fromkeys(DRYER_AVAILABLE_CYCLES.values())),
                 value_processor=value_processors.create_status_mapping_processor(DRYER_AVAILABLE_CYCLES),
                 translation_key="dryer_cycle_message"
             )

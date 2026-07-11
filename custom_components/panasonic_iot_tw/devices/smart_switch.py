@@ -13,9 +13,9 @@ class SmartSwitchDevice(BaseDevice):
     # Command mappings
     POWER_COMMAND = "0x70"
     
-    def __init__(self, coordinator, device_index: int, device_data: Dict[str, Any]):
+    def __init__(self, coordinator, device_key: str, device_data: Dict[str, Any]):
         """Initialize smart switch device."""
-        super().__init__(coordinator, device_index, device_data)
+        super().__init__(coordinator, device_key, device_data)
     
     @property
     def is_on(self) -> bool:

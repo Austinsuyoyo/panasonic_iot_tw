@@ -88,6 +88,8 @@ class WashingMachineDevice(BaseDevice):
                 name="運轉情報",
                 sensor_key="operation_status",
                 icon="mdi:information",
+                device_class=SensorDeviceClass.ENUM,
+                options=list(dict.fromkeys(WASHING_MACHINE_AVAILABLE_STATUS.values())),
                 value_processor=value_processors.create_status_mapping_processor(WASHING_MACHINE_AVAILABLE_STATUS),
                 translation_key="washing_machine_operation_status"
             ),
@@ -97,6 +99,8 @@ class WashingMachineDevice(BaseDevice):
                 name="行程別訊息",
                 sensor_key="cycle_message",
                 icon="mdi:format-list-bulleted",
+                device_class=SensorDeviceClass.ENUM,
+                options=list(dict.fromkeys(WASHING_MACHINE_AVAILABLE_CYCLES.values())),
                 value_processor=value_processors.create_status_mapping_processor(WASHING_MACHINE_AVAILABLE_CYCLES),
                 translation_key="washing_machine_cycle_message"
             )
