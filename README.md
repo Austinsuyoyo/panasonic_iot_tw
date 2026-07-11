@@ -2,217 +2,231 @@
 
 [![GitHub Release](https://img.shields.io/github/release/austinsuyoyo/panasonic_iot_tw.svg?style=flat-square)](https://github.com/austinsuyoyo/panasonic_iot_tw/releases)
 [![License](https://img.shields.io/github/license/austinsuyoyo/panasonic_iot_tw.svg?style=flat-square)](LICENSE)
-[![HACS](https://img.shields.io/badge/HACS-Default-orange.svg?style=flat-square)](https://github.com/hacs/integration)
+[![HACS](https://img.shields.io/badge/HACS-Custom-orange.svg?style=flat-square)](https://github.com/hacs/integration)
 
-A comprehensive Home Assistant custom integration for controlling Panasonic smart appliances through the Panasonic IoT TW API. This integration features a modern architecture with factory pattern device management and comprehensive entity support.
+> 中文說明請見 [README-zh.md](README-zh.md)。
 
-## 🚀 Features
+A Home Assistant custom integration that controls Panasonic Taiwan smart
+appliances through the Panasonic IoT TW cloud (`ems2.panasonic.com.tw`). It logs
+in with your **Panasonic Smart App** account and exposes your appliances as
+native Home Assistant entities. This is a `cloud_polling` integration.
 
-### Supported Devices
+## Supported Devices
 
-| Device Type | Entity Count | Supported Features |
-|-------------|--------------|-------------------|
-| **Air Conditioner** | 18+ entities | Temperature control, fan speed, modes, timers, nanoeX, ECONAVI |
-| **Refrigerator** | 15 entities | Temperature control/monitoring, ECO mode, nanoe, defrosting, ice making |
-| **Washing Machine** | 13 entities | Status monitoring, cycle control, remaining time, bitwise status |
-| **Dryer** | 11 entities | Cycle control, status monitoring, remaining time, bitwise status |
-| **Dehumidifier** | 14+ entities | Humidity control, fan speed, timers, tank status |
-| **Air Purifier** | 4+ entities | Fan control, PM2.5 monitoring, nanoeX |
-| **ERV** | 3+ entities | Operation modes, fan control |
-| **Smart Switch** | 1 entity | On/off control |
+| Device | Home Assistant platforms | Highlights |
+|--------|--------------------------|------------|
+| **Air Conditioner** | climate, sensor, switch, select, number, button | Temperature / mode / fan / swing, nanoeX, ECONAVI, turbo, self-clean, timers, indoor & outdoor temperature, PM2.5 |
+| **Dehumidifier** | humidifier, sensor, binary_sensor, switch, select, number, button | Target humidity, operation mode, fan direction, tank-full, nanoe, PM2.5, on/off timers |
+| **Refrigerator** | sensor, binary_sensor, switch, select | Freezer / fridge / partial-freeze temperature, fresh-freezing / winter / shopping / vacation modes, ECO, defrost, nanoe, ice-making, energy / CO₂ / door-open sensors |
+| **Washing Machine** | sensor, binary_sensor | Operation status, cycle message, remaining time, per-stage engineering-info bits, remote-control-allowed |
+| **Dryer** | sensor, binary_sensor | Operation status, cycle message, remaining time, per-stage engineering-info bits, remote-control-allowed |
+| **ERV (Energy Recovery Ventilator)** | sensor, select | Operation mode, fan level |
+| **Air Purifier** | sensor, switch | Fan level, nanoeX, PM2.5 |
+| **Smart Switch** | switch | On / off |
 
-### Advanced Features
+Enabled platforms: `climate`, `humidifier`, `sensor`, `binary_sensor`, `switch`,
+`select`, `number`, `button`.
 
-- 🏭 **Factory Pattern Architecture** - Modern device creation and management
-- 🔄 **Real-time Status Updates** - Automatic device state synchronization  
-- 🎛️ **Comprehensive Control** - Full access to device features and settings
-- 🌡️ **Multiple Sensors** - Temperature, humidity, PM2.5, and more
-- ⏱️ **Formatted Time Display** - Smart time formatting (e.g., "2小時5分鐘")
-- 🔢 **Bitwise Status** - Individual binary sensors for engineering information
-- 🌐 **Bilingual Support** - English and Traditional Chinese labels
-- 🛡️ **Robust Error Handling** - Comprehensive rate limiting and retry mechanisms
+## Requirements
 
-## 📋 Requirements
+- **Home Assistant** — a recent release. **2026.3 or newer** is recommended so
+  the integration's bundled brand icon is displayed natively; the integration
+  still works on older versions, just without the icon.
+- **Panasonic Smart App account** with registered devices.
+- **Internet access** to `https://ems2.panasonic.com.tw`.
 
-- **Home Assistant** 2023.1 or later
-- **Python** 3.10 or later
-- **Panasonic IoT TW Account** - Active account with registered devices
-- **Network Access** - Internet connection to Panasonic servers (`https://ems2.panasonic.com.tw/api`)
+## Installation
 
-## 🔧 Installation
+### HACS (recommended)
 
-### Method 1: HACS (Recommended)
+1. In HACS, go to **Integrations → ⋮ → Custom repositories**.
+2. Add `https://github.com/Austinsuyoyo/panasonic_iot_tw` and choose the
+   category **Integration**.
+3. Search for **Panasonic IoT TW**, install it, and restart Home Assistant.
 
-1. **Install HACS** if not already installed
-2. **Add Custom Repository**:
-   - Go to HACS → Integrations → ⋮ → Custom repositories
-   - Add `https://github.com/austinsuyoyo/panasonic_iot_tw`
-   - Select category: "Integration"
-3. **Install Integration**:
-   - Search for "Panasonic IoT TW"
-   - Click "Install"
-4. **Restart Home Assistant**
+### Manual
 
-### Method 2: Manual Installation
+1. Copy `custom_components/panasonic_iot_tw` from this repository into your Home
+   Assistant `config/custom_components/` directory.
+2. Restart Home Assistant.
 
-1. **Download Files**:
-   ```bash
-   cd /config/custom_components/
-   git clone https://github.com/austinsuyoyo/panasonic_iot_tw.git
-   ```
+## Configuration
 
-2. **Copy Integration**:
-   ```bash
-   cp -r panasonic_iot_tw/custom_components/panasonic_iot_tw ./
-   ```
+1. Go to **Settings → Devices & Services → Add Integration** and search for
+   **Panasonic IoT TW**.
+2. Log in with your **Panasonic Smart App** account (email + password). You can
+   optionally set an HTTP proxy and the update interval on the same form.
+3. After setup, tune options at any time from the integration card's
+   **Configure** button:
+   - **Update interval** — device poll rate, configurable 60–3600 s (default
+     **180 s**).
+   - **Proxy** — optional HTTP proxy.
 
-3. **Restart Home Assistant**
+### Reauthentication
 
-## ⚙️ Configuration
+If your Panasonic password changes and the stored credentials stop working,
+Home Assistant raises a **re-authentication** prompt on the integration card so
+you can enter the new password, instead of silently retrying a bad login.
 
-### Basic Setup
+### Reconfigure
 
-1. **Add Integration**:
-   - Go to Settings → Devices & Services
-   - Click "Add Integration"
-   - Search for "Panasonic IoT TW"
+A **Reconfigure** flow (change account / password / proxy from the integration
+menu without deleting and re-adding the entry) is being added in parallel; once
+merged it appears in the integration card's menu alongside Configure.
 
-2. **Enter Credentials**:
-   - **Username**: Your Panasonic IoT TW email
-   - **Password**: Your Panasonic IoT TW password
-   - **Proxy** (optional): HTTP proxy if needed
+## What's new in v2026.7.0
 
-3. **Configure Options**:
-   - **Update Interval**: Device status refresh rate (default: 180 seconds)
+This is a major pre-publication overhaul. Highlights:
 
-## 🏠 Device Integration
+- **Config entry schema v2** — the proxy and update interval now live in the
+  entry **options** (the **Configure** button on the integration card). Existing
+  v1 entries are **migrated automatically** on upgrade; no manual action needed.
+- **Options flow fixed** — changing the update interval / proxy now works and
+  reloads the entry. Update interval is validated to 60–3600 s.
+- **Reauthentication flow** — password changes trigger an HA re-auth prompt
+  instead of a silent retry loop.
+- **Reconfigure flow** — account / password / proxy editable from the menu
+  (being added concurrently, see above).
+- **Live availability** — devices going offline / online are reflected
+  immediately. During a cloud outage entities are marked **unavailable** rather
+  than showing stale values.
+- **Failed commands surface as errors** — a control command that fails now
+  raises a visible error in the UI instead of silently doing nothing.
+- **Diagnostics download** (redacted) — see [Reporting issues](#reporting-issues).
+- **Bundled brand icon** — the icon ships inside
+  `custom_components/panasonic_iot_tw/brand/` and displays natively on Home
+  Assistant **2026.3+**.
+- **⚠️ Breaking change: entity state values changed** — see below.
 
-### Refrigerator (15 Entities)
+## ⚠️ Breaking change — select & enum-sensor state values
 
-**Temperature Sensors (3):**
-- Freezer temperature display (-40~40°C)
-- Refrigerator temperature display (-39~40°C)  
-- Partial freezing temperature display (-39~40°C)
+**Raw entity state values for `select` entities and enum `sensor` entities
+changed from Chinese strings to stable English slugs.** The Home Assistant UI
+still shows the Chinese text (via the `zh-Hant` translations), but any
+**automation, script, or template that compares the _raw_ state** against the
+old Chinese string must be updated to the new slug.
 
-**Mode Sensors (4):**
-- Fresh freezing mode (通常/冷卻/急冷/急凍)
-- Winter mode (未啟動/啟動中/可啟動)
-- Shopping mode (未啟動/啟動中/可啟動)
-- Vacation mode (未啟動/啟動中/可啟動)
+Example — an automation that previously used:
 
-**Binary Sensors (3):**
-- ECO status (通常/運作中)
-- Defrosting status (通常/除霜中)
-- nanoe status (通常/運作中)
-
-**Switch Controls (2):**
-- Ice making stop control (停止/啟動)
-- Quick ice making control (停止/啟動)
-
-**Temperature Settings (3):**
-- Freezer temperature setting (弱/中/強)
-- Refrigerator temperature setting (弱/中/強)
-- Partial freezing temperature setting (弱/中/強)
-
-### Washing Machine (13 Entities)
-
-**Time Sensors (2):**
-- Washing remaining time (formatted: "2小時5分鐘")
-- Schedule remaining time (formatted hours)
-
-**Status Sensors (2):**
-- Operation status (待機中/動作中/預約中/終了/異常)
-- Cycle message (標準/快洗/大件行程/etc.)
-
-**Bitwise Binary Sensors (8):**
-- Engineering info 0x34: Prewash(128), Washing(64), Rinsing(32), Spinning(16)
-- Engineering info 0x64: Prewash(1024), Washing(64), Rinsing(32), Spinning(16)
-
-**Control Binary Sensor (1):**
-- Remote control allowance (不允許/允許)
-
-### Dryer (11 Entities)
-
-**Time Sensors (2):**
-- Drying remaining time (formatted: "2小時5分鐘")
-- Schedule remaining time (formatted hours)
-
-**Status Sensors (2):**
-- Operation status (待機中/動作中/預約中/終了/異常)
-- Cycle message (20+ professional programs)
-
-**Bitwise Binary Sensors (6):**
-- Engineering info 0x34: Drying(8), Air flow(4), Soft cooling(2)
-- Drying mode params 0x64: Drying(8), Air flow(4), Soft cooling(2)
-
-**Control Binary Sensor (1):**
-- Remote control allowance (不允許/允許)
-
-## 🏗️ Architecture
-
-### Modern Factory Pattern
-
-The integration uses a factory pattern with device-specific entity creation:
-
-```
-panasonic_iot_tw/
-├── base/                    # Base infrastructure
-│   ├── device_base.py      # BaseDevice abstract class
-│   └── status_reader.py    # Status reading functionality
-├── devices/                # Device implementations
-│   ├── device_factory.py  # DeviceFactory pattern
-│   ├── refrigerator.py     # 15 entities
-│   ├── washing_machine.py  # 13 entities
-│   ├── dryer.py           # 11 entities
-│   └── ...
-├── services/               # Core business logic
-│   ├── smart_app.py       # Main service coordinator
-│   ├── api_client.py      # HTTP API communication
-│   └── ...
-└── platforms/              # Home Assistant platforms
-    ├── sensor.py          # PanasonicTimeSensor, PanasonicStatusSensor
-    ├── binary_sensor.py   # PanasonicBitwiseBinarySensor
-    └── ...
+```yaml
+condition:
+  - condition: state
+    entity_id: sensor.washing_machine_operation_status
+    state: "動作中"          # OLD — no longer matches
 ```
 
-### Key Components
+must become:
 
-- **DeviceFactory**: Creates device instances using factory pattern
-- **BaseDevice**: Abstract base with entity creation interfaces
-- **Custom Sensors**: Time formatting, status mapping, bitwise operations
-- **Service Layer**: API communication with rate limiting
-
-## 🔧 Troubleshooting
-
-### Common Issues
-
-#### Device Creation Errors
+```yaml
+condition:
+  - condition: state
+    entity_id: sensor.washing_machine_operation_status
+    state: "running"        # NEW slug
 ```
-ERROR: property 'device_data' of 'Device' object has no setter
-```
-**Solution**: Ensure you're using the latest version with BaseDevice property setters.
 
-#### No Entities Created
-```
-INFO: Integration loaded but no entities appear
-```
-**Solutions:**
-- Check device compatibility in supported devices list
-- Verify devices are online in Panasonic IoT TW app
-- Check logs for device type errors
-- Restart Home Assistant integration
+### Migration table (common values)
 
-#### API Rate Limiting
-```
-WARNING: API request rate limit exceeded  
-```
-**Solutions:**
-- Increase update interval to 300+ seconds
-- Wait for rate limit to reset (5-10 minutes)
+| Group | Old raw state | New raw state |
+|-------|---------------|---------------|
+| Operation status (washer & dryer) | 不顯示 | `not_displayed` |
+| Operation status (washer & dryer) | 待機中 | `standby` |
+| Operation status (washer & dryer) | 動作中 | `running` |
+| Operation status (washer & dryer) | 預約中 | `reserved` |
+| Operation status (washer & dryer) | 終了 | `finished` |
+| Operation status (washer & dryer) | 異常 | `error` |
+| Refrigerator temperature setting (freezer / fridge / partial-freeze) | 弱 | `low` |
+| Refrigerator temperature setting | 中 | `medium` |
+| Refrigerator temperature setting | 強 | `high` |
+| Dehumidifier operation mode | 自動 | `auto` |
+| Dehumidifier operation mode | 連續除濕 | `continuous` |
+| Dehumidifier operation mode | 衣物乾燥 | `clothes_drying` |
+| Dehumidifier operation mode | 清淨 | `purify` |
+| Dehumidifier fan direction | 停止 | `stop` |
+| Dehumidifier fan direction | 上下擺動 | `swing` |
+| Dehumidifier fan direction | 水平 | `horizontal` |
+| Dehumidifier fan direction | 向上 | `up` |
+| Dehumidifier fan direction | 向下 | `down` |
+| ERV operation mode | 停止 | `stop` |
+| ERV operation mode | 自動 | `auto` |
+| ERV operation mode | 低速 | `low` |
+| ERV operation mode | 中速 | `medium` |
+| ERV operation mode | 高速 | `high` |
+| ERV operation mode | 換氣 | `ventilation` |
+| ERV fan level | 停止 | `stop` |
+| ERV fan level | 低速 | `low` |
+| ERV fan level | 中速 | `medium` |
+| ERV fan level | 高速 | `high` |
 
-### Debug Logging
+<details>
+<summary>Full washer &amp; dryer cycle-message slugs (long)</summary>
 
-Enable detailed logging in `configuration.yaml`:
+**Dryer cycle message** (`sensor.*_cycle_message`)
+
+| Old raw state | New raw state |
+|---------------|---------------|
+| 棉麻行程 | `cotton_linen` |
+| 大件行程 | `large_items` |
+| 自選行程 | `custom` |
+| 高級衣物行程 | `premium_clothing` |
+| 羊毛行程 | `wool` |
+| 運動服行程 | `sportswear` |
+| 羽绒衣行程 | `down_jacket` |
+| 抑菌烘行程 | `antibacterial_dry` |
+| nanoe™X-抑菌行程 | `nanoex_antibacterial` |
+| nanoe™X-除臭行程 | `nanoex_deodorize` |
+| nanoe™X-除蟎行程 | `nanoex_dust_mite` |
+| nanoe™X-除皺行程 | `nanoex_dewrinkle` |
+| nanoe™X-鬆柔行程 | `nanoex_softening` |
+| nanoe™X-皮草保養行程 | `nanoex_fur_care` |
+| 快烘行程 | `quick_dry` |
+| 嬰兒衣物行程 | `baby_clothes` |
+| 薄被行程 | `thin_quilt` |
+| 合成纖維行程 | `synthetic_fiber` |
+| 襯衫行程 | `shirts` |
+| 混合行程 | `mixed` |
+| 機能衣行程 | `functional_wear` |
+| 牛仔行程 | `denim` |
+| 浴巾行程 | `bath_towel` |
+| 冷風清新行程 | `cool_air_refresh` |
+| 工作/校服行程 | `work_school_uniform` |
+| 溫風暖衣行程 | `warm_air` |
+
+**Washing-machine cycle message** (`sensor.*_cycle_message`)
+
+| Old raw state | New raw state |
+|---------------|---------------|
+| 標準 | `standard` |
+| 浸泡 | `soak` |
+| 快洗 | `quick_wash` |
+| 槽洗淨 | `tub_clean` |
+| 大件行程 | `large_items` |
+| 除蟎 | `dust_mite_removal` |
+| 自選 | `custom` |
+| 高級衣物 | `premium_clothing` |
+| 羊毛 | `wool` |
+| 運動服 | `sportswear` |
+| 羽绒衣 | `down_jacket` |
+| 高溫抑菌 | `high_temp_antibacterial` |
+| 節能洗 | `eco_wash` |
+| 脫水 | `spin` |
+| 合成纖維 | `synthetic_fiber` |
+| 襯衫 | `shirts` |
+| 混合洗 | `mixed` |
+| 牛仔 | `denim` |
+
+</details>
+
+## Troubleshooting
+
+### No entities appear
+- Confirm the device type is in the supported list above.
+- Confirm the devices are online in the Panasonic Smart App.
+- Check the logs for device-type errors and restart the integration.
+
+### Rate limiting / slow updates
+- Raise the update interval (e.g. 300 s+) from the **Configure** button.
+
+### Debug logging
 
 ```yaml
 logger:
@@ -220,83 +234,56 @@ logger:
     custom_components.panasonic_iot_tw: debug
 ```
 
-## 🤝 Contributing
+### Reporting issues
 
-### Contributors & Acknowledgments
+When filing a bug, please attach the **diagnostics** download: on the
+integration card go to **⋮ → Download diagnostics**. The output is redacted
+(credentials and tokens removed) and captures the config entry and device
+state, which greatly speeds up debugging. Also include your Home Assistant
+version, the integration version, and the device model.
 
-This project builds upon the excellent work of:
+## Development
 
-- **[PhantasWeng](https://github.com/PhantasWeng/panasonic_smart_app)** - Original Panasonic Smart App integration foundation
-- **[osk2](https://github.com/osk2/panasonic_smart_app)** - Additional improvements and device support
+```bash
+# Unit tests (offline, no credentials needed)
+./venv/bin/pytest tests/unit
+# or set up a fresh environment first:
+pip install -r tests/requirements.txt
+```
 
-Special thanks to these pioneers who made this comprehensive integration possible.
+Integration tests hit the **real** Panasonic API and require valid credentials
+supplied through environment variables (see `tests/integration/`):
 
-## 🔗 Similar Projects
+```bash
+export PANASONIC_ACCOUNT='your_account@example.com'
+export PANASONIC_PASSWORD='your_password'
+export PANASONIC_PROXY='http://proxy:port'   # optional
+```
 
-Here are some other Panasonic integrations for Home Assistant that you might find useful:
+Use a dedicated test account and never commit credentials.
 
-- **[PhantasWeng/panasonic_smart_app](https://github.com/PhantasWeng/panasonic_smart_app)** - Original Panasonic Smart App integration with basic device support
-- **[osk2/panasonic_smart_app](https://github.com/osk2/panasonic_smart_app)** - Enhanced version with additional device types and features
-- **[tsunglung/panasonic_ems2](https://github.com/tsunglung/panasonic_ems2)** - Alternative Panasonic EMS2 integration approach
+## Acknowledgments
 
-### Development
+This project builds on the work of:
 
-1. **Clone Repository**:
-   ```bash
-   git clone https://github.com/austinsuyoyo/panasonic_iot_tw.git
-   cd panasonic_iot_tw
-   ```
+- **[PhantasWeng/panasonic_smart_app](https://github.com/PhantasWeng/panasonic_smart_app)** — the original Panasonic Smart App integration.
+- **[osk2/panasonic_smart_app](https://github.com/osk2/panasonic_smart_app)** — additional device support and improvements.
 
-2. **Set Up Environment**:
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate
-   pip install -r requirements-dev.txt
-   ```
+## Similar projects
 
-3. **Run Tests**:
-   ```bash
-   python -m pytest tests/ -v
-   ```
+- [PhantasWeng/panasonic_smart_app](https://github.com/PhantasWeng/panasonic_smart_app)
+- [osk2/panasonic_smart_app](https://github.com/osk2/panasonic_smart_app)
+- [tsunglung/panasonic_ems2](https://github.com/tsunglung/panasonic_ems2)
 
-### Code Standards
+## License
 
-- **Python 3.10+** compatibility required
-- **Type hints** for all public functions
-- **English comments** throughout codebase
-- **Factory pattern** for device creation
-- **Entity-focused architecture** for platform separation
-
-## 📜 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 📞 Support
-
-### Getting Help
-
-- **Issues**: [GitHub Issues](https://github.com/austinsuyoyo/panasonic_iot_tw/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/austinsuyoyo/panasonic_iot_tw/discussions)
-- **Home Assistant Community**: [Community Forum](https://community.home-assistant.io/)
-
-### Reporting Bugs
-
-When reporting bugs, please include:
-
-1. **Home Assistant version**
-2. **Integration version**  
-3. **Device model and type**
-4. **Error logs** (with personal info redacted)
-5. **Steps to reproduce**
+MIT — see [LICENSE](LICENSE).
 
 ---
 
 ## ⚠️ Disclaimer
 
-This is an **unofficial** integration. Panasonic and related logos are registered trademarks of Panasonic Corporation. This project is not officially affiliated with or endorsed by Panasonic Corporation.
-
-This project is provided as-is without any warranties. Users assume all risks associated with using this integration.
-
----
-
-**Made with ❤️ for the Home Assistant community**
+This is an **unofficial** integration and is **not affiliated with, endorsed by,
+or sponsored by Panasonic**. "Panasonic" and related logos are trademarks of
+their respective owner (Panasonic Holdings Corporation). The software is
+provided as-is, without warranty; you assume all risk from using it.
