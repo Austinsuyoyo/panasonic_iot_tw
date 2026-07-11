@@ -1,0 +1,266 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Panasonic IoT TW",
+        "description": "設定您的 Panasonic IoT TW 帳號",
+        "data": {
+          "username": "使用者名稱",
+          "password": "密碼",
+          "proxy": "代理伺服器 (選填)",
+          "update_interval": "更新間隔 (秒)"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "連線失敗",
+      "invalid_auth": "驗證失敗",
+      "unknown": "發生未知錯誤"
+    },
+    "abort": {
+      "already_configured": "設備已經設定過了"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Panasonic IoT TW 選項",
+        "data": {
+          "proxy": "代理伺服器",
+          "update_interval": "更新間隔 (秒)"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "refrigerator_freezer_temperature": {
+        "name": "冷凍庫溫度"
+      },
+      "refrigerator_refrigerator_temperature": {
+        "name": "冷藏庫溫度"
+      },
+      "refrigerator_partial_freezing_temperature": {
+        "name": "微凍結溫度"
+      },
+      "refrigerator_fresh_freezing_mode": {
+        "name": "新鮮急凍結模式"
+      },
+      "refrigerator_winter_mode": {
+        "name": "冬季模式"
+      },
+      "refrigerator_shopping_mode": {
+        "name": "購物模式"
+      },
+      "refrigerator_vacation_mode": {
+        "name": "外出模式"
+      },
+      "refrigerator_energy_consumption": {
+        "name": "能耗資料"
+      },
+      "refrigerator_co2_footprint": {
+        "name": "碳足跡"
+      },
+      "refrigerator_door_open_count": {
+        "name": "開門次數"
+      },
+      "air_conditioner_current_temperature": {
+        "name": "室內溫度"
+      },
+      "air_conditioner_outdoor_temperature": {
+        "name": "室外溫度"
+      },
+      "air_conditioner_pm25": {
+        "name": "PM2.5"
+      },
+      "dehumidifier_humidity": {
+        "name": "環境濕度"
+      },
+      "dehumidifier_pm25": {
+        "name": "PM2.5"
+      },
+      "purifier_pm25": {
+        "name": "PM2.5"
+      },
+      "dryer_drying_remaining_time": {
+        "name": "乾衣殘時間"
+      },
+      "dryer_schedule_remaining_time": {
+        "name": "預約殘時間"
+      },
+      "dryer_operation_status": {
+        "name": "運轉情報"
+      },
+      "dryer_cycle_message": {
+        "name": "行程別訊息"
+      },
+      "washing_machine_washing_remaining_time": {
+        "name": "洗衣殘時間"
+      },
+      "washing_machine_schedule_remaining_time": {
+        "name": "預約殘時間"
+      },
+      "washing_machine_operation_status": {
+        "name": "運轉情報"
+      },
+      "washing_machine_cycle_message": {
+        "name": "行程別訊息"
+      }
+    },
+    "binary_sensor": {
+      "refrigerator_eco_mode": {
+        "name": "ECO模式"
+      },
+      "refrigerator_defrosting_status": {
+        "name": "除霜狀態"
+      },
+      "refrigerator_nanoe_status": {
+        "name": "nanoe狀態"
+      },
+      "dehumidifier_tank_full": {
+        "name": "水箱滿水"
+      },
+      "dryer_drying_status": {
+        "name": "工程資訊 - 乾衣(bit 3)"
+      },
+      "dryer_air_flow_status": {
+        "name": "工程資訊 - 送風(bit 2)"
+      },
+      "dryer_soft_cooling_status": {
+        "name": "工程資訊 - 鬆柔冷卻(bit 1)"
+      },
+      "dryer_remote_control_allowed": {
+        "name": "遠端控制允許"
+      },
+      "washing_machine_prewash_status": {
+        "name": "工程資訊 - 預洗(bit 7)"
+      },
+      "washing_machine_washing_status": {
+        "name": "工程資訊 - 洗衣(bit 6)"
+      },
+      "washing_machine_rinsing_status": {
+        "name": "工程資訊 - 洗清(bit 5)"
+      },
+      "washing_machine_spinning_status": {
+        "name": "工程資訊 - 脫水(bit 4)"
+      },
+      "washing_machine_remote_control_allowed": {
+        "name": "遠端控制允許"
+      }
+    },
+    "switch": {
+      "refrigerator_stop_ice_making": {
+        "name": "製冰停止"
+      },
+      "refrigerator_quick_ice_making": {
+        "name": "快速製冰"
+      },
+      "smart_switch_power": {
+        "name": "智慧開關"
+      },
+      "purifier_nanoex": {
+        "name": "nanoeX"
+      },
+      "dehumidifier_nanoe": {
+        "name": "nanoe"
+      },
+      "dehumidifier_buzzer": {
+        "name": "操作提示音"
+      },
+      "air_conditioner_nanoex": {
+        "name": "nanoeX"
+      },
+      "air_conditioner_econavi": {
+        "name": "ECONAVI"
+      },
+      "air_conditioner_buzzer": {
+        "name": "操作提示音"
+      },
+      "air_conditioner_turbo": {
+        "name": "急速模式"
+      },
+      "air_conditioner_self_clean": {
+        "name": "自體淨"
+      },
+      "air_conditioner_sleep": {
+        "name": "舒眠模式"
+      },
+      "air_conditioner_mold_prevention": {
+        "name": "乾燥防霉"
+      },
+      "air_conditioner_motion_detection": {
+        "name": "動向感應"
+      },
+      "air_conditioner_indicator_light": {
+        "name": "機體燈光"
+      }
+    },
+    "select": {
+      "refrigerator_freezer_temperature_setting": {
+        "name": "冷凍庫溫度設定"
+      },
+      "refrigerator_refrigerator_temperature_setting": {
+        "name": "冷藏庫溫度設定"
+      },
+      "refrigerator_partial_freezing_temperature_setting": {
+        "name": "微凍結室溫設定"
+      },
+      "erv_operation_mode": {
+        "name": "運轉模式"
+      },
+      "erv_fan_level": {
+        "name": "風量設定"
+      },
+      "dehumidifier_operation_mode": {
+        "name": "運轉模式"
+      },
+      "dehumidifier_fan_direction": {
+        "name": "風向設定"
+      },
+      "air_conditioner_fan_mode": {
+        "name": "風量設定"
+      },
+      "air_conditioner_horizontal_swing": {
+        "name": "水平擺風"
+      },
+      "air_conditioner_vertical_swing": {
+        "name": "垂直擺風"
+      }
+    },
+    "number": {
+      "dehumidifier_target_humidity": {
+        "name": "目標濕度"
+      },
+      "dehumidifier_on_timer": {
+        "name": "定時開機"
+      },
+      "dehumidifier_off_timer": {
+        "name": "定時關機"
+      },
+      "air_conditioner_on_timer": {
+        "name": "定時開機"
+      },
+      "air_conditioner_off_timer": {
+        "name": "定時關機"
+      }
+    },
+    "button": {
+      "dehumidifier_reset_filter": {
+        "name": "重置濾網"
+      },
+      "air_conditioner_self_clean_button": {
+        "name": "自體淨"
+      }
+    },
+    "climate": {
+      "air_conditioner_climate": {
+        "name": "空調控制"
+      }
+    },
+    "humidifier": {
+      "dehumidifier_control": {
+        "name": "除濕控制"
+      }
+    }
+  }
+}

@@ -1,0 +1,266 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Panasonic IoT TW",
+        "description": "Configure your Panasonic IoT TW account",
+        "data": {
+          "username": "Username",
+          "password": "Password",
+          "proxy": "Proxy (optional)",
+          "update_interval": "Update Interval (seconds)"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect",
+      "invalid_auth": "Invalid authentication",
+      "unknown": "Unexpected error occurred"
+    },
+    "abort": {
+      "already_configured": "Device is already configured"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Panasonic IoT TW Options",
+        "data": {
+          "proxy": "Proxy Server",
+          "update_interval": "Update Interval (seconds)"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "refrigerator_freezer_temperature": {
+        "name": "Freezer Temperature"
+      },
+      "refrigerator_refrigerator_temperature": {
+        "name": "Refrigerator Temperature"
+      },
+      "refrigerator_partial_freezing_temperature": {
+        "name": "Partial Freezing Temperature"
+      },
+      "refrigerator_fresh_freezing_mode": {
+        "name": "Fresh Freezing Mode"
+      },
+      "refrigerator_winter_mode": {
+        "name": "Winter Mode"
+      },
+      "refrigerator_shopping_mode": {
+        "name": "Shopping Mode"
+      },
+      "refrigerator_vacation_mode": {
+        "name": "Vacation Mode"
+      },
+      "refrigerator_energy_consumption": {
+        "name": "Energy Consumption"
+      },
+      "refrigerator_co2_footprint": {
+        "name": "CO2 Footprint"
+      },
+      "refrigerator_door_open_count": {
+        "name": "Door Open Count"
+      },
+      "air_conditioner_current_temperature": {
+        "name": "Indoor Temperature"
+      },
+      "air_conditioner_outdoor_temperature": {
+        "name": "Outdoor Temperature"
+      },
+      "air_conditioner_pm25": {
+        "name": "PM2.5"
+      },
+      "dehumidifier_humidity": {
+        "name": "Ambient Humidity"
+      },
+      "dehumidifier_pm25": {
+        "name": "PM2.5"
+      },
+      "purifier_pm25": {
+        "name": "PM2.5"
+      },
+      "dryer_drying_remaining_time": {
+        "name": "Drying Remaining Time"
+      },
+      "dryer_schedule_remaining_time": {
+        "name": "Schedule Remaining Time"
+      },
+      "dryer_operation_status": {
+        "name": "Operation Status"
+      },
+      "dryer_cycle_message": {
+        "name": "Cycle Message"
+      },
+      "washing_machine_washing_remaining_time": {
+        "name": "Washing Remaining Time"
+      },
+      "washing_machine_schedule_remaining_time": {
+        "name": "Schedule Remaining Time"
+      },
+      "washing_machine_operation_status": {
+        "name": "Operation Status"
+      },
+      "washing_machine_cycle_message": {
+        "name": "Cycle Message"
+      }
+    },
+    "binary_sensor": {
+      "refrigerator_eco_mode": {
+        "name": "ECO Mode"
+      },
+      "refrigerator_defrosting_status": {
+        "name": "Defrosting Status"
+      },
+      "refrigerator_nanoe_status": {
+        "name": "nanoe Status"
+      },
+      "dehumidifier_tank_full": {
+        "name": "Water Tank Full"
+      },
+      "dryer_drying_status": {
+        "name": "Engineering info - Drying(bit 3)"
+      },
+      "dryer_air_flow_status": {
+        "name": "Engineering info - Air Flow(bit 2)"
+      },
+      "dryer_soft_cooling_status": {
+        "name": "Engineering info - Soft Cooling(bit 1)"
+      },
+      "dryer_remote_control_allowed": {
+        "name": "Remote Control Allowed"
+      },
+      "washing_machine_prewash_status": {
+        "name": "Engineering info - Prewash(bit 7)"
+      },
+      "washing_machine_washing_status": {
+        "name": "Engineering info - Washing(bit 6)"
+      },
+      "washing_machine_rinsing_status": {
+        "name": "Engineering info - Rinsing(bit 5)"
+      },
+      "washing_machine_spinning_status": {
+        "name": "Engineering info - Spinning(bit 4)"
+      },
+      "washing_machine_remote_control_allowed": {
+        "name": "Remote Control Allowed"
+      }
+    },
+    "switch": {
+      "refrigerator_stop_ice_making": {
+        "name": "Stop Ice Making"
+      },
+      "refrigerator_quick_ice_making": {
+        "name": "Quick Ice Making"
+      },
+      "smart_switch_power": {
+        "name": "Smart Switch"
+      },
+      "purifier_nanoex": {
+        "name": "nanoeX"
+      },
+      "dehumidifier_nanoe": {
+        "name": "nanoe"
+      },
+      "dehumidifier_buzzer": {
+        "name": "Operation Buzzer"
+      },
+      "air_conditioner_nanoex": {
+        "name": "nanoeX"
+      },
+      "air_conditioner_econavi": {
+        "name": "ECONAVI"
+      },
+      "air_conditioner_buzzer": {
+        "name": "Operation Buzzer"
+      },
+      "air_conditioner_turbo": {
+        "name": "Turbo Mode"
+      },
+      "air_conditioner_self_clean": {
+        "name": "Self Clean"
+      },
+      "air_conditioner_sleep": {
+        "name": "Sleep Mode"
+      },
+      "air_conditioner_mold_prevention": {
+        "name": "Mold Prevention"
+      },
+      "air_conditioner_motion_detection": {
+        "name": "Motion Detection"
+      },
+      "air_conditioner_indicator_light": {
+        "name": "Indicator Light"
+      }
+    },
+    "select": {
+      "refrigerator_freezer_temperature_setting": {
+        "name": "Freezer Temperature Setting"
+      },
+      "refrigerator_refrigerator_temperature_setting": {
+        "name": "Refrigerator Temperature Setting"
+      },
+      "refrigerator_partial_freezing_temperature_setting": {
+        "name": "Partial Freezing Temperature Setting"
+      },
+      "erv_operation_mode": {
+        "name": "Operation Mode"
+      },
+      "erv_fan_level": {
+        "name": "Fan Level"
+      },
+      "dehumidifier_operation_mode": {
+        "name": "Operation Mode"
+      },
+      "dehumidifier_fan_direction": {
+        "name": "Fan Direction"
+      },
+      "air_conditioner_fan_mode": {
+        "name": "Fan Mode"
+      },
+      "air_conditioner_horizontal_swing": {
+        "name": "Horizontal Swing"
+      },
+      "air_conditioner_vertical_swing": {
+        "name": "Vertical Swing"
+      }
+    },
+    "number": {
+      "dehumidifier_target_humidity": {
+        "name": "Target Humidity"
+      },
+      "dehumidifier_on_timer": {
+        "name": "On Timer"
+      },
+      "dehumidifier_off_timer": {
+        "name": "Off Timer"
+      },
+      "air_conditioner_on_timer": {
+        "name": "On Timer"
+      },
+      "air_conditioner_off_timer": {
+        "name": "Off Timer"
+      }
+    },
+    "button": {
+      "dehumidifier_reset_filter": {
+        "name": "Reset Filter"
+      },
+      "air_conditioner_self_clean_button": {
+        "name": "Self Clean"
+      }
+    },
+    "climate": {
+      "air_conditioner_climate": {
+        "name": "Air Conditioner"
+      }
+    },
+    "humidifier": {
+      "dehumidifier_control": {
+        "name": "Dehumidifier Control"
+      }
+    }
+  }
+}
