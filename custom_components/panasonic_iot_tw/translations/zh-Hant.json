@@ -17,6 +17,15 @@
         "data": {
           "password": "密碼"
         }
+      },
+      "reconfigure": {
+        "title": "重新設定 Panasonic IoT TW",
+        "description": "更新您的 Panasonic IoT TW 帳號憑證與代理伺服器。",
+        "data": {
+          "username": "使用者名稱",
+          "password": "密碼",
+          "proxy": "代理伺服器 (選填)"
+        }
       }
     },
     "error": {
@@ -26,7 +35,8 @@
     },
     "abort": {
       "already_configured": "設備已經設定過了",
-      "reauth_successful": "重新驗證成功"
+      "reauth_successful": "重新驗證成功",
+      "reconfigure_successful": "重新設定成功"
     }
   },
   "options": {

@@ -157,3 +157,86 @@ async def test_reauth_flow_invalid_auth(hass):
 
     assert result["type"] == data_entry_flow.FlowResultType.FORM
     assert result["errors"] == {"base": "invalid_auth"}
+
+
+async def test_reconfigure_flow_password_change(hass):
+    """Reconfigure updates the password without touching the unique_id."""
+    entry = _existing_entry(hass)
+
+    result = await entry.start_reconfigure_flow(hass)
+    assert result["type"] == data_entry_flow.FlowResultType.FORM
+    assert result["step_id"] == "reconfigure"
+
+    with patch(
+        "custom_components.panasonic_iot_tw.config_flow.validate_input",
+        return_value=None,
+    ):
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"],
+            {
+                CONF_USERNAME: "user@example.com",
+                CONF_PASSWORD: "new-secret",
+                CONF_PROXY: "http://p:1",
+            },
+        )
+
+    assert result["type"] == data_entry_flow.FlowResultType.ABORT
+    assert result["reason"] == "reconfigure_successful"
+    assert entry.data[CONF_PASSWORD] == "new-secret"
+    assert entry.data[CONF_USERNAME] == "user@example.com"
+    assert entry.unique_id == "user@example.com"
+    assert entry.options[CONF_PROXY] == "http://p:1"
+    # Unrelated options are preserved.
+    assert entry.options[CONF_UPDATE_INTERVAL] == 180
+
+
+async def test_reconfigure_flow_username_change_updates_unique_id(hass):
+    """Reconfigure with a new username re-points the entry unique_id."""
+    entry = _existing_entry(hass)
+
+    result = await entry.start_reconfigure_flow(hass)
+
+    with patch(
+        "custom_components.panasonic_iot_tw.config_flow.validate_input",
+        return_value=None,
+    ):
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"],
+            {
+                CONF_USERNAME: "New@Example.com",
+                CONF_PASSWORD: "secret",
+                CONF_PROXY: "",
+            },
+        )
+
+    assert result["type"] == data_entry_flow.FlowResultType.ABORT
+    assert result["reason"] == "reconfigure_successful"
+    assert entry.data[CONF_USERNAME] == "New@Example.com"
+    assert entry.unique_id == "new@example.com"
+
+
+async def test_reconfigure_flow_username_collision_aborts(hass):
+    """Reconfigure to a username owned by another entry aborts."""
+    entry = _existing_entry(hass, username="user@example.com")
+    _existing_entry(hass, username="other@example.com")
+
+    result = await entry.start_reconfigure_flow(hass)
+
+    with patch(
+        "custom_components.panasonic_iot_tw.config_flow.validate_input",
+        return_value=None,
+    ):
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"],
+            {
+                CONF_USERNAME: "Other@Example.com",
+                CONF_PASSWORD: "secret",
+                CONF_PROXY: "",
+            },
+        )
+
+    assert result["type"] == data_entry_flow.FlowResultType.ABORT
+    assert result["reason"] == "already_configured"
+    # Original entry is untouched.
+    assert entry.data[CONF_USERNAME] == "user@example.com"
+    assert entry.unique_id == "user@example.com"

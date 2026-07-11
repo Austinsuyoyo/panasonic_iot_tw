@@ -153,6 +153,71 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             description_placeholders={CONF_USERNAME: username},
         )
 
+    async def async_step_reconfigure(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Handle reconfiguration of username, password and proxy."""
+        errors: dict[str, str] = {}
+        reconfigure_entry = self._get_reconfigure_entry()
+
+        if user_input is not None:
+            new_username = user_input[CONF_USERNAME]
+            new_unique_id = new_username.lower()
+
+            if new_unique_id != reconfigure_entry.unique_id:
+                # The account identity changed: guard against colliding with a
+                # different entry, but allow re-pointing this entry.
+                existing = self.hass.config_entries.async_entry_for_domain_unique_id(
+                    DOMAIN, new_unique_id
+                )
+                if existing is not None and existing.entry_id != reconfigure_entry.entry_id:
+                    return self.async_abort(reason="already_configured")
+
+            try:
+                await validate_input(self.hass, user_input)
+            except CannotConnect:
+                errors["base"] = "cannot_connect"
+            except InvalidAuth:
+                errors["base"] = "invalid_auth"
+            except Exception:  # pylint: disable=broad-except
+                _LOGGER.exception("Unexpected exception")
+                errors["base"] = "unknown"
+            else:
+                await self.async_set_unique_id(new_unique_id)
+                return self.async_update_reload_and_abort(
+                    reconfigure_entry,
+                    unique_id=new_unique_id,
+                    title=f"Panasonic IoT TW ({new_username})",
+                    data={
+                        CONF_USERNAME: new_username,
+                        CONF_PASSWORD: user_input[CONF_PASSWORD],
+                    },
+                    options={
+                        **reconfigure_entry.options,
+                        CONF_PROXY: user_input.get(CONF_PROXY, ""),
+                    },
+                )
+
+        reconfigure_schema = vol.Schema(
+            {
+                vol.Required(
+                    CONF_USERNAME,
+                    default=reconfigure_entry.data.get(CONF_USERNAME, ""),
+                ): str,
+                vol.Required(CONF_PASSWORD): str,
+                vol.Optional(
+                    CONF_PROXY,
+                    default=reconfigure_entry.options.get(CONF_PROXY, ""),
+                ): str,
+            }
+        )
+
+        return self.async_show_form(
+            step_id="reconfigure",
+            data_schema=reconfigure_schema,
+            errors=errors,
+        )
+
     @staticmethod
     def async_get_options_flow(
         config_entry: config_entries.ConfigEntry,

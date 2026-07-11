@@ -17,6 +17,15 @@
         "data": {
           "password": "Password"
         }
+      },
+      "reconfigure": {
+        "title": "Reconfigure Panasonic IoT TW",
+        "description": "Update your Panasonic IoT TW account credentials and proxy.",
+        "data": {
+          "username": "Username",
+          "password": "Password",
+          "proxy": "Proxy (optional)"
+        }
       }
     },
     "error": {
@@ -26,7 +35,8 @@
     },
     "abort": {
       "already_configured": "Device is already configured",
-      "reauth_successful": "Re-authentication was successful"
+      "reauth_successful": "Re-authentication was successful",
+      "reconfigure_successful": "Reconfiguration was successful"
     }
   },
   "options": {
