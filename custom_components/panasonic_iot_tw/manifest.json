@@ -1,0 +1,14 @@
+{
+  "domain": "panasonic_iot_tw",
+  "name": "Panasonic IoT TW",
+  "codeowners": [
+    "@austinsuyoyo"
+  ],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/austinsuyoyo/panasonic_iot_tw",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/austinsuyoyo/panasonic_iot_tw/issues",
+  "requirements": [],
+  "version": "2025.10.0"
+}
