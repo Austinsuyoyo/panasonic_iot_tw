@@ -45,7 +45,7 @@ class PanasonicSelect(PanasonicEntity, SelectEntity):
         
         Args:
             coordinator: Data update coordinator
-            device_key: Index of device in coordinator data
+            device_key: Key of device in coordinator data (device_id)
             device_data: Device information dictionary
             command_type: Command type for status lookup
             name: Display name for select (fallback when translation not available)

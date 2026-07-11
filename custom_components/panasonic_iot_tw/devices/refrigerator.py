@@ -78,7 +78,6 @@ class RefrigeratorDevice(BaseDevice):
                 device_class=SensorDeviceClass.TEMPERATURE,
                 state_class=SensorStateClass.MEASUREMENT,
                 unit=UnitOfTemperature.CELSIUS,
-                icon="mdi:thermometer",
                 value_processor=value_processors.process_signed_temperature,
                 translation_key="refrigerator_freezer_temperature"
             ),
@@ -90,7 +89,6 @@ class RefrigeratorDevice(BaseDevice):
                 device_class=SensorDeviceClass.TEMPERATURE,
                 state_class=SensorStateClass.MEASUREMENT,
                 unit=UnitOfTemperature.CELSIUS,
-                icon="mdi:thermometer",
                 value_processor=value_processors.process_signed_temperature,
                 translation_key="refrigerator_refrigerator_temperature"
             ),
@@ -102,7 +100,6 @@ class RefrigeratorDevice(BaseDevice):
                 device_class=SensorDeviceClass.TEMPERATURE,
                 state_class=SensorStateClass.MEASUREMENT,
                 unit=UnitOfTemperature.CELSIUS,
-                icon="mdi:thermometer",
                 value_processor=value_processors.process_signed_temperature,
                 translation_key="refrigerator_partial_freezing_temperature"
             )
@@ -115,7 +112,6 @@ class RefrigeratorDevice(BaseDevice):
                 command_type=self.FRESH_FREEZING_COMMAND,
                 name="Fresh Freezing Mode",
                 sensor_key="fresh_freezing_mode",
-                icon="mdi:snowflake-variant",
                 translation_key="refrigerator_fresh_freezing_mode"
             ),
             self._create_sensor(
@@ -123,7 +119,6 @@ class RefrigeratorDevice(BaseDevice):
                 command_type=self.WINTER_MODE_COMMAND,
                 name="Winter Mode",
                 sensor_key="winter_mode",
-                icon="mdi:weather-snowy",
                 translation_key="refrigerator_winter_mode"
             ),
             self._create_sensor(
@@ -131,7 +126,6 @@ class RefrigeratorDevice(BaseDevice):
                 command_type=self.SHOPPING_MODE_COMMAND,
                 name="Shopping Mode",
                 sensor_key="shopping_mode",
-                icon="mdi:shopping",
                 translation_key="refrigerator_shopping_mode"
             ),
             self._create_sensor(
@@ -139,7 +133,6 @@ class RefrigeratorDevice(BaseDevice):
                 command_type=self.VACATION_MODE_COMMAND,
                 name="Vacation Mode",
                 sensor_key="vacation_mode",
-                icon="mdi:airplane",
                 translation_key="refrigerator_vacation_mode"
             )
         ])
@@ -160,7 +153,6 @@ class RefrigeratorDevice(BaseDevice):
                 name="ECO Mode",
                 sensor_key="eco_status",
                 device_class=BinarySensorDeviceClass.RUNNING,
-                icon="mdi:leaf",
                 value_processor=value_processors.safe_bool,
                 translation_key="refrigerator_eco_mode"
             ),
@@ -171,7 +163,6 @@ class RefrigeratorDevice(BaseDevice):
                 name="Defrosting Status",
                 sensor_key="defrosting_status",
                 device_class=BinarySensorDeviceClass.RUNNING,
-                icon="mdi:car-defrost-rear",
                 value_processor=value_processors.safe_bool,
                 translation_key="refrigerator_defrosting_status"
             ),
@@ -182,7 +173,6 @@ class RefrigeratorDevice(BaseDevice):
                 name="nanoe Status",
                 sensor_key="nanoe_status",
                 device_class=BinarySensorDeviceClass.RUNNING,
-                icon="mdi:air-filter",
                 value_processor=value_processors.safe_bool,
                 translation_key="refrigerator_nanoe_status"
             )
@@ -197,7 +187,6 @@ class RefrigeratorDevice(BaseDevice):
                 command_type=self.STOP_ICE_MAKING_COMMAND,
                 name="Stop Ice Making",
                 switch_key="stop_ice_making",
-                icon="mdi:snowflake-off",
                 translation_key="refrigerator_stop_ice_making"
             ),
             self._create_switch(
@@ -205,7 +194,6 @@ class RefrigeratorDevice(BaseDevice):
                 command_type=self.QUICK_ICE_MAKING_COMMAND,
                 name="Quick Ice Making", 
                 switch_key="quick_ice_making",
-                icon="mdi:snowflake",
                 translation_key="refrigerator_quick_ice_making"
             )
         ]
@@ -222,7 +210,6 @@ class RefrigeratorDevice(BaseDevice):
                 name="Freezer Temperature Setting",
                 select_key="freezer_temp_setting",
                 options_dict=REFRIGERATOR_TEMPERATURE_SETTINGS,
-                icon="mdi:snowflake",
                 translation_key="refrigerator_freezer_temperature_setting"
             ),
             self._create_select(
@@ -231,7 +218,6 @@ class RefrigeratorDevice(BaseDevice):
                 name="Refrigerator Temperature Setting",
                 select_key="refrigerator_temp_setting",
                 options_dict=REFRIGERATOR_TEMPERATURE_SETTINGS,
-                icon="mdi:fridge",
                 translation_key="refrigerator_refrigerator_temperature_setting"
             ),
             self._create_select(
@@ -240,7 +226,6 @@ class RefrigeratorDevice(BaseDevice):
                 name="Partial Freezing Temperature Setting",
                 select_key="partial_freezing_temp_setting",
                 options_dict=REFRIGERATOR_TEMPERATURE_SETTINGS,
-                icon="mdi:food-steak",
                 translation_key="refrigerator_partial_freezing_temperature_setting"
             )
         ]
@@ -289,7 +274,6 @@ class RefrigeratorDevice(BaseDevice):
                 device_class=SensorDeviceClass.ENERGY,
                 state_class=SensorStateClass.TOTAL_INCREASING,
                 unit=UnitOfEnergy.KILO_WATT_HOUR,
-                icon="mdi:lightning-bolt",
                 data_source="energy",
                 translation_key="refrigerator_energy_consumption"
             ))
@@ -303,7 +287,6 @@ class RefrigeratorDevice(BaseDevice):
                 device_class=SensorDeviceClass.WEIGHT,
                 state_class=SensorStateClass.TOTAL_INCREASING,
                 unit=UnitOfMass.KILOGRAMS,
-                icon="mdi:leaf",
                 data_source="co2",
                 translation_key="refrigerator_co2_footprint"
             ))
@@ -315,7 +298,6 @@ class RefrigeratorDevice(BaseDevice):
                 name="開門次數",
                 sensor_key="door_open_count",
                 state_class=SensorStateClass.TOTAL_INCREASING,
-                icon="mdi:door-open",
                 data_source="door",
                 translation_key="refrigerator_door_open_count"
             ))

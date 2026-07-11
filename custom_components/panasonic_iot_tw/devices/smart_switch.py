@@ -32,7 +32,6 @@ class SmartSwitchDevice(BaseDevice):
                 command_type=self.POWER_COMMAND,
                 name="智慧開關",
                 switch_key="power",
-                icon="mdi:power",
                 translation_key="smart_switch_power"
             )
         ]

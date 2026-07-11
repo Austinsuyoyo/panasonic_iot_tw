@@ -145,7 +145,6 @@ class AirConditionerDevice(BaseDevice):
                 device_class=SensorDeviceClass.TEMPERATURE,
                 state_class=SensorStateClass.MEASUREMENT,
                 unit=UnitOfTemperature.CELSIUS,
-                icon="mdi:thermometer",
                 value_processor=value_processors.process_signed_temperature,
                 translation_key="air_conditioner_current_temperature"
             ),
@@ -158,7 +157,6 @@ class AirConditionerDevice(BaseDevice):
                 device_class=SensorDeviceClass.TEMPERATURE,
                 state_class=SensorStateClass.MEASUREMENT,
                 unit=UnitOfTemperature.CELSIUS,
-                icon="mdi:thermometer",
                 value_processor=value_processors.process_signed_temperature,
                 translation_key="air_conditioner_outdoor_temperature"
             ),
@@ -171,7 +169,6 @@ class AirConditionerDevice(BaseDevice):
                 device_class=SensorDeviceClass.PM25,
                 state_class=SensorStateClass.MEASUREMENT,
                 unit="μg/m³",
-                icon="mdi:air-filter",
                 value_processor=value_processors.safe_int,
                 translation_key="air_conditioner_pm25"
             )
@@ -239,7 +236,6 @@ class AirConditionerDevice(BaseDevice):
                 command_type="0x17",
                 name="乾燥防霉",
                 switch_key="mold_prevention",
-                icon="mdi:weather-windy",
                 translation_key="air_conditioner_mold_prevention"
             ),
             # Motion detection
@@ -248,7 +244,6 @@ class AirConditionerDevice(BaseDevice):
                 command_type="0x19",
                 name="動向感應",
                 switch_key="motion_detection",
-                icon="mdi:motion-sensor",
                 translation_key="air_conditioner_motion_detection"
             ),
             # Indicator light
@@ -257,7 +252,6 @@ class AirConditionerDevice(BaseDevice):
                 command_type="0x1F",
                 name="機體燈光",
                 switch_key="indicator_light",
-                icon="mdi:lightbulb-on-outline",
                 translation_key="air_conditioner_indicator_light"
             )
         ]
@@ -272,7 +266,6 @@ class AirConditionerDevice(BaseDevice):
                 name="風量設定",
                 select_key="fan_mode",
                 options_dict=CLIMATE_AVAILABLE_FAN_MODE,
-                icon="mdi:fan",
                 translation_key="air_conditioner_fan_mode"
             ),
             # Horizontal swing
@@ -282,7 +275,6 @@ class AirConditionerDevice(BaseDevice):
                 name="水平擺風",
                 select_key="horizontal_swing",
                 options_dict=CLIMATE_AVAILABLE_SWING_MODE,
-                icon="mdi:arrow-left-right",
                 translation_key="air_conditioner_horizontal_swing"
             ),
             # Vertical swing
@@ -292,7 +284,6 @@ class AirConditionerDevice(BaseDevice):
                 name="垂直擺風",
                 select_key="vertical_swing",
                 options_dict=CLIMATE_AVAILABLE_SWING_MODE,
-                icon="mdi:arrow-up-down",
                 translation_key="air_conditioner_vertical_swing"
             )
         ]
@@ -310,7 +301,6 @@ class AirConditionerDevice(BaseDevice):
                 max_value=1440,
                 step=1,
                 unit="分鐘",
-                icon="mdi:timer",
                 translation_key="air_conditioner_on_timer"
             ),
             # Off timer
@@ -323,7 +313,6 @@ class AirConditionerDevice(BaseDevice):
                 max_value=1440,
                 step=1,
                 unit="分鐘",
-                icon="mdi:timer-off",
                 translation_key="air_conditioner_off_timer"
             )
         ]
@@ -337,7 +326,6 @@ class AirConditionerDevice(BaseDevice):
                 command_type="0x18",
                 name="自體淨",
                 button_key="self_clean",
-                icon="mdi:broom",
                 translation_key="air_conditioner_self_clean_button"
             )
         ]

@@ -6,59 +6,6 @@ _LOGGER = logging.getLogger(__name__)
 
 
 # ============================================================================
-# Mapping Helper Class
-# ============================================================================
-
-class MappingHelper:
-    """Helper for managing bidirectional value mappings."""
-    
-    def __init__(self, mapping: Dict[int, str]):
-        """Initialize mapping helper with forward mapping.
-        
-        Args:
-            mapping: Dictionary mapping integer keys to string values
-        """
-        self._forward = mapping
-        self._reverse = {v: k for k, v in mapping.items()}
-    
-    def get_name(self, key: int, default: str = "未知") -> str:
-        """Get string name from integer key.
-        
-        Args:
-            key: Integer key
-            default: Default value if key not found
-            
-        Returns:
-            String name or default
-        """
-        return self._forward.get(key, f"{default} ({key})")
-    
-    def get_key(self, name: str, default: int = 0) -> int:
-        """Get integer key from string name.
-        
-        Args:
-            name: String name
-            default: Default value if name not found
-            
-        Returns:
-            Integer key or default
-        """
-        return self._reverse.get(name, default)
-    
-    def get_names(self) -> List[str]:
-        """Get all available names."""
-        return list(self._forward.values())
-    
-    def has_name(self, name: str) -> bool:
-        """Check if name exists in mapping."""
-        return name in self._reverse
-    
-    def has_key(self, key: int) -> bool:
-        """Check if key exists in mapping."""
-        return key in self._forward
-
-
-# ============================================================================
 # Boolean Processors
 # ============================================================================
 def safe_bool(value: Any) -> bool:
