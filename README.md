@@ -70,9 +70,9 @@ you can enter the new password, instead of silently retrying a bad login.
 
 ### Reconfigure
 
-A **Reconfigure** flow (change account / password / proxy from the integration
-menu without deleting and re-adding the entry) is being added in parallel; once
-merged it appears in the integration card's menu alongside Configure.
+Change the account, password, or proxy without deleting and re-adding the
+entry: open the integration card's **⋮ menu → Reconfigure**. If the username
+changes, the entry follows the new account automatically.
 
 ## What's new in v2026.7.0
 
@@ -85,8 +85,8 @@ This is a major pre-publication overhaul. Highlights:
   reloads the entry. Update interval is validated to 60–3600 s.
 - **Reauthentication flow** — password changes trigger an HA re-auth prompt
   instead of a silent retry loop.
-- **Reconfigure flow** — account / password / proxy editable from the menu
-  (being added concurrently, see above).
+- **Reconfigure flow** — account / password / proxy editable from the
+  integration menu.
 - **Live availability** — devices going offline / online are reflected
   immediately. During a cloud outage entities are marked **unavailable** rather
   than showing stale values.
