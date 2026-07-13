@@ -11,6 +11,16 @@ from ..const import DEVICE_TYPE_REFRIGERATOR
 
 _LOGGER = logging.getLogger(__name__)
 
+# The report API (UserGetInfo) is unreliable between local midnight and this
+# hour: the backend rolls its day over on an 8h-ahead schedule, so requests in
+# this window reliably error or return empty results. Defer the daily refresh
+# until the window closes instead of hammering a broken endpoint all night.
+NIGHTLY_MAINTENANCE_END_HOUR = 8
+
+# After a failed report fetch, wait this long before retrying instead of
+# retrying on every coordinator cycle (~180s) and spamming errors.
+FAILURE_RETRY_SECONDS = 1800
+
 
 class ReportService:
     """
@@ -47,6 +57,10 @@ class ReportService:
         # Track which devices support which features
         self._supported_devices_cache = set()
 
+        # Timestamp of the most recent failed fetch, shared across all three
+        # report types, used to back off instead of retrying every cycle.
+        self._last_failed_fetch: Optional[datetime] = None
+
     def get_cache_age_hours(self) -> Optional[float]:
         """Get the age of cached data in hours (using most recent cache timestamp)."""
         timestamps = [t for t in [self._last_energy_fetch, self._last_co2_fetch, self._last_door_fetch] if t]
@@ -58,29 +72,39 @@ class ReportService:
     def _is_daily_update_needed(self, last_fetch_time: Optional[datetime]) -> bool:
         """
         Check if daily update is needed based on smart scheduling.
-        
+
         Updates are needed when:
-        1. Never fetched before
-        2. Last fetch was on a different day
+        1. Never fetched before (startup best effort, even during the night)
+        2. Last fetch was on a different day AND the nightly maintenance window
+           has closed (local hour >= NIGHTLY_MAINTENANCE_END_HOUR)
         3. Cache has expired (24+ hours)
-        
+
+        The date-change refresh is deliberately held back until the maintenance
+        window closes: the report backend rolls its day over ~8h ahead of
+        Taipei time, so the first post-midnight poll would otherwise hit a
+        broken endpoint. The daily refresh therefore lands on the first poll
+        at/after NIGHTLY_MAINTENANCE_END_HOUR rather than at midnight.
+
         Args:
             last_fetch_time: Timestamp of last successful fetch
-            
+
         Returns:
             True if update is needed
         """
         if last_fetch_time is None:
             _LOGGER.debug("Special data update needed: never fetched before")
             return True
-            
+
         now = datetime.now()
-        
+
         # Check if it's a different day (simple daily check)
         if last_fetch_time.date() != now.date():
-            _LOGGER.debug("Special data daily update needed: last fetch was %s, now %s", last_fetch_time.date(), now.date())
-            return True
-            
+            if now.hour >= NIGHTLY_MAINTENANCE_END_HOUR:
+                _LOGGER.debug("Special data daily update needed: last fetch was %s, now %s", last_fetch_time.date(), now.date())
+                return True
+            _LOGGER.debug("Special data date changed but waiting out nightly maintenance window, serving cached data")
+            return False
+
         # Check if cache has expired (fallback safety)
         time_since_last = (now - last_fetch_time).total_seconds()
         if time_since_last > self.CACHE_DURATION:
@@ -89,9 +113,27 @@ class ReportService:
 
         # Cache is fresh, no need to log (individual cache usage will be logged once)
         return False
-    
+
     def _should_fetch_data(self, last_fetch_time: Optional[datetime]) -> bool:
-        """Check if data should be fetched based on daily update logic."""
+        """
+        Check if data should be fetched based on daily update and backoff logic.
+
+        A recent failure suppresses fetches for FAILURE_RETRY_SECONDS so a
+        broken API is retried every ~30 min instead of every coordinator
+        cycle; this applies to the never-fetched startup path as well. A
+        missing timestamp (never fetched, or reset by
+        force_refresh_special_data, which also clears the failure backoff)
+        bypasses the maintenance-hour gate.
+        """
+        if self._last_failed_fetch is not None:
+            elapsed = (datetime.now() - self._last_failed_fetch).total_seconds()
+            if elapsed < FAILURE_RETRY_SECONDS:
+                _LOGGER.debug("Special data fetch backing off: %.0fs since last failure", elapsed)
+                return False
+
+        if last_fetch_time is None:
+            return True
+
         return self._is_daily_update_needed(last_fetch_time)
     
     def _get_current_month_date(self) -> str:
@@ -191,10 +233,10 @@ class ReportService:
         
         # Fetch fresh data
         report_data = await self._make_report_request("Power", "Energy")
-        
+
+        # Extract data for each supported device
+        energy_data = {}
         if report_data:
-            # Extract data for each supported device
-            energy_data = {}
             for device in device_list:
                 if device.get("device_type") in self.SUPPORTED_DEVICE_TYPES:
                     device_gwid = device.get("gwid")
@@ -202,15 +244,22 @@ class ReportService:
                         device_energy = self._extract_device_data(report_data, device_gwid)
                         if device_energy:
                             energy_data[device_gwid] = device_energy
-            
-            # Update cache
-            self._energy_cache = energy_data
-            self._last_energy_fetch = datetime.now()
-            
-            _LOGGER.debug("Cached energy data for %s devices", len(energy_data))
-            return energy_data
-        
-        return {}
+
+        # Treat a missing response, or an empty result while we still hold a
+        # good cache, as a failure (nightly maintenance / transient outage):
+        # keep the existing cache, don't advance the timestamp, and back off.
+        if report_data is None or (not energy_data and self._energy_cache):
+            _LOGGER.warning("Energy fetch failed or returned empty, keeping cached data")
+            self._last_failed_fetch = datetime.now()
+            return self._energy_cache
+
+        # Update cache
+        self._energy_cache = energy_data
+        self._last_energy_fetch = datetime.now()
+        self._last_failed_fetch = None
+
+        _LOGGER.debug("Cached energy data for %s devices", len(energy_data))
+        return energy_data
     
     async def get_co2_data(self, device_list: List[Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
         """
@@ -233,10 +282,10 @@ class ReportService:
         
         # Fetch fresh data
         report_data = await self._make_report_request("CO2", "CO2 Footprint")
-        
+
+        # Extract data for each supported device
+        co2_data = {}
         if report_data:
-            # Extract data for each supported device
-            co2_data = {}
             for device in device_list:
                 if device.get("device_type") in self.SUPPORTED_DEVICE_TYPES:
                     device_gwid = device.get("gwid")
@@ -244,15 +293,21 @@ class ReportService:
                         device_co2 = self._extract_device_data(report_data, device_gwid)
                         if device_co2:
                             co2_data[device_gwid] = device_co2
-            
-            # Update cache
-            self._co2_cache = co2_data
-            self._last_co2_fetch = datetime.now()
-            
-            _LOGGER.debug("Cached CO2 data for %s devices", len(co2_data))
-            return co2_data
-        
-        return {}
+
+        # See get_energy_data: empty result with a live cache means the report
+        # backend is in its nightly window / transient failure. Preserve cache.
+        if report_data is None or (not co2_data and self._co2_cache):
+            _LOGGER.warning("CO2 fetch failed or returned empty, keeping cached data")
+            self._last_failed_fetch = datetime.now()
+            return self._co2_cache
+
+        # Update cache
+        self._co2_cache = co2_data
+        self._last_co2_fetch = datetime.now()
+        self._last_failed_fetch = None
+
+        _LOGGER.debug("Cached CO2 data for %s devices", len(co2_data))
+        return co2_data
     
     async def get_door_data(self, device_list: List[Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
         """
@@ -275,10 +330,10 @@ class ReportService:
         
         # Fetch fresh data
         report_data = await self._make_report_request("Other", "Door Open Count")
-        
+
+        # Extract data for each supported device
+        door_data = {}
         if report_data:
-            # Extract data for each supported device
-            door_data = {}
             for device in device_list:
                 if device.get("device_type") in self.SUPPORTED_DEVICE_TYPES:
                     device_gwid = device.get("gwid")
@@ -286,15 +341,21 @@ class ReportService:
                         device_door = self._extract_device_data(report_data, device_gwid)
                         if device_door:
                             door_data[device_gwid] = device_door
-            
-            # Update cache
-            self._door_cache = door_data
-            self._last_door_fetch = datetime.now()
-            
-            _LOGGER.debug("Cached door data for %s devices", len(door_data))
-            return door_data
-        
-        return {}
+
+        # See get_energy_data: empty result with a live cache means the report
+        # backend is in its nightly window / transient failure. Preserve cache.
+        if report_data is None or (not door_data and self._door_cache):
+            _LOGGER.warning("Door fetch failed or returned empty, keeping cached data")
+            self._last_failed_fetch = datetime.now()
+            return self._door_cache
+
+        # Update cache
+        self._door_cache = door_data
+        self._last_door_fetch = datetime.now()
+        self._last_failed_fetch = None
+
+        _LOGGER.debug("Cached door data for %s devices", len(door_data))
+        return door_data
     
     async def get_all_special_data(self, device_list: List[Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
         """
@@ -361,6 +422,7 @@ class ReportService:
         self._last_energy_fetch = None
         self._last_co2_fetch = None
         self._last_door_fetch = None
+        self._last_failed_fetch = None
         _LOGGER.debug("Report service cache cleared")
     
     def get_cache_stats(self) -> Dict[str, Any]:

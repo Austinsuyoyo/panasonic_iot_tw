@@ -139,10 +139,11 @@ class SmartApp:
                 _LOGGER.info("No devices support special sensors")
                 return True
             
-            # Clear cache timestamps to force refresh
+            # Clear cache timestamps and failure backoff to force refresh
             self._report_service._last_energy_fetch = None
             self._report_service._last_co2_fetch = None
             self._report_service._last_door_fetch = None
+            self._report_service._last_failed_fetch = None
             
             _LOGGER.info("Force fetching special data for %s devices", len(supported_devices))
             
