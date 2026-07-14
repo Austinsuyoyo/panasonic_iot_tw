@@ -1,7 +1,7 @@
 # Panasonic IoT TW - Home Assistant 整合
 
 [![GitHub Release](https://img.shields.io/github/release/austinsuyoyo/panasonic_iot_tw.svg?style=flat-square)](https://github.com/austinsuyoyo/panasonic_iot_tw/releases)
-[![License](https://img.shields.io/github/license/austinsuyoyo/panasonic_iot_tw.svg?style=flat-square)](LICENSE)
+[![License](https://img.shields.io/github/license/Austinsuyoyo/panasonic_iot_tw.svg?style=flat-square&cacheSeconds=3600)](LICENSE)
 [![HACS](https://img.shields.io/badge/HACS-Custom-orange.svg?style=flat-square)](https://github.com/hacs/integration)
 
 > English version: [README.md](README.md)
