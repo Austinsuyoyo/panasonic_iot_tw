@@ -1,7 +1,7 @@
 # Panasonic IoT TW - Home Assistant Integration
 
 [![GitHub Release](https://img.shields.io/github/release/austinsuyoyo/panasonic_iot_tw.svg?style=flat-square)](https://github.com/austinsuyoyo/panasonic_iot_tw/releases)
-[![License](https://img.shields.io/github/license/Austinsuyoyo/panasonic_iot_tw.svg?style=flat-square&cacheSeconds=3600)](LICENSE)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
 [![HACS](https://img.shields.io/badge/HACS-Custom-orange.svg?style=flat-square)](https://github.com/hacs/integration)
 
 > 中文說明請見 [README-zh.md](README-zh.md)。
@@ -38,6 +38,10 @@ Enabled platforms: `climate`, `humidifier`, `sensor`, `binary_sensor`, `switch`,
 ## Installation
 
 ### HACS (recommended)
+
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Austinsuyoyo&repository=panasonic_iot_tw&category=integration)
+
+Click the button above, or manually:
 
 1. In HACS, go to **Integrations → ⋮ → Custom repositories**.
 2. Add `https://github.com/Austinsuyoyo/panasonic_iot_tw` and choose the

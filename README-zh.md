@@ -1,7 +1,7 @@
 # Panasonic IoT TW - Home Assistant 整合
 
 [![GitHub Release](https://img.shields.io/github/release/austinsuyoyo/panasonic_iot_tw.svg?style=flat-square)](https://github.com/austinsuyoyo/panasonic_iot_tw/releases)
-[![License](https://img.shields.io/github/license/Austinsuyoyo/panasonic_iot_tw.svg?style=flat-square&cacheSeconds=3600)](LICENSE)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
 [![HACS](https://img.shields.io/badge/HACS-Custom-orange.svg?style=flat-square)](https://github.com/hacs/integration)
 
 > English version: [README.md](README.md)
@@ -36,6 +36,10 @@ Home Assistant 原生實體。本整合為 `cloud_polling`（雲端輪詢）類�
 ## 安裝方式
 
 ### HACS（推薦）
+
+[![在您的 Home Assistant 中開啟 HACS 並顯示此儲存庫。](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Austinsuyoyo&repository=panasonic_iot_tw&category=integration)
+
+點上方按鈕一鍵加入,或手動操作:
 
 1. 在 HACS 中前往 **整合 → ⋮ → 自訂儲存庫**。
 2. 新增 `https://github.com/Austinsuyoyo/panasonic_iot_tw`，類別選擇 **整合
