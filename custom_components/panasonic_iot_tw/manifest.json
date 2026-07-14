@@ -11,5 +11,5 @@
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/austinsuyoyo/panasonic_iot_tw/issues",
   "requirements": [],
-  "version": "2026.7.0"
+  "version": "2026.7.1"
 }
