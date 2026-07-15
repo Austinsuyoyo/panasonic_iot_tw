@@ -5,12 +5,17 @@ name: OSSAR
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
     # The branches below must be a subset of the branches above
-    branches: [ master ]
+    branches: [ main ]
   schedule:
     - cron: '21 5 * * 3'
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
 
 jobs:
   OSSAR-Scan:
