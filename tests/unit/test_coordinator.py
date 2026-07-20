@@ -1,4 +1,6 @@
 """Unit tests for the PanasonicCoordinator."""
+from datetime import datetime
+
 import pytest
 from unittest.mock import AsyncMock
 
@@ -52,15 +54,80 @@ async def test_update_success(hass):
     assert "dev-1" in data
 
 
+def _freeze(monkeypatch, when):
+    import custom_components.panasonic_iot_tw.coordinator as coord_mod
+
+    class _FakeDatetime(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return when
+
+    monkeypatch.setattr(coord_mod, "datetime", _FakeDatetime)
+
+
 @pytest.mark.parametrize("exc", [PanasonicLoginFailed, PanasonicTokenExpired])
-async def test_auth_error_raises_config_entry_auth_failed(hass, exc):
-    """Auth failures map to ConfigEntryAuthFailed."""
+async def test_single_auth_error_retries_as_update_failed(hass, exc, monkeypatch):
+    """A first auth failure is retried, never instantly escalated to reauth."""
+    _freeze(monkeypatch, datetime(2026, 7, 17, 12, 0, 0))
     entry = _make_entry(hass)
     smart_app = AsyncMock()
     smart_app.get_device_with_info.side_effect = exc("boom")
     coordinator = PanasonicCoordinator(hass, entry, smart_app)
 
+    with pytest.raises(UpdateFailed):
+        await coordinator._async_update_data()
+
+
+async def test_persistent_auth_error_raises_auth_failed(hass, monkeypatch):
+    """Auth failing 3+ times over 30+ minutes in the daytime triggers reauth."""
+    entry = _make_entry(hass)
+    smart_app = AsyncMock()
+    smart_app.get_device_with_info.side_effect = PanasonicLoginFailed("boom")
+    coordinator = PanasonicCoordinator(hass, entry, smart_app)
+
+    for minute in (0, 15):
+        _freeze(monkeypatch, datetime(2026, 7, 17, 12, minute, 0))
+        with pytest.raises(UpdateFailed):
+            await coordinator._async_update_data()
+
+    _freeze(monkeypatch, datetime(2026, 7, 17, 12, 31, 0))
     with pytest.raises(ConfigEntryAuthFailed):
+        await coordinator._async_update_data()
+
+
+async def test_auth_error_never_escalates_in_maintenance_window(hass, monkeypatch):
+    """Persistent auth failures during 00:00-08:00 keep retrying."""
+    entry = _make_entry(hass)
+    smart_app = AsyncMock()
+    smart_app.get_device_with_info.side_effect = PanasonicLoginFailed("boom")
+    coordinator = PanasonicCoordinator(hass, entry, smart_app)
+
+    for minute in (0, 15, 31, 45):
+        _freeze(monkeypatch, datetime(2026, 7, 17, 0, minute, 0))
+        with pytest.raises(UpdateFailed):
+            await coordinator._async_update_data()
+
+
+async def test_success_resets_auth_failure_tracking(hass, monkeypatch):
+    """A successful update clears the auth failure counters."""
+    entry = _make_entry(hass)
+    smart_app = AsyncMock()
+    coordinator = PanasonicCoordinator(hass, entry, smart_app)
+
+    for minute in (0, 15):
+        _freeze(monkeypatch, datetime(2026, 7, 17, 12, minute, 0))
+        smart_app.get_device_with_info.side_effect = PanasonicLoginFailed("boom")
+        with pytest.raises(UpdateFailed):
+            await coordinator._async_update_data()
+
+    smart_app.get_device_with_info.side_effect = None
+    smart_app.get_device_with_info.return_value = {"dev-1": {"available": True}}
+    _freeze(monkeypatch, datetime(2026, 7, 17, 12, 20, 0))
+    await coordinator._async_update_data()
+
+    _freeze(monkeypatch, datetime(2026, 7, 17, 12, 40, 0))
+    smart_app.get_device_with_info.side_effect = PanasonicLoginFailed("boom")
+    with pytest.raises(UpdateFailed):
         await coordinator._async_update_data()
 
 
