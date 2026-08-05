@@ -106,6 +106,12 @@
       "dryer_schedule_remaining_time": {
         "name": "Schedule Remaining Time"
       },
+      "dryer_finish_time": {
+        "name": "Finish time"
+      },
+      "dryer_scheduled_start_time": {
+        "name": "Scheduled start time"
+      },
       "dryer_operation_status": {
         "name": "Operation Status",
         "state": {
@@ -153,6 +159,12 @@
       },
       "washing_machine_schedule_remaining_time": {
         "name": "Schedule Remaining Time"
+      },
+      "washing_machine_finish_time": {
+        "name": "Finish time"
+      },
+      "washing_machine_scheduled_start_time": {
+        "name": "Scheduled start time"
       },
       "washing_machine_operation_status": {
         "name": "Operation Status",

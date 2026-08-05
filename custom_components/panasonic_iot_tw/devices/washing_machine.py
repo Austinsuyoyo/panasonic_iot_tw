@@ -3,7 +3,7 @@ import logging
 from typing import Any, Dict, List, Optional
 
 from homeassistant.components.binary_sensor import BinarySensorDeviceClass
-from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass
+from homeassistant.components.sensor import SensorDeviceClass
 from homeassistant.const import UnitOfTime
 
 from ..base import BaseDevice, value_processors
@@ -25,6 +25,11 @@ class WashingMachineDevice(BaseDevice):
     OPERATION_STATUS_COMMAND = "0x50"          # Operation status Sensor
     CYCLE_MESSAGE_COMMAND = "0x55"             # Cycle message Sensor
     REMOTE_CONTROL_COMMAND = "0x74"            # Remote control allowed BinarySensor
+
+    # Operation status (0x50) values for which a remaining time is meaningful
+    RUNNING_STATUS = 2
+    REMAINING_TIME_STATUSES = {1, 2, 3, 4}     # standby / running / reserved
+    RESERVED_STATUSES = {3, 4}                 # reservation pending
 
     @property
     def washing_remaining_time(self) -> Optional[int]:
@@ -61,10 +66,11 @@ class WashingMachineDevice(BaseDevice):
                 name="洗衣殘時間",
                 sensor_key="washing_remaining_time",
                 device_class=SensorDeviceClass.DURATION,
-                state_class=SensorStateClass.MEASUREMENT,
                 unit=UnitOfTime.MINUTES,
                 value_processor=value_processors.safe_int,
                 extra_state_processor=value_processors.create_time_formatter("minutes"),
+                gate_command=self.OPERATION_STATUS_COMMAND,
+                gate_allowed=self.REMAINING_TIME_STATUSES,
                 translation_key="washing_machine_washing_remaining_time"
             ),
             self._create_sensor(
@@ -73,11 +79,37 @@ class WashingMachineDevice(BaseDevice):
                 name="預約殘時間",
                 sensor_key="schedule_remaining_time",
                 device_class=SensorDeviceClass.DURATION,
-                state_class=SensorStateClass.MEASUREMENT,
                 unit=UnitOfTime.HOURS,
                 value_processor=value_processors.safe_int,
                 extra_state_processor=value_processors.create_time_formatter("hours"),
+                gate_command=self.OPERATION_STATUS_COMMAND,
+                gate_allowed=self.RESERVED_STATUSES,
                 translation_key="washing_machine_schedule_remaining_time"
+            ),
+            # Absolute timestamps derived from the countdown registers
+            self._create_sensor(
+                coordinator,
+                command_type=self.WASHING_REMAINING_TIME_COMMAND,
+                name="洗衣完成時間",
+                sensor_key="finish_time",
+                device_class=SensorDeviceClass.TIMESTAMP,
+                gate_command=self.OPERATION_STATUS_COMMAND,
+                gate_allowed={self.RUNNING_STATUS},
+                timestamp_unit="minutes",
+                clamp_minutes=3,
+                translation_key="washing_machine_finish_time"
+            ),
+            self._create_sensor(
+                coordinator,
+                command_type=self.SCHEDULE_REMAINING_TIME_COMMAND,
+                name="預約開始時間",
+                sensor_key="scheduled_start_time",
+                device_class=SensorDeviceClass.TIMESTAMP,
+                gate_command=self.OPERATION_STATUS_COMMAND,
+                gate_allowed=self.RESERVED_STATUSES,
+                timestamp_unit="hours",
+                clamp_minutes=35,
+                translation_key="washing_machine_scheduled_start_time"
             ),
             # Status sensors with mapping
             self._create_sensor(

@@ -52,6 +52,12 @@
       "dryer_schedule_remaining_time": {
         "default": "mdi:timer-outline"
       },
+      "dryer_finish_time": {
+        "default": "mdi:clock-end"
+      },
+      "dryer_scheduled_start_time": {
+        "default": "mdi:clock-start"
+      },
       "dryer_operation_status": {
         "default": "mdi:information"
       },
@@ -66,6 +72,12 @@
       },
       "washing_machine_schedule_remaining_time": {
         "default": "mdi:timer-outline"
+      },
+      "washing_machine_finish_time": {
+        "default": "mdi:clock-end"
+      },
+      "washing_machine_scheduled_start_time": {
+        "default": "mdi:clock-start"
       },
       "washing_machine_operation_status": {
         "default": "mdi:information"
