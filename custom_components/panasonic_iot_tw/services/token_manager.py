@@ -212,7 +212,11 @@ class TokenManager:
 
             except Exception as e:
                 error_result = ErrorHandler.handle_api_error(e, "Token refresh")
-                if error_result["status"] in ["token_expired", "login_failed"]:
+                # api_error included: an HTTP failure on the refresh endpoint
+                # must fall back to a fresh login (ensure_authenticated treats
+                # PanasonicTokenExpired as "try logging in again"), matching
+                # the pre-strict-HTTP behaviour.
+                if error_result["status"] in ["token_expired", "login_failed", "api_error"]:
                     raise PanasonicTokenExpired(f"Token refresh failed: {str(e)}")
                 else:
                     raise

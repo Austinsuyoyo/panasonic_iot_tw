@@ -18,6 +18,8 @@ from ..api_constants import (
     EXCEPTION_MESSAGES,
 )
 from ..exceptions import (
+    PanasonicAPIError,
+    PanasonicBaseException,
     PanasonicDeviceOffline,
     PanasonicLoginFailed,
     PanasonicTokenExpired,
@@ -206,7 +208,7 @@ class ApiClient:
             # Process response
             return await self._process_response(response, request_id, headers, log)
 
-        except (PanasonicLoginFailed, PanasonicExceedRateLimit, PanasonicTokenExpired, PanasonicDeviceOffline):
+        except PanasonicBaseException:
             # These are business logic exceptions, re-raise them directly
             raise
         except Exception as e:
@@ -232,7 +234,6 @@ class ApiClient:
         
         else:
             await self._handle_error_response(response, request_id)
-            return {}
     
     async def _handle_success_response(
         self,
@@ -306,12 +307,17 @@ class ApiClient:
             raise PanasonicLoginFailed(f"API response error: {state_msg}")
     
     async def _handle_error_response(self, response, request_id: int) -> None:
-        """Handle error response"""
+        """Log an unexpected HTTP error and raise.
+
+        This used to swallow the error and hand the caller an empty dict,
+        which made a failed DeviceSetCommand look like a success in the UI.
+        """
         response_text = await response.text()
         _LOGGER.error(
             "Failed to access #%s API. Returned %s: %s",
             request_id, response.status, _sanitize_text(response_text)
         )
+        raise PanasonicAPIError(f"API request failed with HTTP {response.status}")
     
     def _handle_connection_error(self, error: Exception, headers: Dict[str, str]) -> Dict[str, Any]:
         """Handle connection error"""
