@@ -30,6 +30,7 @@ class DehumidifierDevice(BaseDevice):
     BUZZER_COMMAND = "0x18"           # Operation tone             Switch
     PM25_COMMAND = "0x53"             # PM2.5                      Sensor
     ON_TIMER_COMMAND = "0x55"         # On timer (0-12 h)          Number
+    RESET_FILTER_COMMAND = "0xFF"     # Reset filter (write-only)  Button
     
     # Mode mappings
     MODE_MAPPING = {
@@ -285,7 +286,7 @@ class DehumidifierDevice(BaseDevice):
             # Reset filter button
             self._create_button(
                 coordinator,
-                command_type="0xFF",
+                command_type=self.RESET_FILTER_COMMAND,
                 name="重置濾網",
                 button_key="reset_filter",
                 translation_key="dehumidifier_reset_filter"

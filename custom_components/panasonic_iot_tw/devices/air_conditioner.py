@@ -28,10 +28,17 @@ class AirConditionerDevice(BaseDevice):
     CURRENT_TEMP_COMMAND = "0x04"      # Indoor temperature            Climate, Sensor
     SLEEP_MODE_COMMAND = "0x05"        # Sleep mode                    Switch
     NANOE_COMMAND = "0x08"             # nanoeX                        Switch
+    ON_TIMER_COMMAND = "0x0B"          # On timer (0-1440 min)         Number
+    OFF_TIMER_COMMAND = "0x0C"         # Off timer (0-1440 min)        Number
     HORIZONTAL_SWING_COMMAND = "0x0F"  # Horizontal swing              Select
     VERTICAL_SWING_COMMAND = "0x11"    # Vertical swing                Select
+    MOLD_PREVENTION_COMMAND = "0x17"   # Mold prevention               Switch
     SELF_CLEAN_COMMAND = "0x18"        # Self clean                    Switch
+    MOTION_DETECTION_COMMAND = "0x19"  # Motion detection              Switch
+    TURBO_COMMAND = "0x1A"             # Turbo mode                    Switch
     ECONAVI_COMMAND = "0x1B"           # ECONAVI                       Switch
+    BUZZER_COMMAND = "0x1E"            # Operation tone                Switch
+    INDICATOR_LIGHT_COMMAND = "0x1F"   # Indicator light               Switch
     OUTDOOR_TEMP_COMMAND = "0x21"      # Outdoor temperature           Sensor
     PM25_COMMAND = "0x37"              # PM2.5                         Sensor
     
@@ -189,7 +196,7 @@ class AirConditionerDevice(BaseDevice):
             # nanoeX
             self._create_switch(
                 coordinator,
-                command_type="0x08",
+                command_type=self.NANOE_COMMAND,
                 name="nanoeX",
                 switch_key="nanoex",
                 icon="mdi:atom"
@@ -197,7 +204,7 @@ class AirConditionerDevice(BaseDevice):
             # ECONAVI
             self._create_switch(
                 coordinator,
-                command_type="0x1B",
+                command_type=self.ECONAVI_COMMAND,
                 name="ECONAVI",
                 switch_key="econavi",
                 icon="mdi:leaf"
@@ -205,7 +212,7 @@ class AirConditionerDevice(BaseDevice):
             # Buzzer
             self._create_switch(
                 coordinator,
-                command_type="0x1E",
+                command_type=self.BUZZER_COMMAND,
                 name="操作提示音",
                 switch_key="buzzer",
                 icon="mdi:volume-high",
@@ -214,7 +221,7 @@ class AirConditionerDevice(BaseDevice):
             # Turbo mode
             self._create_switch(
                 coordinator,
-                command_type="0x1A",
+                command_type=self.TURBO_COMMAND,
                 name="急速模式",
                 switch_key="turbo",
                 icon="mdi:clock-fast"
@@ -239,7 +246,7 @@ class AirConditionerDevice(BaseDevice):
             # Mold prevention
             self._create_switch(
                 coordinator,
-                command_type="0x17",
+                command_type=self.MOLD_PREVENTION_COMMAND,
                 name="乾燥防霉",
                 switch_key="mold_prevention",
                 translation_key="air_conditioner_mold_prevention"
@@ -247,7 +254,7 @@ class AirConditionerDevice(BaseDevice):
             # Motion detection
             self._create_switch(
                 coordinator,
-                command_type="0x19",
+                command_type=self.MOTION_DETECTION_COMMAND,
                 name="動向感應",
                 switch_key="motion_detection",
                 translation_key="air_conditioner_motion_detection"
@@ -255,7 +262,7 @@ class AirConditionerDevice(BaseDevice):
             # Indicator light
             self._create_switch(
                 coordinator,
-                command_type="0x1F",
+                command_type=self.INDICATOR_LIGHT_COMMAND,
                 name="機體燈光",
                 switch_key="indicator_light",
                 translation_key="air_conditioner_indicator_light",
@@ -269,7 +276,7 @@ class AirConditionerDevice(BaseDevice):
             # Fan mode
             self._create_select(
                 coordinator,
-                command_type="0x02",
+                command_type=self.FAN_COMMAND,
                 name="風量設定",
                 select_key="fan_mode",
                 options_dict=CLIMATE_AVAILABLE_FAN_MODE,
@@ -278,7 +285,7 @@ class AirConditionerDevice(BaseDevice):
             # Horizontal swing
             self._create_select(
                 coordinator,
-                command_type="0x0F",
+                command_type=self.HORIZONTAL_SWING_COMMAND,
                 name="水平擺風",
                 select_key="horizontal_swing",
                 options_dict=CLIMATE_AVAILABLE_SWING_MODE,
@@ -287,7 +294,7 @@ class AirConditionerDevice(BaseDevice):
             # Vertical swing
             self._create_select(
                 coordinator,
-                command_type="0x11",
+                command_type=self.VERTICAL_SWING_COMMAND,
                 name="垂直擺風",
                 select_key="vertical_swing",
                 options_dict=CLIMATE_AVAILABLE_SWING_MODE,
@@ -301,7 +308,7 @@ class AirConditionerDevice(BaseDevice):
             # On timer
             self._create_number(
                 coordinator,
-                command_type="0x0B",
+                command_type=self.ON_TIMER_COMMAND,
                 name="定時開機",
                 number_key="on_timer",
                 min_value=0,
@@ -315,7 +322,7 @@ class AirConditionerDevice(BaseDevice):
             # Off timer
             self._create_number(
                 coordinator,
-                command_type="0x0C",
+                command_type=self.OFF_TIMER_COMMAND,
                 name="定時關機",
                 number_key="off_timer",
                 min_value=0,
