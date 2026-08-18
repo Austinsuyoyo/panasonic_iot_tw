@@ -1,6 +1,7 @@
 """SmartApp main service coordinator - unified interface and service orchestration"""
 import logging
 import asyncio
+from datetime import datetime, timezone
 from typing import Dict, List, Any, Optional, Union, Tuple
 
 from .api_client import ApiClient
@@ -289,7 +290,7 @@ class SmartApp:
 
         # Update cache
         self._devices_cache = device_data
-        self._last_successful_update = asyncio.get_event_loop().time()
+        self._last_successful_update = datetime.now(timezone.utc)
 
         # Fetch special sensor data for supported devices (async, non-blocking)
         await self._fetch_special_data_for_devices(processed_devices)
@@ -456,7 +457,11 @@ class SmartApp:
         return {
             "account": self.account,
             "operation_count": self._operation_count,
-            "last_successful_update": self._last_successful_update,
+            "last_successful_update": (
+                self._last_successful_update.isoformat()
+                if self._last_successful_update
+                else None
+            ),
             "cached_devices": len(self._devices_cache),
             "token_info": self._token_manager.get_token_info(),
             "api_stats": self._api_client.get_request_stats(),

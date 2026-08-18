@@ -40,6 +40,22 @@ def _entry_with_coordinator():
         }
     }
 
+    coordinator.smart_app.get_statistics.return_value = {
+        "account": "user@example.com",
+        "operation_count": 42,
+        "last_successful_update": "2026-08-18T10:00:00+00:00",
+        "cached_devices": 1,
+        "token_info": {
+            "is_authenticated": True,
+            "is_token_expired": False,
+            "login_count": 1,
+            "refresh_count": 3,
+        },
+        "api_stats": {"total_requests": 99, "cached_devices": 1},
+        "cache_stats": {"cached_devices": 1, "device_ids": ["device_auth_1"]},
+        "report_cache_stats": {"energy_devices": 1},
+    }
+
     entry = Mock()
     entry.data = {"username": "user@example.com", "password": "secret"}
     entry.options = {CONF_PROXY: "http://proxy:8080", CONF_UPDATE_INTERVAL: 180}
@@ -53,10 +69,13 @@ async def test_diagnostics_structure():
 
     result = await async_get_config_entry_diagnostics(Mock(), entry)
 
-    assert set(result) == {"entry", "coordinator", "data"}
+    assert set(result) == {"entry", "coordinator", "client", "data"}
     assert set(result["entry"]) == {"data", "options"}
     assert result["coordinator"]["last_update_success"] is True
     assert result["coordinator"]["update_interval"] == 180.0
+    # Client statistics come through with non-sensitive fields intact.
+    assert result["client"]["token_info"]["refresh_count"] == 3
+    assert result["client"]["api_stats"]["total_requests"] == 99
     # Non-sensitive fields survive.
     assert result["data"]["device_0"]["nickname"] == "Living Room AC"
     assert result["data"]["device_0"]["model"] == "CS-K25YA2"
@@ -90,3 +109,5 @@ async def test_diagnostics_redacts_credentials():
     assert device["raw_data"]["City"] == REDACTED
     assert result["entry"]["data"]["password"] == REDACTED
     assert result["entry"]["data"]["username"] == REDACTED
+    assert result["client"]["account"] == REDACTED
+    assert result["client"]["cache_stats"]["device_ids"] == REDACTED

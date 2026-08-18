@@ -17,6 +17,9 @@ TO_REDACT = {
     # Config entry credentials.
     "username",
     "password",
+    # Client statistics (SmartApp.get_statistics).
+    "account",
+    "device_ids",
     # Processed device identifiers.
     "device_id",
     "auth",
@@ -75,5 +78,9 @@ async def async_get_config_entry_diagnostics(
                 else None
             ),
         },
+        # Client-side statistics: token/refresh state, request counts and
+        # report-cache ages. Helps triage auth and rate-limit issues from a
+        # diagnostics download alone.
+        "client": async_redact_data(coordinator.smart_app.get_statistics(), TO_REDACT),
         "data": redacted_devices,
     }
