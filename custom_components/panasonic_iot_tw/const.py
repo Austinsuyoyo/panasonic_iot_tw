@@ -152,7 +152,7 @@ DEVICE_STATUS_CODES = {
         ("0x53", True),   # Quick ice-making (stopped/active)
         ("0x54", False),  # Unknown / Reserved
         ("0x55", False),  # Unknown / Reserved
-        ("0x56", True),   # Fresh quick-freeze (normal/cooling/quick-cool/quick-freeze) value/256=mode value%256=minutes
+        ("0x56", True),   # Fresh quick-freeze (normal/cooling/quick-cool/quick-freeze)
         ("0x57", True),   # Partial-freeze compartment temperature setting (weak/medium/strong)
         ("0x58", True),   # Partial-freeze temperature display (-39~40 degrees)
         ("0x59", False),  # Unknown / Reserved
@@ -436,7 +436,9 @@ REFRIGERATOR_TEMPERATURE_SETTINGS = {
     4: "high"
 }
 
-# Fresh freezing compartment mode (register 0x56)
+# Fresh freezing compartment mode (register 0x56).
+# Values match the official CommandList parameters for NR-D611XGS
+# (checked live 2026-08-19).
 REFRIGERATOR_FRESH_FREEZING_MODES = {
     0: "normal",
     1: "cooling",
@@ -444,7 +446,9 @@ REFRIGERATOR_FRESH_FREEZING_MODES = {
     3: "quick_freeze"
 }
 
-# Activation state shared by winter/shopping/vacation modes (0x5A/0x5B/0x5C)
+# Activation state shared by winter/shopping/vacation modes (0x5A/0x5B/0x5C).
+# Values match the official CommandList parameters for NR-D611XGS
+# (checked live 2026-08-19).
 REFRIGERATOR_ACTIVATION_MODES = {
     0: "inactive",
     1: "active",

@@ -18,6 +18,8 @@ class DehumidifierDevice(BaseDevice):
     
     # Device registers, ordered by command type. const.py's
     # DEVICE_STATUS_CODES decides which of them are polled.
+    # Inherited from the reference projects; no dehumidifier is registered on
+    # our account, so none of these are verified against a real unit.
     POWER_COMMAND = "0x00"            # Power                      Humidifier
     MODE_COMMAND = "0x01"             # Operating mode             Humidifier, Select
     OFF_TIMER_COMMAND = "0x02"        # Off timer (0-12 h)         Number
@@ -30,7 +32,7 @@ class DehumidifierDevice(BaseDevice):
     BUZZER_COMMAND = "0x18"           # Operation tone             Switch
     PM25_COMMAND = "0x53"             # PM2.5                      Sensor
     ON_TIMER_COMMAND = "0x55"         # On timer (0-12 h)          Number
-    RESET_FILTER_COMMAND = "0xFF"     # Reset filter (write-only)  Button
+    RESET_FILTER_COMMAND = "0xFF"     # Reset filter               Button
     
     # Mode mappings
     MODE_MAPPING = {

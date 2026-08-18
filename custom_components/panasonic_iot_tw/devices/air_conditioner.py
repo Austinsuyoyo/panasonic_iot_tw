@@ -21,6 +21,8 @@ class AirConditionerDevice(BaseDevice):
     
     # Device registers, ordered by command type. const.py's
     # DEVICE_STATUS_CODES decides which of them are polled.
+    # Inherited from the reference projects; no air conditioner is registered on
+    # our account, so none of these are verified against a real unit.
     POWER_COMMAND = "0x00"             # Power                         Climate
     MODE_COMMAND = "0x01"              # Operating mode                Climate
     FAN_COMMAND = "0x02"               # Fan speed                     Climate, Select

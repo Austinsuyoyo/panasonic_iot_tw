@@ -14,6 +14,8 @@ class PurifierDevice(BaseDevice):
     
     # Device registers, ordered by command type. const.py's
     # DEVICE_STATUS_CODES decides which of them are polled.
+    # Inherited from the reference projects; no air purifier is registered on
+    # our account, so none of these are verified against a real unit.
     POWER_COMMAND = "0x00"      # Power      Switch
     FAN_LEVEL_COMMAND = "0x01"  # Fan level  Select
     NANOEX_COMMAND = "0x07"     # nanoeX     Switch

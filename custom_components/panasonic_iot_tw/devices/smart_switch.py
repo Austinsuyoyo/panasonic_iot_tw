@@ -12,6 +12,8 @@ class SmartSwitchDevice(BaseDevice):
     
     # Device registers, ordered by command type. const.py's
     # DEVICE_STATUS_CODES decides which of them are polled.
+    # Inherited from the reference projects; no smart switch is registered on
+    # our account, so none of these are verified against a real unit.
     POWER_COMMAND = "0x70"  # Power  Switch
     
     def __init__(self, coordinator, device_key: str, device_data: Dict[str, Any]):

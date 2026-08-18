@@ -12,6 +12,8 @@ class ERVDevice(BaseDevice):
     
     # Device registers, ordered by command type. const.py's
     # DEVICE_STATUS_CODES decides which of them are polled.
+    # Inherited from the reference projects; no ERV is registered on
+    # our account, so none of these are verified against a real unit.
     POWER_COMMAND = "0x00"           # Power           Switch
     OPERATION_MODE_COMMAND = "0x15"  # Operating mode  Select
     FAN_LEVEL_COMMAND = "0x56"       # Fan level       Select
