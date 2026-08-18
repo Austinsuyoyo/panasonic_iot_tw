@@ -9,7 +9,9 @@ from homeassistant.const import UnitOfTemperature, UnitOfEnergy
 from ..base import BaseDevice, value_processors
 from ..const import (
     SPECIAL_SENSOR_SUPPORTED_DEVICES,
-    DEVICE_TYPE_REFRIGERATOR
+    DEVICE_TYPE_REFRIGERATOR,
+    REFRIGERATOR_ACTIVATION_MODES,
+    REFRIGERATOR_FRESH_FREEZING_MODES
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -114,6 +116,9 @@ class RefrigeratorDevice(BaseDevice):
                 command_type=self.FRESH_FREEZING_COMMAND,
                 name="Fresh Freezing Mode",
                 sensor_key="fresh_freezing_mode",
+                device_class=SensorDeviceClass.ENUM,
+                options=list(dict.fromkeys(REFRIGERATOR_FRESH_FREEZING_MODES.values())),
+                value_processor=value_processors.create_status_mapping_processor(REFRIGERATOR_FRESH_FREEZING_MODES),
                 translation_key="refrigerator_fresh_freezing_mode"
             ),
             self._create_sensor(
@@ -121,6 +126,9 @@ class RefrigeratorDevice(BaseDevice):
                 command_type=self.WINTER_MODE_COMMAND,
                 name="Winter Mode",
                 sensor_key="winter_mode",
+                device_class=SensorDeviceClass.ENUM,
+                options=list(dict.fromkeys(REFRIGERATOR_ACTIVATION_MODES.values())),
+                value_processor=value_processors.create_status_mapping_processor(REFRIGERATOR_ACTIVATION_MODES),
                 translation_key="refrigerator_winter_mode"
             ),
             self._create_sensor(
@@ -128,6 +136,9 @@ class RefrigeratorDevice(BaseDevice):
                 command_type=self.SHOPPING_MODE_COMMAND,
                 name="Shopping Mode",
                 sensor_key="shopping_mode",
+                device_class=SensorDeviceClass.ENUM,
+                options=list(dict.fromkeys(REFRIGERATOR_ACTIVATION_MODES.values())),
+                value_processor=value_processors.create_status_mapping_processor(REFRIGERATOR_ACTIVATION_MODES),
                 translation_key="refrigerator_shopping_mode"
             ),
             self._create_sensor(
@@ -135,6 +146,9 @@ class RefrigeratorDevice(BaseDevice):
                 command_type=self.VACATION_MODE_COMMAND,
                 name="Vacation Mode",
                 sensor_key="vacation_mode",
+                device_class=SensorDeviceClass.ENUM,
+                options=list(dict.fromkeys(REFRIGERATOR_ACTIVATION_MODES.values())),
+                value_processor=value_processors.create_status_mapping_processor(REFRIGERATOR_ACTIVATION_MODES),
                 translation_key="refrigerator_vacation_mode"
             )
         ])

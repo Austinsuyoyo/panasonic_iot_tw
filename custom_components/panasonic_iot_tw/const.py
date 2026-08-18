@@ -436,6 +436,21 @@ REFRIGERATOR_TEMPERATURE_SETTINGS = {
     4: "high"
 }
 
+# Fresh freezing compartment mode (register 0x56)
+REFRIGERATOR_FRESH_FREEZING_MODES = {
+    0: "normal",
+    1: "cooling",
+    2: "quick_cool",
+    3: "quick_freeze"
+}
+
+# Activation state shared by winter/shopping/vacation modes (0x5A/0x5B/0x5C)
+REFRIGERATOR_ACTIVATION_MODES = {
+    0: "inactive",
+    1: "active",
+    2: "available"
+}
+
 # ============================================================================
 # Special Sensors
 # ============================================================================

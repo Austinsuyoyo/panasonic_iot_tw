@@ -62,16 +62,37 @@
         "name": "Partial Freezing Temperature"
       },
       "refrigerator_fresh_freezing_mode": {
-        "name": "Fresh Freezing Mode"
+        "name": "Fresh Freezing Mode",
+        "state": {
+          "normal": "Normal",
+          "cooling": "Cooling",
+          "quick_cool": "Quick cool",
+          "quick_freeze": "Quick freeze"
+        }
       },
       "refrigerator_winter_mode": {
-        "name": "Winter Mode"
+        "name": "Winter Mode",
+        "state": {
+          "inactive": "Inactive",
+          "active": "Active",
+          "available": "Available"
+        }
       },
       "refrigerator_shopping_mode": {
-        "name": "Shopping Mode"
+        "name": "Shopping Mode",
+        "state": {
+          "inactive": "Inactive",
+          "active": "Active",
+          "available": "Available"
+        }
       },
       "refrigerator_vacation_mode": {
-        "name": "Vacation Mode"
+        "name": "Vacation Mode",
+        "state": {
+          "inactive": "Inactive",
+          "active": "Active",
+          "available": "Available"
+        }
       },
       "refrigerator_energy_consumption": {
         "name": "Energy Consumption"

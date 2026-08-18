@@ -62,16 +62,37 @@
         "name": "微凍結溫度"
       },
       "refrigerator_fresh_freezing_mode": {
-        "name": "新鮮急凍結模式"
+        "name": "新鮮急凍結模式",
+        "state": {
+          "normal": "通常",
+          "cooling": "冷卻",
+          "quick_cool": "急冷",
+          "quick_freeze": "急凍"
+        }
       },
       "refrigerator_winter_mode": {
-        "name": "冬季模式"
+        "name": "冬季模式",
+        "state": {
+          "inactive": "未啟動",
+          "active": "啟動中",
+          "available": "可啟動"
+        }
       },
       "refrigerator_shopping_mode": {
-        "name": "購物模式"
+        "name": "購物模式",
+        "state": {
+          "inactive": "未啟動",
+          "active": "啟動中",
+          "available": "可啟動"
+        }
       },
       "refrigerator_vacation_mode": {
-        "name": "外出模式"
+        "name": "外出模式",
+        "state": {
+          "inactive": "未啟動",
+          "active": "啟動中",
+          "available": "可啟動"
+        }
       },
       "refrigerator_energy_consumption": {
         "name": "能耗資料"
