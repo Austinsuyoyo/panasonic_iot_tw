@@ -16,20 +16,20 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 
-# 為 integration 測試允許網路連接
+# Allow network connections for integration tests
 @pytest.fixture(scope="session")
 def socket_enabled():
-    """允許 socket 連接（覆蓋 pytest-homeassistant 的設定）"""
+    """Allow socket connections (overrides pytest-homeassistant's setting)."""
     return True
 
 
 def pytest_runtest_setup(item):
-    """在執行測試前的設定 - 允許 integration 測試使用網路"""
-    # 檢查是否是 integration 測試
+    """Setup run before each test - allows integration tests to use the network."""
+    # Check whether this is an integration test
     if "integration" in str(item.fspath):
-        # 允許網路連接
+        # Allow network connections
         if hasattr(item.config, "_socket_allow_hosts"):
-            # 允許所有 host
+            # Allow all hosts
             item.config._socket_allow_hosts = None
 
 

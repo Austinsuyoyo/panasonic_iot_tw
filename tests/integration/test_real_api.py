@@ -1,26 +1,29 @@
 # -*- coding: utf-8 -*-
 """
-真實 API 整合測試
+Real API integration tests
 
-⚠️ 當前狀態：由於 pytest-homeassistant-custom-component 的 socket 阻擋限制，
-這些測試目前無法執行。請使用 tests/test_direct_api.py 代替。
+Current status: due to socket-blocking restrictions in
+pytest-homeassistant-custom-component, these tests currently cannot run.
+Use tests/test_direct_api.py instead.
 
-未來整合：等待 https://github.com/MatthewFlamm/pytest-homeassistant-custom-component/pull/218
-合併後，這些測試就能正常透過 pytest 執行。
+Future integration: once
+https://github.com/MatthewFlamm/pytest-homeassistant-custom-component/pull/218
+is merged, these tests will be able to run normally through pytest.
 
-這些測試會連接真實的 Panasonic IoT API，需要有效的帳號密碼。
+These tests connect to the real Panasonic IoT API and require valid
+account credentials.
 
-執行方式（未來可用）：
-  # 跳過真實 API 測試（預設）
+How to run (future):
+  # Skip real API tests (default)
   pytest
 
-  # 執行真實 API 測試（需要環境變數）
+  # Run real API tests (requires environment variables)
   pytest -m live_api
 
-環境變數設定：
+Environment variables:
   export PANASONIC_ACCOUNT='your_account@example.com'
   export PANASONIC_PASSWORD='your_password'
-  export PANASONIC_PROXY='http://proxy:port'  # 可選
+  export PANASONIC_PROXY='http://proxy:port'  # optional
 """
 
 import pytest
@@ -35,28 +38,28 @@ from custom_components.panasonic_iot_tw.exceptions import (
 )
 
 
-# 檢查是否有 API 憑證
+# Check whether API credentials are available
 def has_api_credentials() -> bool:
-    """檢查是否設定了 API 憑證"""
+    """Check whether API credentials have been configured."""
     return bool(
         os.getenv("PANASONIC_ACCOUNT") and
         os.getenv("PANASONIC_PASSWORD")
     )
 
 
-# 如果沒有憑證，跳過所有真實 API 測試
+# If no credentials, skip all real API tests
 pytestmark = [
     pytest.mark.skipif(
         not has_api_credentials(),
-        reason="需要設定 PANASONIC_ACCOUNT 和 PANASONIC_PASSWORD 環境變數"
+        reason="Requires PANASONIC_ACCOUNT and PANASONIC_PASSWORD environment variables"
     ),
-    pytest.mark.enable_socket,  # 允許真實網路連接
+    pytest.mark.enable_socket,  # Allow real network connections
 ]
 
 
 @pytest.fixture
 def api_credentials():
-    """提供 API 憑證"""
+    """Provide API credentials."""
     return {
         "account": os.getenv("PANASONIC_ACCOUNT"),
         "password": os.getenv("PANASONIC_PASSWORD"),
@@ -67,10 +70,10 @@ def api_credentials():
 @pytest.mark.live_api
 @pytest.mark.asyncio
 class TestRealAPILogin:
-    """測試真實 API 登入功能"""
+    """Test real API login functionality."""
 
     async def test_login_success(self, api_credentials):
-        """測試登入成功"""
+        """Test successful login."""
         async with aiohttp.ClientSession() as session:
             smartapp = SmartApp(
                 session=session,
@@ -80,13 +83,14 @@ class TestRealAPILogin:
             )
 
             result = await smartapp.login()
-            assert result is True, "登入應該成功"
-            assert smartapp._token_manager.cp_token is not None, "應該取得 CP Token"
-            print(f"\n✅ 登入成功")
+            assert result, "Login should succeed"
+            assert result.get("cp_token"), "Login result should include a CP Token"
+            assert smartapp._token_manager.cp_token is not None, "Should have obtained a CP Token"
+            print(f"\n✅ Login succeeded")
             print(f"   CP Token: {smartapp._token_manager.cp_token[:20]}...")
 
     async def test_login_with_invalid_credentials(self):
-        """測試使用錯誤憑證登入"""
+        """Test login with invalid credentials."""
         async with aiohttp.ClientSession() as session:
             smartapp = SmartApp(
                 session=session,
@@ -101,10 +105,10 @@ class TestRealAPILogin:
 @pytest.mark.live_api
 @pytest.mark.asyncio
 class TestRealAPIDevices:
-    """測試真實 API 裝置操作"""
+    """Test real API device operations."""
 
     async def test_get_devices(self, api_credentials):
-        """測試取得裝置列表"""
+        """Test retrieving the device list."""
         async with aiohttp.ClientSession() as session:
             smartapp = SmartApp(
                 session=session,
@@ -113,24 +117,24 @@ class TestRealAPIDevices:
                 proxy=api_credentials["proxy"]
             )
 
-            # 先登入
+            # Log in first
             await smartapp.login()
 
-            # 取得裝置
+            # Get devices
             devices = await smartapp.get_devices()
 
-            assert isinstance(devices, list), "裝置列表應該是 list"
-            assert len(devices) >= 0, "裝置列表長度應該 >= 0"
+            assert isinstance(devices, list), "Device list should be a list"
+            assert len(devices) >= 0, "Device list length should be >= 0"
 
             if len(devices) > 0:
                 device = devices[0]
-                assert "device_id" in device, "裝置應該有 device_id"
-                assert "nickname" in device, "裝置應該有 nickname"
-                print(f"\n✅ 找到 {len(devices)} 個裝置")
-                print(f"   第一個裝置: {device.get('nickname')} ({device.get('device_id')})")
+                assert "device_id" in device, "Device should have a device_id"
+                assert "nickname" in device, "Device should have a nickname"
+                print(f"\n✅ Found {len(devices)} device(s)")
+                print(f"   First device: {device.get('nickname')} ({device.get('device_id')})")
 
     async def test_get_device_status(self, api_credentials):
-        """測試取得裝置狀態"""
+        """Test retrieving device status."""
         async with aiohttp.ClientSession() as session:
             smartapp = SmartApp(
                 session=session,
@@ -139,35 +143,35 @@ class TestRealAPIDevices:
                 proxy=api_credentials["proxy"]
             )
 
-            # 先登入
+            # Log in first
             await smartapp.login()
 
-            # 取得裝置
+            # Get devices
             devices = await smartapp.get_devices()
 
             if len(devices) == 0:
-                pytest.skip("沒有裝置可測試")
+                pytest.skip("No devices available to test")
 
-            # 只驗證可以取得裝置資訊
+            # Just verify that device info can be retrieved
             device = devices[0]
 
-            # 驗證裝置資料結構
+            # Verify device data structure
             assert "device_id" in device
             assert "nickname" in device
-            print(f"\n✅ 裝置資訊正確")
-            print(f"   裝置名稱: {device.get('nickname')}")
-            print(f"   裝置型號: {device.get('model')}")
-            print(f"   裝置類型: {device.get('device_type')}")
+            print(f"\n✅ Device info is correct")
+            print(f"   Device name: {device.get('nickname')}")
+            print(f"   Device model: {device.get('model')}")
+            print(f"   Device type: {device.get('device_type')}")
 
 
 @pytest.mark.live_api
 @pytest.mark.asyncio
 class TestRealAPICommands:
-    """測試真實 API 控制命令（謹慎使用）"""
+    """Test real API control commands (use with caution)."""
 
-    @pytest.mark.skip(reason="控制命令會影響真實裝置，預設跳過")
+    @pytest.mark.skip(reason="Control commands affect real devices, skipped by default")
     async def test_send_command(self, api_credentials):
-        """測試發送控制命令（預設跳過）"""
+        """Test sending a control command (skipped by default)."""
         async with aiohttp.ClientSession() as session:
             smartapp = SmartApp(
                 session=session,
@@ -176,20 +180,20 @@ class TestRealAPICommands:
                 proxy=api_credentials["proxy"]
             )
 
-            # 先登入
+            # Log in first
             await smartapp.login()
 
-            # 取得裝置
+            # Get devices
             devices = await smartapp.get_devices()
 
             if len(devices) == 0:
-                pytest.skip("沒有裝置可測試")
+                pytest.skip("No devices available to test")
 
-            # 這裡可以加入實際的控制命令測試
-            # 注意：這會影響真實裝置！
+            # Actual control command tests could be added here
+            # Note: this would affect the real device!
             device = devices[0]
 
-            # 範例：只驗證裝置資訊，不控制
+            # Example: only verify device info, don't control it
             assert device is not None
             assert "device_id" in device
 
@@ -197,10 +201,10 @@ class TestRealAPICommands:
 @pytest.mark.live_api
 @pytest.mark.asyncio
 class TestRealAPITokenManagement:
-    """測試真實 API Token 管理"""
+    """Test real API token management."""
 
     async def test_token_refresh(self, api_credentials):
-        """測試 Token 刷新"""
+        """Test token refresh."""
         async with aiohttp.ClientSession() as session:
             smartapp = SmartApp(
                 session=session,
@@ -209,15 +213,97 @@ class TestRealAPITokenManagement:
                 proxy=api_credentials["proxy"]
             )
 
-            # 先登入
+            # Log in first
             await smartapp.login()
 
             old_token = smartapp._token_manager.cp_token
 
-            # 刷新 token（如果 API 支援）
-            # 注意：實際實作可能需要等待 token 過期
+            # Refresh the token (if the API supports it)
+            # Note: the actual implementation may need to wait for the token to expire
 
-            # 驗證 token 存在
-            assert old_token is not None, "應該有 CP Token"
-            print(f"\n✅ Token 管理正常")
+            # Verify the token exists
+            assert old_token is not None, "Should have a CP Token"
+            print(f"\n✅ Token management is working")
             print(f"   CP Token: {old_token[:10]}...{old_token[-10:]}")
+
+
+@pytest.mark.live_api
+@pytest.mark.asyncio
+class TestRealAPIFridgeRegisters:
+    """Verify fridge register decoding assumptions (read-only).
+
+    These registers are not documented in the official CommandList; they
+    were derived by comparing events before and after state changes.
+    Running this class confirms cloud behavior hasn't changed, and lets
+    us capture live values when an anomaly occurs.
+    """
+
+    FRIDGE_REGISTERS = [
+        "0x03", "0x05", "0x0E", "0x13", "0x51",
+        "0x64", "0x65", "0x66", "0x68", "0x69",
+    ]
+
+    async def _read_fridge(self, credentials, registers):
+        """Return the raw values of the specified fridge registers."""
+        from custom_components.panasonic_iot_tw.api_constants import API_ENDPOINTS
+
+        async with aiohttp.ClientSession() as session:
+            smartapp = SmartApp(
+                session=session,
+                account=credentials["account"],
+                password=credentials["password"],
+                proxy=credentials["proxy"],
+            )
+            await smartapp.login()
+            devices = await smartapp.get_devices()
+            fridge = next((d for d in devices if d.get("device_type") == 2), None)
+            if fridge is None:
+                pytest.skip("This account has no fridge")
+
+            raw = fridge["raw_data"]
+            api = smartapp._api_client
+            headers = smartapp._token_manager.get_device_auth_headers(
+                device_id=raw.get("Auth"), gwid=raw.get("GWID")
+            )
+            data = [{"CommandTypes": [{"CommandType": c} for c in registers],
+                     "DeviceID": 1}]
+            response = await api.request(
+                method="POST", endpoint=API_ENDPOINTS["get_device_info"],
+                headers=headers, data=data,
+            )
+            info = (response.get("devices") or [{}])[0].get("Info", [])
+            return {i["CommandType"]: int(i["status"]) for i in info}
+
+    async def test_dump_fridge_registers(self, api_credentials):
+        """Print all current register values (run this to capture state during an incident)."""
+        values = await self._read_fridge(api_credentials, self.FRIDGE_REGISTERS)
+        meaning = {
+            "0x03": "Freezer temp", "0x05": "Fridge temp", "0x0E": "Error code (per implementation-defined reference)",
+            "0x13": "Cumulative power usage", "0x51": "Status bits, bit0=ice box",
+            "0x66": "Door status, bit15=open",
+        }
+        print("\n=== Fridge register snapshot ===")
+        for reg in self.FRIDGE_REGISTERS:
+            if reg in values:
+                print(f"  {reg} = {values[reg]:<8} 0x{values[reg]:04X}  {meaning.get(reg, '')}")
+            else:
+                print(f"  {reg} = (unsupported)")
+        assert values, "Should have read at least one register"
+
+    async def test_door_bit_is_readable(self, api_credentials):
+        """0x66 exists and bit15 can be decoded as the door open/closed state."""
+        values = await self._read_fridge(api_credentials, ["0x66"])
+        assert "0x66" in values, "0x66 should have a response"
+        door_open = bool(values["0x66"] & 0x8000)
+        print(f"\n0x66 = {values['0x66']} (0x{values['0x66']:04X}) → door "
+              f"{'open' if door_open else 'closed'}")
+        assert values["0x66"] != 65535, "65535 means unsupported, which would invalidate the decoding assumption"
+
+    async def test_status_flags_readable(self, api_credentials):
+        """0x51 exists; bit0 = 1 means ice box is normal, 0 means full."""
+        values = await self._read_fridge(api_credentials, ["0x51"])
+        assert "0x51" in values, "0x51 should have a response"
+        flags = values["0x51"]
+        print(f"\n0x51 = {flags} (0b{flags:08b}) → ice box "
+              f"{'normal' if flags & 0x01 else 'full'}")
+        assert flags != 65535, "65535 means unsupported"
