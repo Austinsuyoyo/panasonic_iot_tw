@@ -214,6 +214,9 @@
       },
       "dryer_error_code": {
         "name": "錯誤代碼"
+      },
+      "refrigerator_status_flags": {
+        "name": "狀態位元"
       }
     },
     "binary_sensor": {

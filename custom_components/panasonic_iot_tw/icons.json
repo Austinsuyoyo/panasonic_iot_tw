@@ -78,6 +78,9 @@
       },
       "dryer_error_code": {
         "default": "mdi:alert-circle-outline"
+      },
+      "refrigerator_status_flags": {
+        "default": "mdi:bit"
       }
     },
     "binary_sensor": {

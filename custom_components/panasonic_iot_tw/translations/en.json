@@ -214,6 +214,9 @@
       },
       "dryer_error_code": {
         "name": "Error code"
+      },
+      "refrigerator_status_flags": {
+        "name": "Status flags"
       }
     },
     "binary_sensor": {

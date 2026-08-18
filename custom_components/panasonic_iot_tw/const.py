@@ -147,7 +147,7 @@ DEVICE_STATUS_CODES = {
         ("0x4E", False),  # Unknown / Reserved
         ("0x4F", False),  # Unknown / Reserved
         ("0x50", True),   # Defrost setting (normal/defrosting)
-        ("0x51", False),  # Unknown / Reserved not 65535
+        ("0x51", True),   # Packed status bits, meaning not yet decoded; logged for study
         ("0x52", True),   # Ice-making stop (stopped/active)
         ("0x53", True),   # Quick ice-making (stopped/active)
         ("0x54", False),  # Unknown / Reserved

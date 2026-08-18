@@ -247,3 +247,18 @@ def process_error_code_attributes(value: Any) -> Dict[str, Any]:
     """Expose the undecoded register alongside the code."""
     return {"raw_value": int(value)}
 
+
+def process_status_flag_bits(value: Any) -> Dict[str, Any]:
+    """Break a packed status word into its individual bits.
+
+    The meaning of each bit is still unknown, so they are published as-is:
+    correlating a bit with an appliance event is what identifies it.
+    """
+    packed = int(value)
+    attrs: Dict[str, Any] = {
+        "raw_value": packed,
+        "binary": f"0b{packed:08b}",
+    }
+    for bit in range(8):
+        attrs[f"bit_{bit}"] = bool(packed & (1 << bit))
+    return attrs

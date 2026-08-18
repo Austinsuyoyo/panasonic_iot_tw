@@ -3,6 +3,7 @@ import logging
 from typing import Any, Dict, List, Optional
 
 from homeassistant.components.binary_sensor import BinarySensorDeviceClass
+from homeassistant.helpers.entity import EntityCategory
 from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass
 from homeassistant.const import UnitOfTemperature, UnitOfEnergy
 
@@ -27,6 +28,7 @@ class RefrigeratorDevice(BaseDevice):
     REFRIGERATOR_TEMP_DISPLAY_COMMAND = "0x05"      # Refrigerator temperature display (-39~40°C) Sensor
     ECO_STATUS_COMMAND = "0x0C"                     # ECO mode status (Normal/Operating) BinarySensor
     DEFROSTING_STATUS_COMMAND = "0x50"              # Defrosting status (Normal/Defrosting) BinarySensor
+    STATUS_FLAGS_COMMAND = "0x51"                    # Packed status bits, undecoded             Sensor (diagnostic)
     DOOR_STATUS_COMMAND = "0x66"                    # Packed register; bit 15 is set while a door is open
     DOOR_OPEN_BIT = 0x8000
     STOP_ICE_MAKING_COMMAND = "0x52"                # Stop ice making (Stop/Start) Switch
@@ -150,6 +152,21 @@ class RefrigeratorDevice(BaseDevice):
                 options=list(dict.fromkeys(REFRIGERATOR_ACTIVATION_MODES.values())),
                 value_processor=value_processors.create_status_mapping_processor(REFRIGERATOR_ACTIVATION_MODES),
                 translation_key="refrigerator_vacation_mode"
+            ),
+            # Raw status word. The bits are not decoded yet: bit 0 dropped when
+            # the appliance reported a full ice box, but did not come back when
+            # the ice was removed, so the meaning is still unconfirmed. Logged
+            # as a plain number so Home Assistant records its history and the
+            # next ice-box event can be read off the timeline.
+            self._create_sensor(
+                coordinator,
+                command_type=self.STATUS_FLAGS_COMMAND,
+                name="狀態位元",
+                sensor_key="status_flags",
+                value_processor=value_processors.safe_int,
+                extra_state_processor=value_processors.process_status_flag_bits,
+                entity_category=EntityCategory.DIAGNOSTIC,
+                translation_key="refrigerator_status_flags"
             )
         ])
         
