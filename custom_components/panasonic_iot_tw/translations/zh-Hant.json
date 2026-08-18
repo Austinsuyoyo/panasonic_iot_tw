@@ -187,6 +187,12 @@
           "mixed": "混合洗",
           "denim": "牛仔"
         }
+      },
+      "washing_machine_error_code": {
+        "name": "錯誤代碼"
+      },
+      "dryer_error_code": {
+        "name": "錯誤代碼"
       }
     },
     "binary_sensor": {

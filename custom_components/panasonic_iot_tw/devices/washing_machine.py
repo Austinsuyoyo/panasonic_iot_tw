@@ -3,6 +3,7 @@ import logging
 from typing import Any, Dict, List, Optional
 
 from homeassistant.components.binary_sensor import BinarySensorDeviceClass
+from homeassistant.helpers.entity import EntityCategory
 from homeassistant.components.sensor import SensorDeviceClass
 from homeassistant.const import UnitOfTime
 
@@ -22,6 +23,7 @@ class WashingMachineDevice(BaseDevice):
     # DEVICE_STATUS_CODES decides which of them are polled.
     WASHING_REMAINING_TIME_COMMAND = "0x13"   # Washing remaining time (0-599 min)   Sensor
     SCHEDULE_REMAINING_TIME_COMMAND = "0x15"  # Reservation remaining time (0-24 h)  Sensor
+    ERROR_CODE_COMMAND = "0x19"               # Panel error code, 0 = no fault       Sensor
     ENGINEERING_INFO_COMMAND = "0x34"         # Stage bits 128/64/32/16              4x BinarySensor
 
     # Also gates the remaining-time sensors: they report nothing while idle,
@@ -111,7 +113,17 @@ class WashingMachineDevice(BaseDevice):
                 options=list(dict.fromkeys(WASHING_MACHINE_AVAILABLE_CYCLES.values())),
                 value_processor=value_processors.create_status_mapping_processor(WASHING_MACHINE_AVAILABLE_CYCLES),
                 translation_key="washing_machine_cycle_message"
-            )
+            ),
+            self._create_sensor(
+                coordinator,
+                command_type=self.ERROR_CODE_COMMAND,
+                name="錯誤代碼",
+                sensor_key="error_code",
+                value_processor=value_processors.process_error_code,
+                extra_state_processor=value_processors.process_error_code_attributes,
+                entity_category=EntityCategory.DIAGNOSTIC,
+                translation_key="washing_machine_error_code"
+            ),
         ]
     
     def get_binary_sensor_entities(self, coordinator) -> List:

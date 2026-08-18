@@ -72,6 +72,12 @@
       },
       "washing_machine_cycle_message": {
         "default": "mdi:format-list-bulleted"
+      },
+      "washing_machine_error_code": {
+        "default": "mdi:alert-circle-outline"
+      },
+      "dryer_error_code": {
+        "default": "mdi:alert-circle-outline"
       }
     },
     "binary_sensor": {

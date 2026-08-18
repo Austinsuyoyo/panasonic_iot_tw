@@ -95,7 +95,7 @@ class TestDryerDevice:
     def test_get_sensor_entities_count(self, dryer_device, mock_coordinator):
         """Test that get_sensor_entities returns correct number of sensors."""
         sensors = dryer_device.get_sensor_entities(mock_coordinator)
-        assert len(sensors) == 4  # 2 time sensors + 2 status sensors
+        assert len(sensors) == 5  # 2 time + 2 status + error code
 
     def test_get_sensor_entities_types(self, dryer_device, mock_coordinator):
         """Test that sensor entities have correct types and properties."""
@@ -106,7 +106,7 @@ class TestDryerDevice:
             sensors = dryer_device.get_sensor_entities(mock_coordinator)
 
             # Should create 6 sensors
-            assert mock_sensor_class.call_count == 4
+            assert mock_sensor_class.call_count == 5
 
             # Check specific sensor configurations
             calls = mock_sensor_class.call_args_list

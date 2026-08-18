@@ -2,6 +2,8 @@
 import pytest
 from unittest.mock import Mock
 
+from homeassistant.helpers.entity import EntityCategory
+
 from custom_components.panasonic_iot_tw.devices.dryer import DryerDevice
 from custom_components.panasonic_iot_tw.devices.washing_machine import WashingMachineDevice
 
@@ -103,3 +105,50 @@ class TestDurationSensorGating:
         assert sensors["washing_remaining_time"].native_value is None
         assert sensors["washing_remaining_time"].extra_state_attributes is None
 
+
+class TestErrorCodeSensor:
+    """The error register is decoded into the code shown on the machine."""
+
+    # The two machines report the panel code in different registers:
+    # verified live, the washer uses 0x19 and the dryer 0x0A.
+    @pytest.mark.parametrize(
+        "device_cls,status,register",
+        [
+            (WashingMachineDevice, WASHER_STATUS, "0x19"),
+            (DryerDevice, DRYER_STATUS, "0x0A"),
+        ],
+    )
+    @pytest.mark.parametrize(
+        "raw,expected",
+        [
+            (0, None),          # no fault
+            (21771, "U11"),     # 0x550B — drain fault
+            (21772, "U12"),     # 0x550C — lid not closed
+            (0x4801, "H01"),
+            (12345, "0x3039"),  # unknown layout falls back to raw hex
+        ],
+    )
+    def test_decodes_panel_code(self, device_cls, status, register, raw, expected):
+        coordinator, sensors = _sensors(device_cls, status)
+        _set_status(coordinator, **{register: raw, "0x50": 2})
+        assert sensors["error_code"].native_value == expected
+
+    def test_dryer_ignores_the_washer_register(self):
+        """0x19 reads 0 on the dryer even during a fault, so it must not be used."""
+        coordinator, sensors = _sensors(DryerDevice, DRYER_STATUS)
+        _set_status(coordinator, **{"0x19": 21772, "0x0A": 0, "0x50": 8})
+        assert sensors["error_code"].native_value is None
+
+    def test_raw_value_kept_as_attribute(self):
+        coordinator, sensors = _sensors(WashingMachineDevice, WASHER_STATUS)
+        _set_status(coordinator, **{"0x19": 21771, "0x50": 8})
+        assert sensors["error_code"].extra_state_attributes == {"raw_value": 21771}
+
+    def test_missing_register_is_none(self):
+        coordinator, sensors = _sensors(WashingMachineDevice, WASHER_STATUS)
+        _set_status(coordinator, **{"0x50": 2})
+        assert sensors["error_code"].native_value is None
+
+    def test_is_diagnostic(self):
+        _, sensors = _sensors(WashingMachineDevice, WASHER_STATUS)
+        assert sensors["error_code"].entity_category is EntityCategory.DIAGNOSTIC

@@ -222,3 +222,28 @@ def create_time_formatter(unit: str = "minutes") -> Callable[[Any], Dict[str, st
             return {"formatted_time": "0分鐘"}
     return formatter
 
+
+
+# Error Code Processors
+def process_error_code(value: Any) -> Optional[str]:
+    """Decode an appliance error register into its panel code.
+
+    The register packs the code the machine shows on its own display: the
+    high byte is the letter as ASCII and the low byte the number, so 0x550B
+    is the drain fault "U11". Zero means no fault. Codes that do not fit
+    that layout are reported as raw hex rather than guessed at.
+    """
+    code = int(value)
+    if code == 0:
+        return None
+
+    letter, number = (code >> 8) & 0xFF, code & 0xFF
+    if 0x41 <= letter <= 0x5A:
+        return f"{chr(letter)}{number:02d}"
+    return f"0x{code:04X}"
+
+
+def process_error_code_attributes(value: Any) -> Dict[str, Any]:
+    """Expose the undecoded register alongside the code."""
+    return {"raw_value": int(value)}
+

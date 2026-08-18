@@ -187,6 +187,12 @@
           "mixed": "Mixed",
           "denim": "Denim"
         }
+      },
+      "washing_machine_error_code": {
+        "name": "Error code"
+      },
+      "dryer_error_code": {
+        "name": "Error code"
       }
     },
     "binary_sensor": {

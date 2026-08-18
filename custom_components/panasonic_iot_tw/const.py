@@ -203,7 +203,7 @@ DEVICE_STATUS_CODES = {
         ("0x0A", False),  # Unknown / Reserved
         ("0x13", True),   # Washing remaining time (Min=0 Max=599 minutes)
         ("0x15", True),   # Schedule remaining time (Min=0 Max=24 hours)
-        ("0x19", True),   # Unknown / Reserved
+        ("0x19", True),   # Error code (0=normal; high byte=panel letter, low byte=number)
         ("0x34", True),   # Engineering info (bitwise): bit7=prewash(128), bit6=wash(64), bit5=rinse(32), bit4=spin(16)
         ("0x40", False),  # Unknown / Reserved
         ("0x44", False),  # Unknown / Reserved
@@ -249,10 +249,10 @@ DEVICE_STATUS_CODES = {
         ("0x03", False),  # Unknown / Reserved
         ("0x04", False),  # Unknown / Reserved
         ("0x05", True),   # Drying remaining time (Min=0 Max=599 remaining minutes)
-        ("0x0A", True),   # Unknown / Reserved
+        ("0x0A", True),   # Panel error code (0=normal; high byte=ASCII letter, low byte=number)
         ("0x13", False),  # Unknown / Reserved
         ("0x15", True),   # Schedule remaining time (Min=0 Max=24 hours)
-        ("0x19", False),  # Unknown / Reserved
+        ("0x19", False),  # Not used by the dryer; error code is at 0x0A (verified by testing)
         ("0x34", True),   # Engineering info (bitwise): bit3=drying(8), bit2=air-flow(4), bit1=soft-cooling(2)
         ("0x40", False),  # Unknown / Reserved
         ("0x44", False),  # Unknown / Reserved
