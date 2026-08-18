@@ -412,9 +412,6 @@
     "button": {
       "dehumidifier_reset_filter": {
         "name": "重置濾網"
-      },
-      "air_conditioner_self_clean_button": {
-        "name": "自體淨"
       }
     },
     "climate": {

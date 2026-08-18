@@ -193,9 +193,6 @@
       }
     },
     "button": {
-      "air_conditioner_self_clean_button": {
-        "default": "mdi:broom"
-      },
       "dehumidifier_reset_filter": {
         "default": "mdi:air-filter"
       }

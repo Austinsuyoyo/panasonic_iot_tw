@@ -2,8 +2,10 @@
 import logging
 from typing import Any, Dict, List, Optional
 
+from homeassistant.components.number import NumberDeviceClass
 from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass
-from homeassistant.const import UnitOfTemperature
+from homeassistant.const import UnitOfTemperature, UnitOfTime
+from homeassistant.helpers.entity import EntityCategory
 
 from ..base import BaseDevice, value_processors
 from ..const import (
@@ -28,6 +30,7 @@ class AirConditionerDevice(BaseDevice):
     NANOE_COMMAND = "0x08"             # nanoeX                        Switch
     HORIZONTAL_SWING_COMMAND = "0x0F"  # Horizontal swing              Select
     VERTICAL_SWING_COMMAND = "0x11"    # Vertical swing                Select
+    SELF_CLEAN_COMMAND = "0x18"        # Self clean                    Switch
     ECONAVI_COMMAND = "0x1B"           # ECONAVI                       Switch
     OUTDOOR_TEMP_COMMAND = "0x21"      # Outdoor temperature           Sensor
     PM25_COMMAND = "0x37"              # PM2.5                         Sensor
@@ -205,7 +208,8 @@ class AirConditionerDevice(BaseDevice):
                 command_type="0x1E",
                 name="操作提示音",
                 switch_key="buzzer",
-                icon="mdi:volume-high"
+                icon="mdi:volume-high",
+                entity_category=EntityCategory.CONFIG
             ),
             # Turbo mode
             self._create_switch(
@@ -218,10 +222,11 @@ class AirConditionerDevice(BaseDevice):
             # Self clean
             self._create_switch(
                 coordinator,
-                command_type="0x18",
+                command_type=self.SELF_CLEAN_COMMAND,
                 name="自體淨",
                 switch_key="self_clean",
-                icon="mdi:broom"
+                icon="mdi:broom",
+                translation_key="air_conditioner_self_clean"
             ),
             # Sleep mode
             self._create_switch(
@@ -253,7 +258,8 @@ class AirConditionerDevice(BaseDevice):
                 command_type="0x1F",
                 name="機體燈光",
                 switch_key="indicator_light",
-                translation_key="air_conditioner_indicator_light"
+                translation_key="air_conditioner_indicator_light",
+                entity_category=EntityCategory.CONFIG
             )
         ]
     
@@ -301,7 +307,9 @@ class AirConditionerDevice(BaseDevice):
                 min_value=0,
                 max_value=1440,
                 step=1,
-                unit="分鐘",
+                unit=UnitOfTime.MINUTES,
+                device_class=NumberDeviceClass.DURATION,
+                entity_category=EntityCategory.CONFIG,
                 translation_key="air_conditioner_on_timer"
             ),
             # Off timer
@@ -313,23 +321,17 @@ class AirConditionerDevice(BaseDevice):
                 min_value=0,
                 max_value=1440,
                 step=1,
-                unit="分鐘",
+                unit=UnitOfTime.MINUTES,
+                device_class=NumberDeviceClass.DURATION,
+                entity_category=EntityCategory.CONFIG,
                 translation_key="air_conditioner_off_timer"
             )
         ]
-    
+
     def get_button_entities(self, coordinator) -> List:
         """Return button entities for air conditioner."""
-        return [
-            # Self clean button
-            self._create_button(
-                coordinator,
-                command_type="0x18",
-                name="自體淨",
-                button_key="self_clean",
-                translation_key="air_conditioner_self_clean_button"
-            )
-        ]
+        # Self clean is exposed as a switch (0x18), which also reports state
+        return []
     
     def get_climate_entities(self, coordinator) -> List:
         """Return climate entities for air conditioner."""

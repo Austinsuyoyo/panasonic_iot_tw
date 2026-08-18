@@ -3,8 +3,10 @@ import logging
 from typing import Any, Dict, List, Optional
 
 from homeassistant.components.binary_sensor import BinarySensorDeviceClass
+from homeassistant.components.number import NumberDeviceClass
 from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass
-from homeassistant.const import PERCENTAGE
+from homeassistant.const import PERCENTAGE, UnitOfTime
+from homeassistant.helpers.entity import EntityCategory
 
 from ..base import BaseDevice, value_processors
 from ..const import (
@@ -191,7 +193,8 @@ class DehumidifierDevice(BaseDevice):
                 command_type=self.BUZZER_COMMAND,
                 name="操作提示音",
                 switch_key="buzzer",
-                translation_key="dehumidifier_buzzer"
+                translation_key="dehumidifier_buzzer",
+                entity_category=EntityCategory.CONFIG
             )
         ]
     
@@ -258,7 +261,9 @@ class DehumidifierDevice(BaseDevice):
                 min_value=0,
                 max_value=12,
                 step=1,
-                unit="小時",
+                unit=UnitOfTime.HOURS,
+                device_class=NumberDeviceClass.DURATION,
+                entity_category=EntityCategory.CONFIG,
                 translation_key="dehumidifier_on_timer"
             ),
             # Off timer
@@ -270,7 +275,9 @@ class DehumidifierDevice(BaseDevice):
                 min_value=0,
                 max_value=12,
                 step=1,
-                unit="小時",
+                unit=UnitOfTime.HOURS,
+                device_class=NumberDeviceClass.DURATION,
+                entity_category=EntityCategory.CONFIG,
                 translation_key="dehumidifier_off_timer"
             )
         ]

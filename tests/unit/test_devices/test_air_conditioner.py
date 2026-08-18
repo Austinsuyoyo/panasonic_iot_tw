@@ -2,8 +2,10 @@
 """Unit tests for air conditioner device implementation."""
 import pytest
 from unittest.mock import Mock, patch
+from homeassistant.components.number import NumberDeviceClass
 from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass
-from homeassistant.const import UnitOfTemperature
+from homeassistant.const import UnitOfTemperature, UnitOfTime
+from homeassistant.helpers.entity import EntityCategory
 
 from custom_components.panasonic_iot_tw.devices.air_conditioner import AirConditionerDevice
 
@@ -197,3 +199,39 @@ class TestAirConditionerDevice:
         # Air conditioner should have get_climate_entities method
         assert hasattr(ac_device, 'get_climate_entities')
         assert callable(getattr(ac_device, 'get_climate_entities'))
+
+    def test_self_clean_exposed_once(self, ac_device, mock_coordinator):
+        """Self clean (0x18) is a switch only; the redundant button is gone."""
+        assert ac_device.get_button_entities(mock_coordinator) == []
+
+        switches = ac_device.get_switch_entities(mock_coordinator)
+        self_clean = [
+            s for s in switches
+            if s._attr_unique_id == "ac_test_001_self_clean"
+        ]
+        assert len(self_clean) == 1
+        assert self_clean[0]._command_type == AirConditionerDevice.SELF_CLEAN_COMMAND
+        assert self_clean[0]._attr_translation_key == "air_conditioner_self_clean"
+
+    def test_auxiliary_settings_are_config(self, ac_device, mock_coordinator):
+        """Buzzer/indicator light/timers are config, primary controls are not."""
+        entities = {
+            e._attr_unique_id: e
+            for e in ac_device.get_switch_entities(mock_coordinator)
+            + ac_device.get_number_entities(mock_coordinator)
+        }
+        for key in ("buzzer", "indicator_light", "on_timer", "off_timer"):
+            assert entities[f"ac_test_001_{key}"].entity_category is EntityCategory.CONFIG
+        for key in ("nanoex", "econavi", "self_clean"):
+            assert entities[f"ac_test_001_{key}"].entity_category is None
+
+    def test_timer_numbers_use_standard_units(self, ac_device, mock_coordinator):
+        """Timer numbers report minutes with a duration device class."""
+        numbers = {
+            e._attr_unique_id: e
+            for e in ac_device.get_number_entities(mock_coordinator)
+        }
+        for key in ("on_timer", "off_timer"):
+            number = numbers[f"ac_test_001_{key}"]
+            assert number.native_unit_of_measurement == UnitOfTime.MINUTES
+            assert number.device_class is NumberDeviceClass.DURATION
