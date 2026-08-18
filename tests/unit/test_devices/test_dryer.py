@@ -4,6 +4,7 @@ from unittest.mock import Mock, patch, MagicMock
 from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass
 from homeassistant.components.binary_sensor import BinarySensorDeviceClass
 from homeassistant.const import UnitOfTime
+from homeassistant.helpers.entity import EntityCategory
 
 from custom_components.panasonic_iot_tw.devices.dryer import DryerDevice
 from custom_components.panasonic_iot_tw.const import (
@@ -158,7 +159,9 @@ class TestDryerDevice:
             args, kwargs = calls[3]
             assert kwargs['command_type'] == "0x74"
             assert kwargs['sensor_key'] == "remote_control_allowed"
-            assert kwargs['device_class'] == BinarySensorDeviceClass.CONNECTIVITY
+            # Panel permission is not connectivity; it is a diagnostic flag
+            assert 'device_class' not in kwargs
+            assert kwargs['entity_category'] == EntityCategory.DIAGNOSTIC
 
     def test_empty_entity_methods(self, dryer_device, mock_coordinator):
         """Test that unsupported entity types return empty lists."""

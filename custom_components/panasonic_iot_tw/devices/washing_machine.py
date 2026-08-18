@@ -176,8 +176,8 @@ class WashingMachineDevice(BaseDevice):
                 command_type=self.REMOTE_CONTROL_COMMAND,
                 name="遠端控制允許",
                 sensor_key="remote_control_allowed",
-                device_class=BinarySensorDeviceClass.CONNECTIVITY,
                 value_processor=value_processors.process_remote_control,
+                entity_category=EntityCategory.DIAGNOSTIC,
                 translation_key="washing_machine_remote_control_allowed"
             )
         ]

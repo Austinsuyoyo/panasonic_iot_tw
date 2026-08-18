@@ -4,6 +4,7 @@ from unittest.mock import Mock, patch
 from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass
 from homeassistant.components.binary_sensor import BinarySensorDeviceClass
 from homeassistant.const import UnitOfTime
+from homeassistant.helpers.entity import EntityCategory
 
 from custom_components.panasonic_iot_tw.devices.washing_machine import WashingMachineDevice
 from custom_components.panasonic_iot_tw.const import (
@@ -146,7 +147,9 @@ class TestWashingMachineDevice:
             args, kwargs = calls[4]
             assert kwargs['command_type'] == "0x74"
             assert kwargs['sensor_key'] == "remote_control_allowed"
-            assert kwargs['device_class'] == BinarySensorDeviceClass.CONNECTIVITY
+            # Panel permission is not connectivity; it is a diagnostic flag
+            assert 'device_class' not in kwargs
+            assert kwargs['entity_category'] == EntityCategory.DIAGNOSTIC
 
     def test_engineering_info_sensor_keys(self, washing_machine_device, mock_coordinator):
         """Test that engineering info binary sensors have correct sensor keys."""

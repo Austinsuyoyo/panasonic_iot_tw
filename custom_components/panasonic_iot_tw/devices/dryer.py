@@ -167,7 +167,7 @@ class DryerDevice(BaseDevice):
                 command_type=self.REMOTE_CONTROL_COMMAND,
                 name="遠端控制允許",
                 sensor_key="remote_control_allowed",
-                device_class=BinarySensorDeviceClass.CONNECTIVITY,
+                entity_category=EntityCategory.DIAGNOSTIC,
                 translation_key="dryer_remote_control_allowed"
             )
         ]

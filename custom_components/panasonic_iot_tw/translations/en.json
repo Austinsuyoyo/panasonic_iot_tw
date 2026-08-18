@@ -242,7 +242,11 @@
         "name": "Engineering info - Soft Cooling(bit 1)"
       },
       "dryer_remote_control_allowed": {
-        "name": "Remote Control Allowed"
+        "name": "Remote operation permission",
+        "state": {
+          "on": "Granted on panel",
+          "off": "Not granted on panel"
+        }
       },
       "washing_machine_prewash_status": {
         "name": "Engineering info - Prewash(bit 7)"
@@ -257,7 +261,11 @@
         "name": "Engineering info - Spinning(bit 4)"
       },
       "washing_machine_remote_control_allowed": {
-        "name": "Remote Control Allowed"
+        "name": "Remote operation permission",
+        "state": {
+          "on": "Granted on panel",
+          "off": "Not granted on panel"
+        }
       },
       "refrigerator_door": {
         "name": "Door"

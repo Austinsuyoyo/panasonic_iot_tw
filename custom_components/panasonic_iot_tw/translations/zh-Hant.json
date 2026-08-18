@@ -242,7 +242,11 @@
         "name": "工程資訊 - 鬆柔冷卻(bit 1)"
       },
       "dryer_remote_control_allowed": {
-        "name": "遠端控制允許"
+        "name": "遠端操作授權",
+        "state": {
+          "on": "面板已授權",
+          "off": "面板未授權"
+        }
       },
       "washing_machine_prewash_status": {
         "name": "工程資訊 - 預洗(bit 7)"
@@ -257,7 +261,11 @@
         "name": "工程資訊 - 脫水(bit 4)"
       },
       "washing_machine_remote_control_allowed": {
-        "name": "遠端控制允許"
+        "name": "遠端操作授權",
+        "state": {
+          "on": "面板已授權",
+          "off": "面板未授權"
+        }
       },
       "refrigerator_door": {
         "name": "冰箱門"
