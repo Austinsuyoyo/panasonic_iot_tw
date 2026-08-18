@@ -1,4 +1,4 @@
-"""服務層模組"""
+"""Service layer module"""
 from .api_client import ApiClient
 from .token_manager import TokenManager
 from .device_service import DeviceService

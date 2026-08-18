@@ -12,11 +12,12 @@ _LOGGER = logging.getLogger(__name__)
 class PurifierDevice(BaseDevice):
     """Air purifier device logic."""
     
-    # Command mappings
-    POWER_COMMAND = "0x00"
-    FAN_LEVEL_COMMAND = "0x01"
-    NANOEX_COMMAND = "0x07"
-    PM25_COMMAND = "0x50"
+    # Device registers, ordered by command type. const.py's
+    # DEVICE_STATUS_CODES decides which of them are polled.
+    POWER_COMMAND = "0x00"      # Power      Switch
+    FAN_LEVEL_COMMAND = "0x01"  # Fan level  Select
+    NANOEX_COMMAND = "0x07"     # nanoeX     Switch
+    PM25_COMMAND = "0x50"       # PM2.5      Sensor
     
     def __init__(self, coordinator, device_key: str, device_data: Dict[str, Any]):
         """Initialize purifier device."""

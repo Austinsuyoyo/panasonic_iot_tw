@@ -17,19 +17,20 @@ _LOGGER = logging.getLogger(__name__)
 class AirConditionerDevice(BaseDevice):
     """Air conditioner device logic."""
     
-    # Command mappings
-    POWER_COMMAND = "0x00"
-    MODE_COMMAND = "0x01"
-    FAN_COMMAND = "0x02"
-    TARGET_TEMP_COMMAND = "0x03"
-    CURRENT_TEMP_COMMAND = "0x04"
-    SLEEP_MODE_COMMAND = "0x05"
-    NANOE_COMMAND = "0x08"
-    HORIZONTAL_SWING_COMMAND = "0x0F"
-    VERTICAL_SWING_COMMAND = "0x11"
-    ECONAVI_COMMAND = "0x1B"
-    OUTDOOR_TEMP_COMMAND = "0x21"
-    PM25_COMMAND = "0x37"
+    # Device registers, ordered by command type. const.py's
+    # DEVICE_STATUS_CODES decides which of them are polled.
+    POWER_COMMAND = "0x00"             # Power                         Climate
+    MODE_COMMAND = "0x01"              # Operating mode                Climate
+    FAN_COMMAND = "0x02"               # Fan speed                     Climate, Select
+    TARGET_TEMP_COMMAND = "0x03"       # Target temperature (16-30 C)  Climate
+    CURRENT_TEMP_COMMAND = "0x04"      # Indoor temperature            Climate, Sensor
+    SLEEP_MODE_COMMAND = "0x05"        # Sleep mode                    Switch
+    NANOE_COMMAND = "0x08"             # nanoeX                        Switch
+    HORIZONTAL_SWING_COMMAND = "0x0F"  # Horizontal swing              Select
+    VERTICAL_SWING_COMMAND = "0x11"    # Vertical swing                Select
+    ECONAVI_COMMAND = "0x1B"           # ECONAVI                       Switch
+    OUTDOOR_TEMP_COMMAND = "0x21"      # Outdoor temperature           Sensor
+    PM25_COMMAND = "0x37"              # PM2.5                         Sensor
     
     # Mode mappings
     MODE_MAPPING = {

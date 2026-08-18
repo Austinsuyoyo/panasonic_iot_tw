@@ -17,19 +17,20 @@ _LOGGER = logging.getLogger(__name__)
 class DehumidifierDevice(BaseDevice):
     """Dehumidifier device logic."""
     
-    # Command mappings
-    POWER_COMMAND = "0x00"
-    MODE_COMMAND = "0x01"
-    OFF_TIMER_COMMAND = "0x02"
-    TARGET_HUMIDITY_COMMAND = "0x04"
-    HUMIDITY_SENSOR_COMMAND = "0x07"
-    FAN_DIRECTION_COMMAND = "0x09"
-    TANK_STATUS_COMMAND = "0x0A"
-    NANOE_COMMAND = "0x0D"
-    FAN_MODE_COMMAND = "0x0E"
-    BUZZER_COMMAND = "0x18"
-    PM25_COMMAND = "0x53"
-    ON_TIMER_COMMAND = "0x55"
+    # Device registers, ordered by command type. const.py's
+    # DEVICE_STATUS_CODES decides which of them are polled.
+    POWER_COMMAND = "0x00"            # Power                      Humidifier
+    MODE_COMMAND = "0x01"             # Operating mode             Humidifier, Select
+    OFF_TIMER_COMMAND = "0x02"        # Off timer (0-12 h)         Number
+    TARGET_HUMIDITY_COMMAND = "0x04"  # Target humidity (40-70 %)  Humidifier, Number
+    HUMIDITY_SENSOR_COMMAND = "0x07"  # Current humidity           Humidifier, Sensor
+    FAN_DIRECTION_COMMAND = "0x09"    # Louvre direction           Select
+    TANK_STATUS_COMMAND = "0x0A"      # Water tank full            BinarySensor
+    NANOE_COMMAND = "0x0D"            # nanoe                      Switch
+    FAN_MODE_COMMAND = "0x0E"         # Fan speed                  Select
+    BUZZER_COMMAND = "0x18"           # Operation tone             Switch
+    PM25_COMMAND = "0x53"             # PM2.5                      Sensor
+    ON_TIMER_COMMAND = "0x55"         # On timer (0-12 h)          Number
     
     # Mode mappings
     MODE_MAPPING = {

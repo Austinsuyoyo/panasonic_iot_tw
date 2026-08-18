@@ -10,10 +10,11 @@ _LOGGER = logging.getLogger(__name__)
 class ERVDevice(BaseDevice):
     """Energy Recovery Ventilator device logic."""
     
-    # Command mappings
-    POWER_COMMAND = "0x00"
-    OPERATION_MODE_COMMAND = "0x15"
-    FAN_LEVEL_COMMAND = "0x56"
+    # Device registers, ordered by command type. const.py's
+    # DEVICE_STATUS_CODES decides which of them are polled.
+    POWER_COMMAND = "0x00"           # Power           Switch
+    OPERATION_MODE_COMMAND = "0x15"  # Operating mode  Select
+    FAN_LEVEL_COMMAND = "0x56"       # Fan level       Select
     
     def __init__(self, coordinator, device_key: str, device_data: Dict[str, Any]):
         """Initialize ERV device."""

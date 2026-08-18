@@ -1,41 +1,41 @@
-"""自定義異常類別"""
+"""Custom exception classes"""
 
 class PanasonicBaseException(Exception):
-    """Panasonic 基礎異常類別"""
+    """Base class for all Panasonic integration errors."""
     pass
 
 class PanasonicDeviceOffline(PanasonicBaseException):
-    """設備離線異常"""
+    """Raised when the appliance is offline."""
     pass
 
 class PanasonicExceedRateLimit(PanasonicBaseException):
-    """超過 API 調用頻率限制"""
+    """Raised when the API call rate limit is exceeded."""
     pass
 
 class PanasonicTokenExpired(PanasonicBaseException):
-    """Token 過期異常"""
+    """Raised when the token has expired."""
     pass
 
 class PanasonicLoginFailed(PanasonicBaseException):
-    """登入失敗異常"""
+    """Raised when login fails."""
     pass
 
 class PanasonicAPIError(PanasonicBaseException):
-    """API 錯誤異常"""
+    """Raised on a generic API error."""
     pass
 
 class PanasonicAuthError(PanasonicBaseException):
-    """認證錯誤異常"""
+    """Raised on an authentication error."""
     pass
 
 class PanasonicDeviceNotFound(PanasonicBaseException):
-    """設備未找到異常"""
+    """Raised when the device is not found."""
     pass
 
 class PanasonicInvalidCommand(PanasonicBaseException):
-    """無效命令異常"""
+    """Raised on an invalid command."""
     pass
 
 class PanasonicRefreshTokenNotFound(PanasonicBaseException):
-    """Refresh Token 不存在異常"""
+    """Raised when the refresh token does not exist."""
     pass

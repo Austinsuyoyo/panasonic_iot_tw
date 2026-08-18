@@ -18,13 +18,19 @@ _LOGGER = logging.getLogger(__name__)
 class DryerDevice(BaseDevice):
     """Dryer device logic."""
 
-    # Command mappings according to user specification
-    DRYING_REMAINING_TIME_COMMAND = "0x05"      # Drying remaining time (Min=0 Max=599 minutes) Sensor
-    SCHEDULE_REMAINING_TIME_COMMAND = "0x15"    # Schedule remaining time (Min=0 Max=24 hours) Sensor
-    ENGINEERING_INFO_COMMAND = "0x34"           # Engineering info (bitwise) 3x BinarySensor
-    OPERATION_STATUS_COMMAND = "0x50"           # Operation status Sensor
-    CYCLE_MESSAGE_COMMAND = "0x55"              # Cycle message Sensor
-    REMOTE_CONTROL_COMMAND = "0x74"             # Remote control allowed BinarySensor
+    # Device registers, ordered by command type. const.py's
+    # DEVICE_STATUS_CODES decides which of them are polled.
+    DRYING_REMAINING_TIME_COMMAND = "0x05"    # Drying remaining time (0-599 min)    Sensor
+
+    SCHEDULE_REMAINING_TIME_COMMAND = "0x15"  # Reservation remaining time (0-24 h)  Sensor
+    ENGINEERING_INFO_COMMAND = "0x34"         # Stage bits 8/4/2                     3x BinarySensor
+
+    # Also gates the remaining-time sensors: they report nothing while idle,
+    # because the register keeps the last programme's duration.
+    OPERATION_STATUS_COMMAND = "0x50"         # Operation status, 8 = fault          Sensor
+
+    CYCLE_MESSAGE_COMMAND = "0x55"            # Selected programme                   Sensor
+    REMOTE_CONTROL_COMMAND = "0x74"           # Remote control allowed               BinarySensor
 
     # Operation status (0x50) values for which a remaining time is meaningful
     RUNNING_STATUS = 2
@@ -36,7 +42,7 @@ class DryerDevice(BaseDevice):
         """Return device data with dynamic availability based on operation status."""
         data = self._device_data.copy()
 
-        # Check operation status (0x50) - if 0 (不顯示), make all sensors unavailable
+        # Check operation status (0x50) - if 0 (not displayed), make all sensors unavailable
         try:
             operation_status = self.get_int_status(self.OPERATION_STATUS_COMMAND, default=1)
             # When operation status is 0, sensors should be unavailable

@@ -66,19 +66,19 @@ DEVICE_STATUS_CODES = {
         ("0x37", True),   # AC PM2.5
     ],
     DEVICE_TYPE_REFRIGERATOR: [
-        ("0x00", True),   # 冷凍庫溫設定 (弱/中/強)
-        ("0x01", True),   # 冷藏庫溫設定 (弱/中/強)
+        ("0x00", True),   # Freezer temperature setting (weak/medium/strong)
+        ("0x01", True),   # Fridge temperature setting (weak/medium/strong)
         ("0x02", False),  # Unknown / Reserved
-        ("0x03", True),   # 冷凍溫度顯示 (-40~40度)
+        ("0x03", True),   # Freezer temperature display (-40~40 degrees)
         ("0x04", False),  # Unknown / Reserved
-        ("0x05", True),   # 冷藏溫度顯示 (-39~40度)
+        ("0x05", True),   # Fridge temperature display (-39~40 degrees)
         ("0x06", False),  # Unknown / Reserved
         ("0x07", False),  # Unknown / Reserved
         ("0x08", False),  # Unknown / Reserved
         ("0x09", False),  # Unknown / Reserved
         ("0x0A", False),  # Unknown / Reserved
         ("0x0B", False),  # Unknown / Reserved
-        ("0x0C", True),   # ECO設定 (通常/運作中)
+        ("0x0C", True),   # ECO setting (normal/active)
         ("0x0D", False),  # Unknown / Reserved
         ("0x0E", False),  # Unknown / Reserved
         ("0x0F", False),  # Unknown / Reserved
@@ -146,24 +146,24 @@ DEVICE_STATUS_CODES = {
         ("0x4D", False),  # Unknown / Reserved
         ("0x4E", False),  # Unknown / Reserved
         ("0x4F", False),  # Unknown / Reserved
-        ("0x50", True),   # 除霜設定 (通常/除霜中)
+        ("0x50", True),   # Defrost setting (normal/defrosting)
         ("0x51", False),  # Unknown / Reserved not 65535
-        ("0x52", True),   # 製冰停止 (停止/啟動)
-        ("0x53", True),   # 快速製冰 (停止/啟動)
+        ("0x52", True),   # Ice-making stop (stopped/active)
+        ("0x53", True),   # Quick ice-making (stopped/active)
         ("0x54", False),  # Unknown / Reserved
         ("0x55", False),  # Unknown / Reserved
-        ("0x56", True),   # 新鮮急凍結 (通常/冷卻/急冷/急凍) value/256=模式 value%256=分鐘
-        ("0x57", True),   # 微凍結室溫設定 (弱/中/強)
-        ("0x58", True),   # 微凍結溫度顯示 (-39~40度)
+        ("0x56", True),   # Fresh quick-freeze (normal/cooling/quick-cool/quick-freeze) value/256=mode value%256=minutes
+        ("0x57", True),   # Partial-freeze compartment temperature setting (weak/medium/strong)
+        ("0x58", True),   # Partial-freeze temperature display (-39~40 degrees)
         ("0x59", False),  # Unknown / Reserved
-        ("0x5A", True),   # 冬季模式 (未啟動/啟動中/可啟動)
-        ("0x5B", True),   # 購物模式 (未啟動/啟動中/可啟動)
-        ("0x5C", True),   # 外出模式 (未啟動/啟動中/可啟動)
+        ("0x5A", True),   # Winter mode (inactive/active/available)
+        ("0x5B", True),   # Shopping mode (inactive/active/available)
+        ("0x5C", True),   # Away mode (inactive/active/available)
         ("0x5D", False),  # Unknown / Reserved
         ("0x5E", False),  # Unknown / Reserved
         ("0x5F", False),  # Unknown / Reserved
         ("0x60", False),  # Unknown / Reserved
-        ("0x61", True),   # nanoe (通常/運作中)
+        ("0x61", True),   # nanoe (normal/active)
         ("0x62", False),  # Unknown / Reserved
         ("0x63", False),  # Unknown / Reserved
         ("0x64", False),  # Unknown / Reserved not 65535
@@ -201,10 +201,10 @@ DEVICE_STATUS_CODES = {
         ("0x04", False),  # Unknown / Reserved
         ("0x05", False),  # Unknown / Reserved
         ("0x0A", False),  # Unknown / Reserved
-        ("0x13", True),   # 洗衣殘時間 (Min=0 Max=599 分鐘)
-        ("0x15", True),   # 預約殘時間 (Min=0 Max=24 小時)
+        ("0x13", True),   # Washing remaining time (Min=0 Max=599 minutes)
+        ("0x15", True),   # Schedule remaining time (Min=0 Max=24 hours)
         ("0x19", True),   # Unknown / Reserved
-        ("0x34", True),   # 工程資訊 (bitwise): bit7=預洗(128), bit6=洗衣(64), bit5=洗清(32), bit4=脫水(16)
+        ("0x34", True),   # Engineering info (bitwise): bit7=prewash(128), bit6=wash(64), bit5=rinse(32), bit4=spin(16)
         ("0x40", False),  # Unknown / Reserved
         ("0x44", False),  # Unknown / Reserved
         ("0x45", False),  # Unknown / Reserved
@@ -213,17 +213,17 @@ DEVICE_STATUS_CODES = {
         ("0x4A", False),  # Unknown / Reserved
         ("0x4B", False),  # Unknown / Reserved
         ("0x4E", False),  # Unknown / Reserved
-        ("0x50", True),   # 運轉情報: 0-不顯示 1-待機中 2-動作中 3-預約中 4-預約中 5-終了 8-異常
-        ("0x55", True),   # 行程別訊息 (詳細行程對應見 WASHING_MACHINE_AVAILABLE_CYCLES)
+        ("0x50", True),   # Operation status: 0-not displayed 1-standby 2-running 3-reserved 4-reserved 5-finished 8-error
+        ("0x55", True),   # Cycle message (see WASHING_MACHINE_AVAILABLE_CYCLES for detailed cycle mapping)
         ("0x5A", False),  # Unknown / Reserved
         ("0x5B", False),  # Unknown / Reserved
         ("0x5C", False),  # Unknown / Reserved
-        ("0x64", True),   # 工程資訊 (bitwise): bit10=預洗(1024), bit6=洗衣(64), bit5=洗清(32), bit4=脫水(16)
+        ("0x64", True),   # Engineering info (bitwise): bit10=prewash(1024), bit6=wash(64), bit5=rinse(32), bit4=spin(16)
         ("0x69", False),  # Unknown / Reserved
         ("0x71", True),   # Unknown / Reserved
         ("0x72", True),   # Unknown / Reserved
         ("0x73", True),   # Unknown / Reserved
-        ("0x74", True),   # 是否允許遠端空置 0=不允許 1=允許
+        ("0x74", True),   # Whether remote idle is allowed 0=not allowed 1=allowed
         ("0x75", True),   # Unknown / Reserved
         ("0x79", False),  # Unknown / Reserved
     ],
@@ -248,12 +248,12 @@ DEVICE_STATUS_CODES = {
         ("0x02", False),  # Unknown / Reserved
         ("0x03", False),  # Unknown / Reserved
         ("0x04", False),  # Unknown / Reserved
-        ("0x05", True),   # 乾衣殘時間 (Min=0 Max=599 剩餘分鐘)
+        ("0x05", True),   # Drying remaining time (Min=0 Max=599 remaining minutes)
         ("0x0A", True),   # Unknown / Reserved
         ("0x13", False),  # Unknown / Reserved
-        ("0x15", True),   # 預約殘時間 (Min=0 Max=24 小時)
+        ("0x15", True),   # Schedule remaining time (Min=0 Max=24 hours)
         ("0x19", False),  # Unknown / Reserved
-        ("0x34", True),   # 工程資訊 (bitwise): bit3=乾衣(8), bit2=送風(4), bit1=鬆柔冷卻(2)
+        ("0x34", True),   # Engineering info (bitwise): bit3=drying(8), bit2=air-flow(4), bit1=soft-cooling(2)
         ("0x40", False),  # Unknown / Reserved
         ("0x44", False),  # Unknown / Reserved
         ("0x45", False),  # Unknown / Reserved
@@ -262,17 +262,17 @@ DEVICE_STATUS_CODES = {
         ("0x4A", False),  # Unknown / Reserved
         ("0x4B", False),  # Unknown / Reserved
         ("0x4E", False),  # Unknown / Reserved
-        ("0x50", True),   # 運轉情報: 0-不顯示 1-待機中 2-動作中 3-預約中 4-預約中 5-終了 8-異常
-        ("0x55", True),   # 行程別訊息 (詳細行程對應見 DRYER_AVAILABLE_CYCLES)
+        ("0x50", True),   # Operation status: 0-not displayed 1-standby 2-running 3-reserved 4-reserved 5-finished 8-error
+        ("0x55", True),   # Cycle message (see DRYER_AVAILABLE_CYCLES for detailed cycle mapping)
         ("0x5A", False),  # Unknown / Reserved
         ("0x5B", False),  # Unknown / Reserved
         ("0x5C", False),  # Unknown / Reserved
-        ("0x64", True),   # 工程資訊 (bitwise): bit3=乾衣(8), bit2=送風(4), bit1=鬆柔冷卻(2)
+        ("0x64", True),   # Engineering info (bitwise): bit3=drying(8), bit2=air-flow(4), bit1=soft-cooling(2)
         ("0x69", False),  # Unknown / Reserved
         ("0x71", True),   # Unknown / Reserved
         ("0x72", True),   # Unknown / Reserved
         ("0x73", True),   # Unknown / Reserved
-        ("0x74", True),   # 是否允許遠端空置 0=不允許 1=允許
+        ("0x74", True),   # Whether remote idle is allowed 0=not allowed 1=allowed
         ("0x75", True),   # Unknown / Reserved
         ("0x79", False),  # Unknown / Reserved
     ],

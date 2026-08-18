@@ -10,8 +10,9 @@ _LOGGER = logging.getLogger(__name__)
 class SmartSwitchDevice(BaseDevice):
     """Smart switch device logic."""
     
-    # Command mappings
-    POWER_COMMAND = "0x70"
+    # Device registers, ordered by command type. const.py's
+    # DEVICE_STATUS_CODES decides which of them are polled.
+    POWER_COMMAND = "0x70"  # Power  Switch
     
     def __init__(self, coordinator, device_key: str, device_data: Dict[str, Any]):
         """Initialize smart switch device."""

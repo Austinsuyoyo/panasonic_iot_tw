@@ -99,7 +99,7 @@ def process_integer_command(value: float) -> int:
 # ============================================================================
 
 def process_remote_control(value: Any) -> bool:
-    """Process remote control allowance (0=不允許 1=允許)."""
+    """Process remote control allowance (0=not allowed, 1=allowed)."""
     return bool(int(value))
 
 

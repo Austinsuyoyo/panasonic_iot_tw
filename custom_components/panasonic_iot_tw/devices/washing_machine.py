@@ -18,13 +18,18 @@ _LOGGER = logging.getLogger(__name__)
 class WashingMachineDevice(BaseDevice):
     """Washing machine device logic."""
 
-    # Command mappings according to user specification
-    WASHING_REMAINING_TIME_COMMAND = "0x13"     # Washing remaining time (Min=0 Max=599 minutes) Sensor
-    SCHEDULE_REMAINING_TIME_COMMAND = "0x15"    # Schedule remaining time (Min=0 Max=24 hours) Sensor
-    ENGINEERING_INFO_COMMAND = "0x34"          # Engineering info (bitwise) 4x BinarySensor
-    OPERATION_STATUS_COMMAND = "0x50"          # Operation status Sensor
-    CYCLE_MESSAGE_COMMAND = "0x55"             # Cycle message Sensor
-    REMOTE_CONTROL_COMMAND = "0x74"            # Remote control allowed BinarySensor
+    # Device registers, ordered by command type. const.py's
+    # DEVICE_STATUS_CODES decides which of them are polled.
+    WASHING_REMAINING_TIME_COMMAND = "0x13"   # Washing remaining time (0-599 min)   Sensor
+    SCHEDULE_REMAINING_TIME_COMMAND = "0x15"  # Reservation remaining time (0-24 h)  Sensor
+    ENGINEERING_INFO_COMMAND = "0x34"         # Stage bits 128/64/32/16              4x BinarySensor
+
+    # Also gates the remaining-time sensors: they report nothing while idle,
+    # because the register keeps the last programme's duration.
+    OPERATION_STATUS_COMMAND = "0x50"         # Operation status, 8 = fault          Sensor
+
+    CYCLE_MESSAGE_COMMAND = "0x55"            # Selected programme                   Sensor
+    REMOTE_CONTROL_COMMAND = "0x74"           # Remote control allowed               BinarySensor
 
     # Operation status (0x50) values for which a remaining time is meaningful
     RUNNING_STATUS = 2

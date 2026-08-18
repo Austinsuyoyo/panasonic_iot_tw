@@ -1,4 +1,4 @@
-"""命令處理工具類 - 統一處理設備命令邏輯"""
+"""Command processing utilities - unifies device command handling logic."""
 import logging
 from typing import List, Dict, Tuple, Optional, Any
 
@@ -6,19 +6,19 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class CommandHelper:
-    """統一的命令處理工具類，減少重複的命令查找和處理邏輯"""
+    """Unified command processing helper, reduces duplicate command lookup/handling logic."""
     
     @staticmethod
     def get_command_parameters(commands: List[Dict], command_type: str) -> List[List]:
         """
-        獲取指定命令類型的參數列表
+        Get the parameter list for a given command type.
         
         Args:
-            commands: 命令列表
-            command_type: 命令類型 (如 "0x01")
+            commands: Command list
+            command_type: Command type (e.g. "0x01")
             
         Returns:
-            參數列表，如果未找到返回空列表
+            Parameter list, or an empty list if not found
         """
         try:
             for command in commands:
@@ -35,14 +35,14 @@ class CommandHelper:
     @staticmethod
     def find_parameter_by_value(parameters: List[List], value: int) -> Optional[Tuple[str, int]]:
         """
-        根據數值查找參數
+        Find a parameter by value.
         
         Args:
-            parameters: 參數列表 [[name, value], ...]
-            value: 要查找的數值
+            parameters: Parameter list [[name, value], ...]
+            value: The value to look up
             
         Returns:
-            (name, value) 元組，如果未找到返回 None
+            (name, value) tuple, or None if not found
         """
         try:
             for param in parameters:
@@ -59,14 +59,14 @@ class CommandHelper:
     @staticmethod
     def find_parameter_by_name(parameters: List[List], name: str) -> Optional[Tuple[str, int]]:
         """
-        根據名稱查找參數
+        Find a parameter by name.
         
         Args:
-            parameters: 參數列表 [[name, value], ...]
-            name: 要查找的名稱
+            parameters: Parameter list [[name, value], ...]
+            name: The name to look up
             
         Returns:
-            (name, value) 元組，如果未找到返回 None
+            (name, value) tuple, or None if not found
         """
         try:
             for param in parameters:
@@ -83,13 +83,13 @@ class CommandHelper:
     @staticmethod
     def get_parameter_names(parameters: List[List]) -> List[str]:
         """
-        獲取所有參數名稱
+        Get all parameter names.
         
         Args:
-            parameters: 參數列表
+            parameters: Parameter list
             
         Returns:
-            參數名稱列表
+            List of parameter names
         """
         try:
             return [param[0] for param in parameters if len(param) >= 1]
@@ -104,15 +104,15 @@ class CommandHelper:
         current_value: int
     ) -> Optional[str]:
         """
-        獲取當前選項的名稱
+        Get the name of the current option.
         
         Args:
-            commands: 命令列表
-            command_type: 命令類型
-            current_value: 當前數值
+            commands: Command list
+            command_type: Command type
+            current_value: Current value
             
         Returns:
-            選項名稱，如果未找到返回 None
+            Option name, or None if not found
         """
         parameters = CommandHelper.get_command_parameters(commands, command_type)
         if not parameters:
@@ -128,15 +128,15 @@ class CommandHelper:
         option_name: str
     ) -> bool:
         """
-        驗證選項是否有效
+        Validate whether an option is valid.
         
         Args:
-            commands: 命令列表
-            command_type: 命令類型
-            option_name: 選項名稱
+            commands: Command list
+            command_type: Command type
+            option_name: Option name
             
         Returns:
-            是否有效
+            Whether the option is valid
         """
         parameters = CommandHelper.get_command_parameters(commands, command_type)
         if not parameters:
@@ -146,33 +146,33 @@ class CommandHelper:
 
 
 class DeviceCommands:
-    """設備命令常數定義"""
+    """Device command constant definitions"""
     
     class Power:
-        """電源相關命令"""
+        """Power-related commands"""
         COMMAND = 128
         STATUS = "0x00"
         ON = 1
         OFF = 0
     
     class Temperature:
-        """溫度相關命令"""
+        """Temperature-related commands"""
         SET_COMMAND = 3
         CURRENT_STATUS = "0x04"
         TARGET_STATUS = "0x03"
     
     class Mode:
-        """模式相關命令"""
+        """Mode-related commands"""
         SET_COMMAND = 129
         STATUS = "0x01"
     
     class Fan:
-        """風扇相關命令"""
+        """Fan-related commands"""
         SET_COMMAND = 130
         STATUS = "0x02"
     
     class Timer:
-        """定時器相關命令"""
+        """Timer-related commands"""
         ON_TIMER_COMMAND = 139
         OFF_TIMER_COMMAND = 140
         ON_TIMER_STATUS = "0x0B"

@@ -1,4 +1,4 @@
-"""基礎設施層模組"""
+"""Infrastructure layer module"""
 from .status_reader import StatusReader
 from .command_helper import CommandHelper, DeviceCommands
 from .error_handler import ErrorHandler
