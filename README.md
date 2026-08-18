@@ -78,28 +78,10 @@ Change the account, password, or proxy without deleting and re-adding the
 entry: open the integration card's **⋮ menu → Reconfigure**. If the username
 changes, the entry follows the new account automatically.
 
-## What's new in v2026.7.0
+## Changelog
 
-This is a major pre-publication overhaul. Highlights:
-
-- **Config entry schema v2** — the proxy and update interval now live in the
-  entry **options** (the **Configure** button on the integration card). Existing
-  v1 entries are **migrated automatically** on upgrade; no manual action needed.
-- **Options flow fixed** — changing the update interval / proxy now works and
-  reloads the entry. Update interval is validated to 60–3600 s.
-- **Reauthentication flow** — password changes trigger an HA re-auth prompt
-  instead of a silent retry loop.
-- **Reconfigure flow** — account / password / proxy editable from the
-  integration menu.
-- **Live availability** — devices going offline / online are reflected
-  immediately. During a cloud outage entities are marked **unavailable** rather
-  than showing stale values.
-- **Failed commands surface as errors** — a control command that fails now
-  raises a visible error in the UI instead of silently doing nothing.
-- **Diagnostics download** (redacted) — see [Reporting issues](#reporting-issues).
-- **Bundled brand icon** — the icon ships inside
-  `custom_components/panasonic_iot_tw/brand/` and displays natively on Home
-  Assistant **2026.3+**.
+Release history lives in [CHANGELOG.md](CHANGELOG.md); each GitHub release
+carries the same notes.
 
 ## Troubleshooting
 

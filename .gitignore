@@ -204,3 +204,5 @@ __marimo__/
 
 # Project-local scratch / capture data (root-anchored so tests/integration/ is kept)
 /integration/
+# Local agent instructions (not part of the published integration)
+CLAUDE.md
