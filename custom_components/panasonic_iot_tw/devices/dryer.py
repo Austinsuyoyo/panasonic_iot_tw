@@ -89,31 +89,6 @@ class DryerDevice(BaseDevice):
                 gate_allowed=self.RESERVED_STATUSES,
                 translation_key="dryer_schedule_remaining_time"
             ),
-            # Absolute timestamps derived from the countdown registers
-            self._create_sensor(
-                coordinator,
-                command_type=self.DRYING_REMAINING_TIME_COMMAND,
-                name="乾衣完成時間",
-                sensor_key="finish_time",
-                device_class=SensorDeviceClass.TIMESTAMP,
-                gate_command=self.OPERATION_STATUS_COMMAND,
-                gate_allowed={self.RUNNING_STATUS},
-                timestamp_unit="minutes",
-                clamp_minutes=3,
-                translation_key="dryer_finish_time"
-            ),
-            self._create_sensor(
-                coordinator,
-                command_type=self.SCHEDULE_REMAINING_TIME_COMMAND,
-                name="預約開始時間",
-                sensor_key="scheduled_start_time",
-                device_class=SensorDeviceClass.TIMESTAMP,
-                gate_command=self.OPERATION_STATUS_COMMAND,
-                gate_allowed=self.RESERVED_STATUSES,
-                timestamp_unit="hours",
-                clamp_minutes=35,
-                translation_key="dryer_scheduled_start_time"
-            ),
             # Status sensors with mapping
             self._create_sensor(
                 coordinator,

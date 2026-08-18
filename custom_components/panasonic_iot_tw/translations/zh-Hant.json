@@ -106,12 +106,6 @@
       "dryer_schedule_remaining_time": {
         "name": "預約殘時間"
       },
-      "dryer_finish_time": {
-        "name": "乾衣完成時間"
-      },
-      "dryer_scheduled_start_time": {
-        "name": "預約開始時間"
-      },
       "dryer_operation_status": {
         "name": "運轉情報",
         "state": {
@@ -159,12 +153,6 @@
       },
       "washing_machine_schedule_remaining_time": {
         "name": "預約殘時間"
-      },
-      "washing_machine_finish_time": {
-        "name": "洗衣完成時間"
-      },
-      "washing_machine_scheduled_start_time": {
-        "name": "預約開始時間"
       },
       "washing_machine_operation_status": {
         "name": "運轉情報",

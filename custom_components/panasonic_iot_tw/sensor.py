@@ -1,6 +1,5 @@
 """Sensor platform for Panasonic IoT TW integration."""
 import logging
-from datetime import datetime, timedelta
 from typing import Any, Dict, Iterable, Optional, Callable, Set
 
 from homeassistant.components.sensor import (
@@ -11,7 +10,6 @@ from homeassistant.components.sensor import (
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.util import dt as dt_util
 
 from .base import PanasonicEntity, PlatformSetupHelper
 from .base import value_processors
@@ -51,8 +49,6 @@ class PanasonicSensor(PanasonicEntity, SensorEntity):
         translation_key: Optional[str] = None,
         gate_command: Optional[str] = None,
         gate_allowed: Optional[Iterable[int]] = None,
-        timestamp_unit: Optional[str] = None,
-        clamp_minutes: Optional[float] = None,
         **kwargs
     ):
         """Initialize the configurable sensor.
@@ -74,10 +70,6 @@ class PanasonicSensor(PanasonicEntity, SensorEntity):
             translation_key: Translation key for entity name
             gate_command: Command type whose value gates this sensor (optional)
             gate_allowed: Gate values for which this sensor reports a value
-            timestamp_unit: When set ("minutes"/"hours"), the raw value is an
-                offset from now and the sensor reports an absolute timestamp
-            clamp_minutes: Jitter tolerance for timestamp sensors; a new
-                estimate within this many minutes keeps the previous timestamp
             **kwargs: Additional attributes to set on entity
         """
         # Call parent with common initialization
@@ -93,11 +85,6 @@ class PanasonicSensor(PanasonicEntity, SensorEntity):
         self._extra_state_processor = extra_state_processor
         self._gate_command = gate_command
         self._gate_allowed: Set[int] = set(gate_allowed or ())
-        self._timestamp_unit = timestamp_unit
-        self._clamp_delta = (
-            timedelta(minutes=clamp_minutes) if clamp_minutes else timedelta(0)
-        )
-        self._last_timestamp: Optional[datetime] = None
 
         # Set sensor-specific entity attributes
         self._attr_device_class = device_class
@@ -182,36 +169,13 @@ class PanasonicSensor(PanasonicEntity, SensorEntity):
             )
             return False
 
-    def _get_timestamp_value(self, raw_value: Any) -> Optional[datetime]:
-        """Return an absolute timestamp derived from a remaining-time offset."""
-        offset = self._get_processed_value(raw_value, value_processors.safe_int)
-        if offset is None:
-            self._last_timestamp = None
-            return None
-
-        estimate = dt_util.utcnow() + timedelta(**{self._timestamp_unit: offset})
-
-        # Cloud-reported remaining time jitters between polls; only move the
-        # emitted timestamp once the estimate drifts beyond the tolerance.
-        if (
-            self._last_timestamp is not None
-            and abs(estimate - self._last_timestamp) <= self._clamp_delta
-        ):
-            return self._last_timestamp
-
-        self._last_timestamp = estimate
-        return estimate
-
     @property
     def native_value(self) -> Any:
         """Return the processed sensor value."""
         if not self._is_gate_open():
-            self._last_timestamp = None
             return None
 
         raw_value = self._get_raw_value()
-        if self._timestamp_unit:
-            return self._get_timestamp_value(raw_value)
         return self._get_processed_value(raw_value, self._value_processor)
 
     @property

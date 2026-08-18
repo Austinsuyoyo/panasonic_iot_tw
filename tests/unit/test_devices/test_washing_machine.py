@@ -25,7 +25,7 @@ class TestWashingMachineDevice:
                     "0x13": 45,   # Washing remaining time: 45 minutes
                     "0x15": 3,    # Schedule remaining time: 3 hours
                     "0x34": 208,  # Engineering info: binary 11010000 (pre_wash=128, washing=64, rinse=16)
-                    "0x50": 2,    # Operation status: 2 (動作中)
+                    "0x50": 2,    # Operation status: 2 (running)
                     "0x55": 1,    # Cycle message: 1
                     "0x64": 1088, # Engineering info ext: binary 10001000000 (pre_wash_ext=1024, washing_ext=64)
                     "0x74": 1,    # Remote control allowed: 1
@@ -71,7 +71,7 @@ class TestWashingMachineDevice:
     def test_get_sensor_entities_count(self, washing_machine_device, mock_coordinator):
         """Test that get_sensor_entities returns correct number of sensors."""
         sensors = washing_machine_device.get_sensor_entities(mock_coordinator)
-        assert len(sensors) == 6  # 2 time sensors + 2 timestamp sensors + 2 status sensors
+        assert len(sensors) == 4  # 2 time sensors + 2 status sensors
 
     def test_get_sensor_entities_types(self, washing_machine_device, mock_coordinator):
         """Test that sensor entities have correct types and properties."""
@@ -82,7 +82,7 @@ class TestWashingMachineDevice:
             sensors = washing_machine_device.get_sensor_entities(mock_coordinator)
 
             # Should create 6 sensors
-            assert mock_sensor_class.call_count == 6
+            assert mock_sensor_class.call_count == 4
 
             # Check specific sensor configurations
             calls = mock_sensor_class.call_args_list
@@ -101,13 +101,13 @@ class TestWashingMachineDevice:
             assert kwargs['device_class'] == SensorDeviceClass.DURATION
             assert kwargs['unit'] == UnitOfTime.HOURS
 
-            # Fifth call - operation status
-            args, kwargs = calls[4]
+            # Third call - operation status
+            args, kwargs = calls[2]
             assert kwargs['command_type'] == "0x50"
             assert kwargs['sensor_key'] == "operation_status"
 
-            # Sixth call - cycle message
-            args, kwargs = calls[5]
+            # Fourth call - cycle message
+            args, kwargs = calls[3]
             assert kwargs['command_type'] == "0x55"
             assert kwargs['sensor_key'] == "cycle_message"
 
@@ -237,10 +237,8 @@ class TestWashingMachineDevice:
 
             assert sensor_calls[0][1]['translation_key'] == "washing_machine_washing_remaining_time"
             assert sensor_calls[1][1]['translation_key'] == "washing_machine_schedule_remaining_time"
-            assert sensor_calls[2][1]['translation_key'] == "washing_machine_finish_time"
-            assert sensor_calls[3][1]['translation_key'] == "washing_machine_scheduled_start_time"
-            assert sensor_calls[4][1]['translation_key'] == "washing_machine_operation_status"
-            assert sensor_calls[5][1]['translation_key'] == "washing_machine_cycle_message"
+            assert sensor_calls[2][1]['translation_key'] == "washing_machine_operation_status"
+            assert sensor_calls[3][1]['translation_key'] == "washing_machine_cycle_message"
 
             # Reset mock
             mock_binary_sensor_class.reset_mock()

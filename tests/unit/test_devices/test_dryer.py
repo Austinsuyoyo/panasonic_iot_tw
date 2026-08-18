@@ -25,7 +25,7 @@ class TestDryerDevice:
                     "0x05": 120,  # Drying remaining time: 120 minutes
                     "0x15": 2,    # Schedule remaining time: 2 hours
                     "0x34": 12,   # Engineering info: binary 1100 (drying=8, air_flow=4)
-                    "0x50": 2,    # Operation status: 2 (動作中)
+                    "0x50": 2,    # Operation status: 2 (running)
                     "0x55": 1,    # Cycle message: 1
                     "0x64": 6,    # Drying mode params: binary 0110 (air_flow=4, soft_cooling=2)
                     "0x74": 1,    # Remote control allowed: 1
@@ -75,7 +75,7 @@ class TestDryerDevice:
 
     def test_device_data_unavailable_when_operation_status_zero(self, mock_coordinator, mock_device_data):
         """Test device_data returns available=False when operation status is 0."""
-        # Set operation status to 0 (不顯示)
+        # Set operation status to 0 (not displayed)
         mock_coordinator.data[0]["status"]["0x50"] = 0
         dryer_device = DryerDevice(mock_coordinator, 0, mock_device_data)
 
@@ -95,7 +95,7 @@ class TestDryerDevice:
     def test_get_sensor_entities_count(self, dryer_device, mock_coordinator):
         """Test that get_sensor_entities returns correct number of sensors."""
         sensors = dryer_device.get_sensor_entities(mock_coordinator)
-        assert len(sensors) == 6  # 2 time sensors + 2 timestamp sensors + 2 status sensors
+        assert len(sensors) == 4  # 2 time sensors + 2 status sensors
 
     def test_get_sensor_entities_types(self, dryer_device, mock_coordinator):
         """Test that sensor entities have correct types and properties."""
@@ -106,7 +106,7 @@ class TestDryerDevice:
             sensors = dryer_device.get_sensor_entities(mock_coordinator)
 
             # Should create 6 sensors
-            assert mock_sensor_class.call_count == 6
+            assert mock_sensor_class.call_count == 4
 
             # Check specific sensor configurations
             calls = mock_sensor_class.call_args_list
@@ -180,13 +180,13 @@ class TestDryerDevice:
             assert device_data["available"] is True
 
     @pytest.mark.parametrize("operation_status,expected_available", [
-        (0, False),   # 不顯示 - should be unavailable
-        (1, True),    # 待機中 - should be available
-        (2, True),    # 動作中 - should be available
-        (3, True),    # 預約中 - should be available
-        (4, True),    # 預約中 - should be available
-        (5, True),    # 終了 - should be available
-        (8, True),    # 異常 - should be available (for diagnostics)
+        (0, False),   # not displayed - should be unavailable
+        (1, True),    # standby - should be available
+        (2, True),    # running - should be available
+        (3, True),    # reserved - should be available
+        (4, True),    # reserved - should be available
+        (5, True),    # finished - should be available
+        (8, True),    # error - should be available (for diagnostics)
     ])
     def test_device_availability_by_operation_status(self, mock_coordinator, mock_device_data, operation_status, expected_available):
         """Test device availability for all operation status codes."""
