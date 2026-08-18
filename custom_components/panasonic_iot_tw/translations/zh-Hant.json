@@ -234,6 +234,9 @@
       },
       "washing_machine_remote_control_allowed": {
         "name": "遠端控制允許"
+      },
+      "refrigerator_door": {
+        "name": "冰箱門"
       }
     },
     "switch": {

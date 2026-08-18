@@ -98,6 +98,13 @@
       },
       "washing_machine_remote_control_allowed": {
         "default": "mdi:remote"
+      },
+      "refrigerator_door": {
+        "default": "mdi:fridge-alert",
+        "state": {
+          "off": "mdi:fridge",
+          "on": "mdi:fridge-alert"
+        }
       }
     },
     "switch": {

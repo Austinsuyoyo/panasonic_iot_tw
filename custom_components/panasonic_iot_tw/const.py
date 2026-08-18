@@ -168,7 +168,7 @@ DEVICE_STATUS_CODES = {
         ("0x63", False),  # Unknown / Reserved
         ("0x64", False),  # Unknown / Reserved not 65535
         ("0x65", False),  # Unknown / Reserved not 65535
-        ("0x66", False),  # Unknown / Reserved not 65535
+        ("0x66", True),   # Door status: bit15 (0x8000) = any door open; lower bits purpose unknown
         ("0x67", False),  # Unknown / Reserved
         ("0x68", False),  # Unknown / Reserved not 65535
         ("0x69", False),  # Unknown / Reserved not 65535

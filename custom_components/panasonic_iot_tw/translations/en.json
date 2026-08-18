@@ -234,6 +234,9 @@
       },
       "washing_machine_remote_control_allowed": {
         "name": "Remote Control Allowed"
+      },
+      "refrigerator_door": {
+        "name": "Door"
       }
     },
     "switch": {

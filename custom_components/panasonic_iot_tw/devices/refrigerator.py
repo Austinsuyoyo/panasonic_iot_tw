@@ -25,6 +25,8 @@ class RefrigeratorDevice(BaseDevice):
     REFRIGERATOR_TEMP_DISPLAY_COMMAND = "0x05"      # Refrigerator temperature display (-39~40°C) Sensor
     ECO_STATUS_COMMAND = "0x0C"                     # ECO mode status (Normal/Operating) BinarySensor
     DEFROSTING_STATUS_COMMAND = "0x50"              # Defrosting status (Normal/Defrosting) BinarySensor
+    DOOR_STATUS_COMMAND = "0x66"                    # Packed register; bit 15 is set while a door is open
+    DOOR_OPEN_BIT = 0x8000
     STOP_ICE_MAKING_COMMAND = "0x52"                # Stop ice making (Stop/Start) Switch
     QUICK_ICE_MAKING_COMMAND = "0x53"               # Quick ice making (Stop/Start) Switch
     FRESH_FREEZING_COMMAND = "0x56"                 # Fresh freezing mode (Normal/Cooling/Quick Cool/Quick Freeze) Sensor
@@ -175,6 +177,16 @@ class RefrigeratorDevice(BaseDevice):
                 device_class=BinarySensorDeviceClass.RUNNING,
                 value_processor=value_processors.safe_bool,
                 translation_key="refrigerator_nanoe_status"
+            ),
+            # Door open (bit 15 of the packed status register)
+            self._create_binary_sensor(
+                coordinator,
+                command_type=self.DOOR_STATUS_COMMAND,
+                name="Door",
+                sensor_key="door",
+                device_class=BinarySensorDeviceClass.DOOR,
+                bit_mask=self.DOOR_OPEN_BIT,
+                translation_key="refrigerator_door"
             )
         ]
     
