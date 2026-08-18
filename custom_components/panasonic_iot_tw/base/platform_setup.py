@@ -1,6 +1,5 @@
 """Unified platform setup helper for reducing code duplication."""
 import logging
-from typing import Callable
 
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry

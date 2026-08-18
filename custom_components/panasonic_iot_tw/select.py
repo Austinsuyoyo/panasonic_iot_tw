@@ -1,6 +1,6 @@
 """Select platform for Panasonic IoT TW integration."""
 import logging
-from typing import Any, Dict, List, Optional, Callable
+from typing import Any, Dict, Optional, Callable
 
 from homeassistant.components.select import SelectEntity
 from homeassistant.config_entries import ConfigEntry
@@ -8,7 +8,6 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .base import PanasonicEntity, PlatformSetupHelper
-from .base import value_processors
 
 _LOGGER = logging.getLogger(__name__)
 

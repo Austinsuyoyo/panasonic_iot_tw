@@ -1,6 +1,6 @@
 """Refrigerator device logic for Panasonic IoT TW integration."""
 import logging
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 
 from homeassistant.components.binary_sensor import BinarySensorDeviceClass
 from homeassistant.helpers.entity import EntityCategory

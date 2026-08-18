@@ -12,7 +12,6 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .base import PanasonicEntity, PlatformSetupHelper
-from .base import value_processors
 
 _LOGGER = logging.getLogger(__name__)
 

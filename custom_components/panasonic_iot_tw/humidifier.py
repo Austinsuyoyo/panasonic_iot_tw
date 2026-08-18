@@ -1,6 +1,6 @@
 """Humidifier platform for Panasonic IoT TW integration."""
 import logging
-from typing import Any, Dict, List, Optional, Callable
+from typing import Any, Dict, Optional, Callable
 
 from homeassistant.components.humidifier import (
     HumidifierEntity,

@@ -1,6 +1,6 @@
 """Smart switch device logic for Panasonic IoT TW integration."""
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from ..base import BaseDevice
 

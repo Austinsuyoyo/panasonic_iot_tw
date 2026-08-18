@@ -145,7 +145,7 @@ class TokenManager:
                     "cp_token": self._cp_token,
                 }
 
-            except (PanasonicLoginFailed, PanasonicExceedRateLimit, PanasonicTokenExpired) as e:
+            except (PanasonicLoginFailed, PanasonicExceedRateLimit, PanasonicTokenExpired):
                 # These are expected exceptions from lower layers, re-raise without additional logging
                 raise
             except Exception as e:

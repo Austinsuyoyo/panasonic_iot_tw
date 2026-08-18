@@ -10,11 +10,9 @@ from .data_processor import DataProcessor
 from .report_service import ReportService
 from ..exceptions import (
     PanasonicExceedRateLimit,
-    PanasonicDeviceOffline,
     PanasonicLoginFailed,
     PanasonicTokenExpired,
 )
-from ..base import ErrorHandler
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -140,10 +138,7 @@ class SmartApp:
                 return True
             
             # Clear cache timestamps and failure backoff to force refresh
-            self._report_service._last_energy_fetch = None
-            self._report_service._last_co2_fetch = None
-            self._report_service._last_door_fetch = None
-            self._report_service._last_failed_fetch = None
+            self._report_service.reset_fetch_backoff()
             
             _LOGGER.info("Force fetching special data for %s devices", len(supported_devices))
             
@@ -180,7 +175,7 @@ class SmartApp:
             result = await self._token_manager.login()
             _LOGGER.info("SmartApp login successful")
             return result
-        except (PanasonicLoginFailed, PanasonicExceedRateLimit, PanasonicTokenExpired) as e:
+        except (PanasonicLoginFailed, PanasonicExceedRateLimit, PanasonicTokenExpired):
             # These are expected exceptions, re-raise without additional logging
             # The specific error is already logged at lower level
             raise

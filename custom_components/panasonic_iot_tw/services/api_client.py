@@ -3,6 +3,7 @@ import logging
 import asyncio
 import json
 import re
+import time
 from typing import Literal, Optional, Dict, Any
 from http import HTTPStatus
 from aiohttp import ClientTimeout
@@ -15,8 +16,6 @@ from ..api_constants import (
     RATE_LIMIT_BACKOFF_BASE,
     RATE_LIMIT_MAX_DELAY,
     EXCEPTION_MESSAGES,
-    API_ENDPOINTS,
-    APP_TOKEN,
 )
 from ..exceptions import (
     PanasonicDeviceOffline,
@@ -24,7 +23,6 @@ from ..exceptions import (
     PanasonicTokenExpired,
     PanasonicExceedRateLimit,
 )
-from ..base import ErrorHandler
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -154,7 +152,6 @@ class ApiClient:
         """
         # Smart delay logic: minimal delays with rate limiting awareness
         if apply_delay:
-            import time
             current_time = time.time()
             
             # Check if we're still under rate limiting
@@ -209,7 +206,7 @@ class ApiClient:
             # Process response
             return await self._process_response(response, request_id, headers, log)
 
-        except (PanasonicLoginFailed, PanasonicExceedRateLimit, PanasonicTokenExpired, PanasonicDeviceOffline) as e:
+        except (PanasonicLoginFailed, PanasonicExceedRateLimit, PanasonicTokenExpired, PanasonicDeviceOffline):
             # These are business logic exceptions, re-raise them directly
             raise
         except Exception as e:
@@ -252,7 +249,6 @@ class ApiClient:
                     request_id, response.status, _sanitize_text(response_text)
                 )
             # Parse JSON from text
-            import json
             resp_data = json.loads(response_text)
             return resp_data
         except Exception as e:
@@ -267,12 +263,12 @@ class ApiClient:
         """Handle 417 Expectation Failed response"""
         try:
             resp_data = await response.json()
-        except Exception as e:
+        except Exception:
             # Get raw response text for debugging
             try:
                 response_text = await response.text()
                 _LOGGER.debug("Non-JSON response received: %s...", response_text[:200])
-            except:
+            except Exception:
                 response_text = "Unable to get response text"
 
             # Check for common error messages in plain text response
@@ -332,7 +328,7 @@ class ApiClient:
             if device.get("Auth") == auth:
                 return device.get("NickName", "unknown device")
         
-        return "未知設備"
+        return "unknown device"
     
     async def request_with_retry(
         self,
@@ -375,7 +371,6 @@ class ApiClient:
                 last_exception = e
                 if attempt < max_retries:
                     # Smart rate limiting: set future rate limit period
-                    import time
                     backoff_time = min(RATE_LIMIT_BACKOFF_BASE * (2 ** attempt), RATE_LIMIT_MAX_DELAY)
                     self._rate_limit_until = time.time() + backoff_time
                     

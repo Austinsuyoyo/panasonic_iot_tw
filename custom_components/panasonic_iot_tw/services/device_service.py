@@ -1,6 +1,6 @@
 """Device data service - handles device information retrieval and command sending"""
 import logging
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any
 
 from .api_client import ApiClient
 from .token_manager import TokenManager
@@ -126,7 +126,7 @@ class DeviceService:
             
         except Exception as e:
             # ErrorHandler logs all errors centrally
-            error_result = ErrorHandler.handle_api_error(e, "get device status", device_name)
+            ErrorHandler.handle_api_error(e, "get device status", device_name)
             return {}
     
     async def send_command(
@@ -169,7 +169,7 @@ class DeviceService:
             }
             
             # Send command (use GET method, not POST)
-            response = await self._api_client.request(
+            await self._api_client.request(
                 method="GET",
                 endpoint=API_ENDPOINTS["set_command"],
                 headers=headers,
@@ -180,16 +180,20 @@ class DeviceService:
             return True
             
         except Exception as e:
-            error_result = ErrorHandler.handle_api_error(e, f"send device command", device_name)
+            ErrorHandler.handle_api_error(e, "send device command", device_name)
             return False
     
     async def get_device_info(self, device: Dict[str, Any]) -> Dict[str, Any]:
         """
         Get device detailed information
-        
+
+        Kept for future use; nothing calls it yet. Note that it posts to the
+        UserGetInfo endpoint (account/report information), NOT DeviceGetInfo,
+        which is the register-read endpoint used by get_device_status.
+
         Args:
             device: Device information dictionary
-            
+
         Returns:
             Device detailed information
         """
@@ -217,5 +221,5 @@ class DeviceService:
             return response
             
         except Exception as e:
-            error_result = ErrorHandler.handle_api_error(e, f"get device detailed information", device_name)
+            ErrorHandler.handle_api_error(e, "get device detailed information", device_name)
             return {}

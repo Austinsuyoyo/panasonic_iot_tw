@@ -9,9 +9,6 @@ from homeassistant.const import PERCENTAGE, UnitOfTime
 from homeassistant.helpers.entity import EntityCategory
 
 from ..base import BaseDevice, value_processors
-from ..const import (
-    DEHUMIDIFIER_AVAILABLE_HUMIDITY
-)
 
 _LOGGER = logging.getLogger(__name__)
 

@@ -176,14 +176,6 @@ def create_options_processor(options_dict: Dict[int, str]) -> Callable[[Any], Op
     return processor
 
 
-def create_running_status_processor(running_codes: list) -> Callable[[Any], bool]:
-    """Create a processor for running status (washing/dryer machines)."""
-    def processor(value: Any) -> bool:
-        status_int = int(value)
-        return status_int in running_codes
-    return processor
-
-
 def create_humidity_mapping_processor(humidity_mapping: Dict[int, int]) -> Callable[[Any], int]:
     """Create a processor for humidity mapping."""
     def processor(value: Any) -> int:

@@ -1,7 +1,7 @@
 """Base device class for all Panasonic IoT TW devices."""
 import logging
-from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional
+from abc import ABC
+from typing import Any, Dict, List
 
 from .status_reader import StatusReader
 from ..const import DOMAIN, MANUFACTURER

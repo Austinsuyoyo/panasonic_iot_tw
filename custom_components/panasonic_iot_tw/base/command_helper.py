@@ -1,6 +1,6 @@
 """Command processing utilities - unifies device command handling logic."""
 import logging
-from typing import List, Dict, Tuple, Optional, Any
+from typing import List, Dict, Tuple, Optional
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -146,7 +146,12 @@ class CommandHelper:
 
 
 class DeviceCommands:
-    """Device command constant definitions"""
+    """Device command constant definitions.
+
+    Numeric write-command ids carried over from the reference projects;
+    NOT verified against our appliances yet. Confirm on a real device
+    before relying on them.
+    """
     
     class Power:
         """Power-related commands"""

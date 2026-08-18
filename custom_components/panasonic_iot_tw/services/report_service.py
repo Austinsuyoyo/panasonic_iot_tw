@@ -1,8 +1,8 @@
 """Smart report service for energy/CO2/door data with device filtering and caching."""
 import logging
 import asyncio
-from typing import Dict, List, Any, Optional, Set
-from datetime import datetime, timedelta
+from typing import Dict, List, Any, Optional
+from datetime import datetime
 
 from .api_client import ApiClient
 from .token_manager import TokenManager
@@ -424,6 +424,14 @@ class ReportService:
         self._last_door_fetch = None
         self._last_failed_fetch = None
         _LOGGER.debug("Report service cache cleared")
+
+    def reset_fetch_backoff(self):
+        """Forget the fetch timestamps and the failure backoff so the next
+        request fetches fresh data immediately. Cached data is kept."""
+        self._last_energy_fetch = None
+        self._last_co2_fetch = None
+        self._last_door_fetch = None
+        self._last_failed_fetch = None
     
     def get_cache_stats(self) -> Dict[str, Any]:
         """Get cache statistics for monitoring."""
