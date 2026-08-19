@@ -268,7 +268,11 @@
         }
       },
       "refrigerator_door": {
-        "name": "冰箱門"
+        "name": "門未關警示",
+        "state": {
+          "on": "門未關好",
+          "off": "正常"
+        }
       }
     },
     "switch": {

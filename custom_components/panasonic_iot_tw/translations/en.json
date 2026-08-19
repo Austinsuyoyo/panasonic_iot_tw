@@ -268,7 +268,11 @@
         }
       },
       "refrigerator_door": {
-        "name": "Door"
+        "name": "Door left open",
+        "state": {
+          "on": "Left open",
+          "off": "OK"
+        }
       }
     },
     "switch": {

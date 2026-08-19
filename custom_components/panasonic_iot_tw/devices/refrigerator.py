@@ -29,8 +29,8 @@ class RefrigeratorDevice(BaseDevice):
     ECO_STATUS_COMMAND = "0x0C"                     # ECO mode status (Normal/Operating) BinarySensor
     DEFROSTING_STATUS_COMMAND = "0x50"              # Defrosting status (Normal/Defrosting) BinarySensor
     STATUS_FLAGS_COMMAND = "0x51"                    # Packed status bits, undecoded             Sensor (diagnostic)
-    DOOR_STATUS_COMMAND = "0x66"                    # Packed register; bit 15 is set while a door is open
-    DOOR_OPEN_BIT = 0x8000
+    DOOR_STATUS_COMMAND = "0x66"                    # Packed register; bit 15 = door-ajar alarm (see below)
+    DOOR_ALARM_BIT = 0x8000
     STOP_ICE_MAKING_COMMAND = "0x52"                # Stop ice making (Stop/Start) Switch
     QUICK_ICE_MAKING_COMMAND = "0x53"               # Quick ice making (Stop/Start) Switch
     FRESH_FREEZING_COMMAND = "0x56"                 # Fresh freezing mode (Normal/Cooling/Quick Cool/Quick Freeze) Sensor
@@ -209,14 +209,19 @@ class RefrigeratorDevice(BaseDevice):
                 value_processor=value_processors.safe_bool,
                 translation_key="refrigerator_nanoe_status"
             ),
-            # Door open (bit 15 of the packed status register)
+            # Door-ajar alarm (bit 15 of the packed status register).
+            # NOT the live door state: the appliance raises the bit only
+            # after a door has stayed open past its own alarm delay - the
+            # same condition that fires the vendor app's "door not closed"
+            # notification - and clears it when the door closes.
+            # (Owner-observed 2026-08-19; brief openings never set the bit.)
             self._create_binary_sensor(
                 coordinator,
                 command_type=self.DOOR_STATUS_COMMAND,
-                name="Door",
+                name="門未關警示",
                 sensor_key="door",
-                device_class=BinarySensorDeviceClass.DOOR,
-                bit_mask=self.DOOR_OPEN_BIT,
+                device_class=BinarySensorDeviceClass.PROBLEM,
+                bit_mask=self.DOOR_ALARM_BIT,
                 translation_key="refrigerator_door"
             )
         ]

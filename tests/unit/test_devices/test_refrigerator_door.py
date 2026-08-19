@@ -1,4 +1,8 @@
-"""Unit tests for the fridge door binary sensor decoded from register 0x66."""
+"""Unit tests for the fridge door-ajar alarm decoded from register 0x66.
+
+Bit 15 is not the live door state: the appliance raises it only after a
+door has stayed open past its own alarm delay (owner-observed 2026-08-19).
+"""
 import pytest
 from unittest.mock import Mock
 
@@ -26,24 +30,26 @@ def _sensors(status):
     }
 
 
-class TestRefrigeratorDoor:
+class TestRefrigeratorDoorAlarm:
     @pytest.mark.parametrize(
         "raw,expected",
         [
-            (552, False),      # 0x0228 — all doors closed
-            (33320, True),     # 0x8228 — bit 15 set while a door is open
-            (696, False),      # 0x02B8 — a different low-byte value, still closed
+            (552, False),      # 0x0228 — no alarm
+            (33320, True),     # 0x8228 — bit 15 set: door open past the alarm delay
+            (696, False),      # 0x02B8 — a different low-byte value, still no alarm
             (0x8000, True),    # bit 15 alone
             (0, False),
         ],
     )
-    def test_door_bit(self, raw, expected):
+    def test_alarm_bit(self, raw, expected):
         coordinator, sensors = _sensors({"0x66": raw})
         assert sensors["door"].is_on is expected
 
     def test_device_class(self):
         _, sensors = _sensors({"0x66": 552})
-        assert sensors["door"].device_class is BinarySensorDeviceClass.DOOR
+        # PROBLEM, not DOOR: the bit is the appliance's door-ajar alarm,
+        # not the physical door position.
+        assert sensors["door"].device_class is BinarySensorDeviceClass.PROBLEM
 
     def test_missing_register(self):
         _, sensors = _sensors({})
