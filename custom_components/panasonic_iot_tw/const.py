@@ -220,7 +220,7 @@ DEVICE_STATUS_CODES = {
         ("0x5C", False),  # Unknown / Reserved
         ("0x64", True),   # Engineering info (bitwise): bit10=prewash(1024), bit6=wash(64), bit5=rinse(32), bit4=spin(16)
         ("0x69", False),  # Unknown / Reserved
-        ("0x71", True),   # Unknown / Reserved
+        ("0x71", True),   # Dispenser: bit8 (0x0100) = detergent low
         ("0x72", True),   # Unknown / Reserved
         ("0x73", True),   # Unknown / Reserved
         ("0x74", True),   # Whether remote idle is allowed 0=not allowed 1=allowed

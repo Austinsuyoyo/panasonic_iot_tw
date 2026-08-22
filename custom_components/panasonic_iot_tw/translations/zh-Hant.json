@@ -260,6 +260,13 @@
       "washing_machine_spinning_status": {
         "name": "工程資訊 - 脫水(bit 4)"
       },
+      "washing_machine_detergent_low": {
+        "name": "洗衣劑",
+        "state": {
+          "on": "不足",
+          "off": "充足"
+        }
+      },
       "washing_machine_remote_control_allowed": {
         "name": "遠端操作授權",
         "state": {

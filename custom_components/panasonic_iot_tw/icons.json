@@ -99,6 +99,13 @@
       "dryer_remote_control_allowed": {
         "default": "mdi:remote"
       },
+      "washing_machine_detergent_low": {
+        "default": "mdi:cup-water",
+        "state": {
+          "off": "mdi:cup-water",
+          "on": "mdi:cup-off-outline"
+        }
+      },
       "washing_machine_remote_control_allowed": {
         "default": "mdi:remote"
       },

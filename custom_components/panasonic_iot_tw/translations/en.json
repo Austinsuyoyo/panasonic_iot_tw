@@ -260,6 +260,13 @@
       "washing_machine_spinning_status": {
         "name": "Engineering info - Spinning(bit 4)"
       },
+      "washing_machine_detergent_low": {
+        "name": "Detergent",
+        "state": {
+          "on": "Low",
+          "off": "OK"
+        }
+      },
       "washing_machine_remote_control_allowed": {
         "name": "Remote operation permission",
         "state": {

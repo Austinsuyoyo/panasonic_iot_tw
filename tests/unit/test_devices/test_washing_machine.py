@@ -115,7 +115,7 @@ class TestWashingMachineDevice:
     def test_get_binary_sensor_entities_count(self, washing_machine_device, mock_coordinator):
         """Test that get_binary_sensor_entities returns correct number of sensors."""
         sensors = washing_machine_device.get_binary_sensor_entities(mock_coordinator)
-        assert len(sensors) == 5  # 4 engineering + 1 remote control
+        assert len(sensors) == 6  # 4 engineering + detergent + remote control
 
     def test_get_binary_sensor_entities_types(self, washing_machine_device, mock_coordinator):
         """Test that binary sensor entities have correct configurations."""
@@ -126,7 +126,7 @@ class TestWashingMachineDevice:
             sensors = washing_machine_device.get_binary_sensor_entities(mock_coordinator)
 
             # Should create 5 binary sensors
-            assert mock_sensor_class.call_count == 5
+            assert mock_sensor_class.call_count == 6
 
             calls = mock_sensor_class.call_args_list
 
@@ -143,8 +143,14 @@ class TestWashingMachineDevice:
             assert calls[2][1]['bit_mask'] == 32   # rinse
             assert calls[3][1]['bit_mask'] == 16   # spin
 
-            # Check remote control sensor (last one)
+            # Detergent flag sits between the stage bits and remote control
             args, kwargs = calls[4]
+            assert kwargs['command_type'] == "0x71"
+            assert kwargs['sensor_key'] == "detergent_low"
+            assert kwargs['bit_mask'] == 0x0100
+
+            # Check remote control sensor (last one)
+            args, kwargs = calls[5]
             assert kwargs['command_type'] == "0x74"
             assert kwargs['sensor_key'] == "remote_control_allowed"
             # Panel permission is not connectivity; it is a diagnostic flag
@@ -255,6 +261,7 @@ class TestWashingMachineDevice:
                 "washing_machine_washing_status",
                 "washing_machine_rinsing_status",
                 "washing_machine_spinning_status",
+                "washing_machine_detergent_low",
                 "washing_machine_remote_control_allowed"
             ]
 

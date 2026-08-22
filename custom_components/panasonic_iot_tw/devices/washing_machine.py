@@ -31,6 +31,16 @@ class WashingMachineDevice(BaseDevice):
     OPERATION_STATUS_COMMAND = "0x50"         # Operation status, 8 = fault          Sensor
 
     CYCLE_MESSAGE_COMMAND = "0x55"            # Selected programme                   Sensor
+
+    # Auto-dispenser state. Absent from the cloud's CommandList; bit 8 tracks the
+    # detergent tank behind the vendor app's "please refill detergent" push.
+    # Evidence: 0x0100 stayed set across three separate low-detergent events
+    # (idle and running alike) and cleared the moment the tank was refilled,
+    # including at an identical cycle stage (0x34=16), which rules out the
+    # value merely following the programme.
+    DISPENSER_COMMAND = "0x71"                # Dispenser flags                      BinarySensor
+    DETERGENT_LOW_BIT = 0x0100
+
     REMOTE_CONTROL_COMMAND = "0x74"           # Remote control allowed               BinarySensor
 
     # Operation status (0x50) values for which a remaining time is meaningful
@@ -169,6 +179,16 @@ class WashingMachineDevice(BaseDevice):
                 bit_mask=16,
                 translation_key="washing_machine_spinning_status",
                 entity_registry_enabled_default=False
+            ),
+            # Detergent tank low (bit 8 of the dispenser register)
+            self._create_binary_sensor(
+                coordinator,
+                command_type=self.DISPENSER_COMMAND,
+                name="洗衣劑不足",
+                sensor_key="detergent_low",
+                device_class=BinarySensorDeviceClass.PROBLEM,
+                bit_mask=self.DETERGENT_LOW_BIT,
+                translation_key="washing_machine_detergent_low"
             ),
             # Remote control allowance
             self._create_binary_sensor(
