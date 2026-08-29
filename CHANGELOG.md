@@ -8,6 +8,60 @@ and versions follow the calendar scheme `YYYY.M.PATCH` used by Home Assistant.
 
 ## [Unreleased]
 
+## [2026.8.0] - 2026-08-29
+
+### Added
+
+- Panel error-code sensors for the washing machine and the dryer. The code
+  the appliance shows on its own display (U11, U12, H86 …) is now readable
+  in Home Assistant, together with the raw register value. The two machines
+  keep it in different registers — verified by triggering a fault on each.
+- A door-ajar alarm for the refrigerator. It reports the appliance's own
+  "door not closed" warning, the one behind the vendor app's notification.
+- A detergent sensor for the washing machine, reporting when the automatic
+  dispenser's tank runs low.
+- A diagnostic sensor exposing the refrigerator's undecoded status word, so
+  its behaviour can be correlated with appliance events over time.
+- Client statistics (token state, request counts, report-cache ages) in the
+  diagnostics download, to make authentication and rate-limit issues
+  diagnosable from a bug report alone.
+
+### Changed
+
+- The refrigerator's fresh-freezing, winter, shopping and vacation sensors
+  are proper enums with translated states instead of raw numbers.
+- "Remote control allowed" is now the diagnostic "Remote operation
+  permission" with granted / not granted states. It reports whether the
+  appliance's front panel has authorised remote operation — not
+  connectivity, which is what the old device class implied.
+- Air-conditioner and dehumidifier timers use real duration units, and
+  settings-style entities (buzzer, indicator light, timers) are marked as
+  configuration so they group separately on the device page.
+
+### Removed
+
+- The derived finish-time and scheduled-start-time sensors. A three-minute
+  poll cannot support a minute-level absolute timestamp: the appliances
+  re-plan the remaining time as a load progresses, so the estimate crept on
+  every update. The plain remaining-time countdowns stay.
+- The air-conditioner self-clean button, which wrote the same value to the
+  same register as the existing switch.
+
+### Fixed
+
+- A control command that met an unexpected HTTP error was reported as a
+  success. The transport now raises, so a failed command surfaces in the
+  UI and a failed device-list fetch is retried instead of emptying every
+  entity.
+
+**新增洗衣機/乾衣機面板錯誤碼、冰箱門未關警示、洗衣機洗衣劑不足感測器**,
+皆為實機事件比對後解出的暫存器(兩台洗衣設備的錯誤碼位置不同,已各自實測)。
+冰箱四個模式改為 ENUM 並翻譯顯示;「遠端控制允許」正名為診斷用的「遠端操作授權」
+(語意是面板是否已授權遠端操作,不是連線狀態);冷氣/除濕機定時器改用標準時間
+單位,設定類實體歸入「設定」區。**移除**推算的完成時間/預約開始時間感測器
+(3 分鐘輪詢撐不起分鐘級推算,數值會持續跳動)與重複的冷氣自體淨按鈕。
+**修正**指令遇到非預期 HTTP 錯誤時會誤報成功的問題。
+
 ## [2026.7.2] - 2026-07-20
 
 ### Fixed
@@ -80,7 +134,8 @@ First public release. 首次公開發佈。
 遷移),實體可用性改為即時讀取,狀態值改用穩定 slug 並透過翻譯顯示中文;
 指令失敗會在 UI 顯示錯誤,token 不再寫入除錯記錄。
 
-[Unreleased]: https://github.com/Austinsuyoyo/panasonic_iot_tw/compare/v2026.7.2...HEAD
+[Unreleased]: https://github.com/Austinsuyoyo/panasonic_iot_tw/compare/v2026.8.0...HEAD
+[2026.8.0]: https://github.com/Austinsuyoyo/panasonic_iot_tw/releases/tag/v2026.8.0
 [2026.7.2]: https://github.com/Austinsuyoyo/panasonic_iot_tw/releases/tag/v2026.7.2
 [2026.7.1]: https://github.com/Austinsuyoyo/panasonic_iot_tw/releases/tag/v2026.7.1
 [2026.7.0]: https://github.com/Austinsuyoyo/panasonic_iot_tw/releases/tag/v2026.7.0

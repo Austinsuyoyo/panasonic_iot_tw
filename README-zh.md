@@ -14,11 +14,11 @@ Home Assistant 原生實體。本整合為 `cloud_polling`（雲端輪詢）類�
 
 | 設備 | Home Assistant 平台 | 主要功能 |
 |------|---------------------|----------|
-| **冷氣機** | climate、sensor、switch、select、number、button | 溫度／模式／風量／擺風、nanoeX、ECONAVI、急速、自體淨、定時器、室內外溫度、PM2.5 |
+| **冷氣機** | climate、sensor、switch、select、number | 溫度／模式／風量／擺風、nanoeX、ECONAVI、急速、自體淨、定時器、室內外溫度、PM2.5 |
 | **除濕機** | humidifier、sensor、binary_sensor、switch、select、number、button | 目標濕度、運轉模式、風向設定、水箱滿水、nanoe、PM2.5、開／關機定時 |
-| **冰箱** | sensor、binary_sensor、switch、select | 冷凍／冷藏／微凍結溫度、新鮮急凍結／冬季／購物／外出模式、ECO、除霜、nanoe、製冰、能耗／碳足跡／開門次數感測器 |
-| **洗衣機** | sensor、binary_sensor | 運轉情報、行程別訊息、剩餘時間、各階段工程資訊位元、遠端控制允許 |
-| **烘乾機** | sensor、binary_sensor | 運轉情報、行程別訊息、剩餘時間、各階段工程資訊位元、遠端控制允許 |
+| **冰箱** | sensor、binary_sensor、switch、select | 冷凍／冷藏／微凍結溫度、新鮮急凍結／冬季／購物／外出模式、ECO、除霜、nanoe、製冰、能耗／碳足跡／開門次數感測器、門未關警示 |
+| **洗衣機** | sensor、binary_sensor | 運轉情報、行程別訊息、剩餘時間、面板錯誤碼、洗衣劑不足、各階段工程資訊位元、遠端操作授權 |
+| **烘乾機** | sensor、binary_sensor | 運轉情報、行程別訊息、剩餘時間、面板錯誤碼、各階段工程資訊位元、遠端操作授權 |
 | **全熱交換器（ERV）** | sensor、select | 運轉模式、風量設定 |
 | **空氣清淨機** | sensor、switch | 風量、nanoeX、PM2.5 |
 | **智慧開關** | switch | 開／關 |

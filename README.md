@@ -15,11 +15,11 @@ native Home Assistant entities. This is a `cloud_polling` integration.
 
 | Device | Home Assistant platforms | Highlights |
 |--------|--------------------------|------------|
-| **Air Conditioner** | climate, sensor, switch, select, number, button | Temperature / mode / fan / swing, nanoeX, ECONAVI, turbo, self-clean, timers, indoor & outdoor temperature, PM2.5 |
+| **Air Conditioner** | climate, sensor, switch, select, number | Temperature / mode / fan / swing, nanoeX, ECONAVI, turbo, self-clean, timers, indoor & outdoor temperature, PM2.5 |
 | **Dehumidifier** | humidifier, sensor, binary_sensor, switch, select, number, button | Target humidity, operation mode, fan direction, tank-full, nanoe, PM2.5, on/off timers |
-| **Refrigerator** | sensor, binary_sensor, switch, select | Freezer / fridge / partial-freeze temperature, fresh-freezing / winter / shopping / vacation modes, ECO, defrost, nanoe, ice-making, energy / CO₂ / door-open sensors |
-| **Washing Machine** | sensor, binary_sensor | Operation status, cycle message, remaining time, per-stage engineering-info bits, remote-control-allowed |
-| **Dryer** | sensor, binary_sensor | Operation status, cycle message, remaining time, per-stage engineering-info bits, remote-control-allowed |
+| **Refrigerator** | sensor, binary_sensor, switch, select | Freezer / fridge / partial-freeze temperature, fresh-freezing / winter / shopping / vacation modes, ECO, defrost, nanoe, ice-making, energy / CO₂ / door-open sensors, door-ajar alarm |
+| **Washing Machine** | sensor, binary_sensor | Operation status, cycle message, remaining time, panel error code, detergent low, per-stage engineering-info bits, remote operation permission |
+| **Dryer** | sensor, binary_sensor | Operation status, cycle message, remaining time, panel error code, per-stage engineering-info bits, remote operation permission |
 | **ERV (Energy Recovery Ventilator)** | sensor, select | Operation mode, fan level |
 | **Air Purifier** | sensor, switch | Fan level, nanoeX, PM2.5 |
 | **Smart Switch** | switch | On / off |
