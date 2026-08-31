@@ -81,6 +81,30 @@
       },
       "refrigerator_status_flags": {
         "default": "mdi:bit"
+      },
+      "refrigerator_door_register": {
+        "default": "mdi:bit"
+      },
+      "washing_machine_register_72": {
+        "default": "mdi:bit"
+      },
+      "washing_machine_register_73": {
+        "default": "mdi:bit"
+      },
+      "washing_machine_register_75": {
+        "default": "mdi:bit"
+      },
+      "dryer_register_71": {
+        "default": "mdi:bit"
+      },
+      "dryer_register_72": {
+        "default": "mdi:bit"
+      },
+      "dryer_register_73": {
+        "default": "mdi:bit"
+      },
+      "dryer_register_75": {
+        "default": "mdi:bit"
       }
     },
     "binary_sensor": {

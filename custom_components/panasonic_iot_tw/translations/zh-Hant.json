@@ -217,6 +217,30 @@
       },
       "refrigerator_status_flags": {
         "name": "狀態位元"
+      },
+      "refrigerator_door_register": {
+        "name": "門暫存器 0x66"
+      },
+      "washing_machine_register_72": {
+        "name": "暫存器 0x72"
+      },
+      "washing_machine_register_73": {
+        "name": "暫存器 0x73"
+      },
+      "washing_machine_register_75": {
+        "name": "暫存器 0x75"
+      },
+      "dryer_register_71": {
+        "name": "暫存器 0x71"
+      },
+      "dryer_register_72": {
+        "name": "暫存器 0x72"
+      },
+      "dryer_register_73": {
+        "name": "暫存器 0x73"
+      },
+      "dryer_register_75": {
+        "name": "暫存器 0x75"
       }
     },
     "binary_sensor": {

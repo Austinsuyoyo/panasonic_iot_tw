@@ -115,6 +115,49 @@ class DryerDevice(BaseDevice):
                 value_processor=value_processors.create_status_mapping_processor(DRYER_AVAILABLE_CYCLES),
                 translation_key="dryer_cycle_message"
             ),
+            # Undecoded registers kept for the "clean the filter" reminder,
+            # which the vendor app raises but no decoded register reflects.
+            # 0x75 read 1024 during one such alert and is the main suspect.
+            self._create_sensor(
+                coordinator,
+                command_type="0x71",
+                name="暫存器 0x71",
+                sensor_key="register_71",
+                value_processor=value_processors.safe_int,
+                extra_state_processor=value_processors.process_status_flag_bits,
+                entity_category=EntityCategory.DIAGNOSTIC,
+                translation_key="dryer_register_71"
+            ),
+            self._create_sensor(
+                coordinator,
+                command_type="0x72",
+                name="暫存器 0x72",
+                sensor_key="register_72",
+                value_processor=value_processors.safe_int,
+                extra_state_processor=value_processors.process_status_flag_bits,
+                entity_category=EntityCategory.DIAGNOSTIC,
+                translation_key="dryer_register_72"
+            ),
+            self._create_sensor(
+                coordinator,
+                command_type="0x73",
+                name="暫存器 0x73",
+                sensor_key="register_73",
+                value_processor=value_processors.safe_int,
+                extra_state_processor=value_processors.process_status_flag_bits,
+                entity_category=EntityCategory.DIAGNOSTIC,
+                translation_key="dryer_register_73"
+            ),
+            self._create_sensor(
+                coordinator,
+                command_type="0x75",
+                name="暫存器 0x75",
+                sensor_key="register_75",
+                value_processor=value_processors.safe_int,
+                extra_state_processor=value_processors.process_status_flag_bits,
+                entity_category=EntityCategory.DIAGNOSTIC,
+                translation_key="dryer_register_75"
+            ),
             self._create_sensor(
                 coordinator,
                 command_type=self.ERROR_CODE_COMMAND,

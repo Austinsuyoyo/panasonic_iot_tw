@@ -124,6 +124,39 @@ class WashingMachineDevice(BaseDevice):
                 value_processor=value_processors.create_status_mapping_processor(WASHING_MACHINE_AVAILABLE_CYCLES),
                 translation_key="washing_machine_cycle_message"
             ),
+            # Undecoded dispenser-area registers, recorded so a future
+            # "softener low" or maintenance alert can be traced to a bit.
+            # 0x71 next to them is the confirmed detergent flag.
+            self._create_sensor(
+                coordinator,
+                command_type="0x72",
+                name="暫存器 0x72",
+                sensor_key="register_72",
+                value_processor=value_processors.safe_int,
+                extra_state_processor=value_processors.process_status_flag_bits,
+                entity_category=EntityCategory.DIAGNOSTIC,
+                translation_key="washing_machine_register_72"
+            ),
+            self._create_sensor(
+                coordinator,
+                command_type="0x73",
+                name="暫存器 0x73",
+                sensor_key="register_73",
+                value_processor=value_processors.safe_int,
+                extra_state_processor=value_processors.process_status_flag_bits,
+                entity_category=EntityCategory.DIAGNOSTIC,
+                translation_key="washing_machine_register_73"
+            ),
+            self._create_sensor(
+                coordinator,
+                command_type="0x75",
+                name="暫存器 0x75",
+                sensor_key="register_75",
+                value_processor=value_processors.safe_int,
+                extra_state_processor=value_processors.process_status_flag_bits,
+                entity_category=EntityCategory.DIAGNOSTIC,
+                translation_key="washing_machine_register_75"
+            ),
             self._create_sensor(
                 coordinator,
                 command_type=self.ERROR_CODE_COMMAND,

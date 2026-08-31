@@ -240,6 +240,11 @@ def process_error_code_attributes(value: Any) -> Dict[str, Any]:
     return {"raw_value": int(value)}
 
 
+# Registers seen so far need 16 bits: the refrigerator's door word reads
+# 33320 (bit 15) and the laundry registers reach 1024 (bit 10).
+STATUS_FLAG_BIT_WIDTH = 16
+
+
 def process_status_flag_bits(value: Any) -> Dict[str, Any]:
     """Break a packed status word into its individual bits.
 
@@ -249,8 +254,8 @@ def process_status_flag_bits(value: Any) -> Dict[str, Any]:
     packed = int(value)
     attrs: Dict[str, Any] = {
         "raw_value": packed,
-        "binary": f"0b{packed:08b}",
+        "binary": f"0b{packed:0{STATUS_FLAG_BIT_WIDTH}b}",
     }
-    for bit in range(8):
+    for bit in range(STATUS_FLAG_BIT_WIDTH):
         attrs[f"bit_{bit}"] = bool(packed & (1 << bit))
     return attrs

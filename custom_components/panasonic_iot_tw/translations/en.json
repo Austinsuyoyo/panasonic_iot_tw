@@ -217,6 +217,30 @@
       },
       "refrigerator_status_flags": {
         "name": "Status flags"
+      },
+      "refrigerator_door_register": {
+        "name": "Door register 0x66"
+      },
+      "washing_machine_register_72": {
+        "name": "Register 0x72"
+      },
+      "washing_machine_register_73": {
+        "name": "Register 0x73"
+      },
+      "washing_machine_register_75": {
+        "name": "Register 0x75"
+      },
+      "dryer_register_71": {
+        "name": "Register 0x71"
+      },
+      "dryer_register_72": {
+        "name": "Register 0x72"
+      },
+      "dryer_register_73": {
+        "name": "Register 0x73"
+      },
+      "dryer_register_75": {
+        "name": "Register 0x75"
       }
     },
     "binary_sensor": {

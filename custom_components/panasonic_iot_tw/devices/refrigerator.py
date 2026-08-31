@@ -167,6 +167,20 @@ class RefrigeratorDevice(BaseDevice):
                 extra_state_processor=value_processors.process_status_flag_bits,
                 entity_category=EntityCategory.DIAGNOSTIC,
                 translation_key="refrigerator_status_flags"
+            ),
+            # Raw door register. The decoded bit-15 alarm did not rise during a
+            # door-open notification on 2026-08-31 even though the appliance was
+            # being polled, so the whole word is recorded to tell a missed poll
+            # apart from the alarm living somewhere other than this register.
+            self._create_sensor(
+                coordinator,
+                command_type=self.DOOR_STATUS_COMMAND,
+                name="門暫存器 0x66",
+                sensor_key="door_register",
+                value_processor=value_processors.safe_int,
+                extra_state_processor=value_processors.process_status_flag_bits,
+                entity_category=EntityCategory.DIAGNOSTIC,
+                translation_key="refrigerator_door_register"
             )
         ])
         
