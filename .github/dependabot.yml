@@ -6,3 +6,7 @@ updates:
       interval: daily
       time: "06:00"
     open-pull-requests-limit: 10
+    # Floating major tags (@v4) already track minor/patch releases.
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-minor", "version-update:semver-patch"]
