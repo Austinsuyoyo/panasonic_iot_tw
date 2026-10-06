@@ -132,7 +132,7 @@ class WashingMachineDevice(BaseDevice):
                 command_type="0x72",
                 name="暫存器 0x72",
                 sensor_key="register_72",
-                value_processor=value_processors.safe_int,
+                value_processor=value_processors.raw_register_word,
                 extra_state_processor=value_processors.process_status_flag_bits,
                 entity_category=EntityCategory.DIAGNOSTIC,
                 translation_key="washing_machine_register_72"
@@ -142,7 +142,7 @@ class WashingMachineDevice(BaseDevice):
                 command_type="0x73",
                 name="暫存器 0x73",
                 sensor_key="register_73",
-                value_processor=value_processors.safe_int,
+                value_processor=value_processors.raw_register_word,
                 extra_state_processor=value_processors.process_status_flag_bits,
                 entity_category=EntityCategory.DIAGNOSTIC,
                 translation_key="washing_machine_register_73"
@@ -152,7 +152,7 @@ class WashingMachineDevice(BaseDevice):
                 command_type="0x75",
                 name="暫存器 0x75",
                 sensor_key="register_75",
-                value_processor=value_processors.safe_int,
+                value_processor=value_processors.raw_register_word,
                 extra_state_processor=value_processors.process_status_flag_bits,
                 entity_category=EntityCategory.DIAGNOSTIC,
                 translation_key="washing_machine_register_75"

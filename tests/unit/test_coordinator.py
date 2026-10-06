@@ -11,6 +11,7 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry
 from custom_components.panasonic_iot_tw.const import (
     CONF_UPDATE_INTERVAL,
     DOMAIN,
+    TRANSIENT_FAILURE_TOLERANCE,
 )
 from custom_components.panasonic_iot_tw.coordinator import PanasonicCoordinator
 from custom_components.panasonic_iot_tw.exceptions import (
@@ -140,3 +141,36 @@ async def test_other_error_raises_update_failed(hass):
 
     with pytest.raises(UpdateFailed):
         await coordinator._async_update_data()
+
+
+async def test_short_outage_keeps_last_known_state(hass):
+    """A couple of failed polls serve the last good data; the next one fails."""
+    entry = _make_entry(hass)
+    smart_app = AsyncMock()
+    good = {"dev-1": {"device_id": "dev-1", "available": True, "status": {}}}
+    smart_app.get_device_with_info.return_value = good
+    coordinator = PanasonicCoordinator(hass, entry, smart_app)
+    coordinator.data = await coordinator._async_update_data()
+
+    smart_app.get_device_with_info.side_effect = RuntimeError("SQL timeout")
+    for _ in range(TRANSIENT_FAILURE_TOLERANCE):
+        assert await coordinator._async_update_data() == good
+    with pytest.raises(UpdateFailed):
+        await coordinator._async_update_data()
+
+
+async def test_recovery_resets_outage_tolerance(hass):
+    """A good poll in between restarts the count of tolerated failures."""
+    entry = _make_entry(hass)
+    smart_app = AsyncMock()
+    good = {"dev-1": {"device_id": "dev-1", "available": True, "status": {}}}
+    smart_app.get_device_with_info.return_value = good
+    coordinator = PanasonicCoordinator(hass, entry, smart_app)
+    coordinator.data = await coordinator._async_update_data()
+
+    for _ in range(3):
+        smart_app.get_device_with_info.side_effect = RuntimeError("blip")
+        for _ in range(TRANSIENT_FAILURE_TOLERANCE):
+            assert await coordinator._async_update_data() == good
+        smart_app.get_device_with_info.side_effect = None
+        assert await coordinator._async_update_data() == good

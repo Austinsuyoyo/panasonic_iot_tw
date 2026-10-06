@@ -88,6 +88,20 @@ def _sanitize_text(text: str) -> str:
     return json.dumps(_sanitize_data(parsed), ensure_ascii=False)
 
 
+# The cloud's own database failures, seen on 417 responses (2026-10-04):
+# "建立連接至 SQL Server 時，發生網路相關…" and the SQL pre-login handshake
+# timeout "已超過連接逾時的設定。在嘗試使用登入前的信號交換確認時…".
+# They say nothing about the credentials, so they must not count towards reauth.
+_BACKEND_FAILURE_MARKERS = ("SQL Server", "信號交換")
+
+
+def _raise_if_backend_failure(message: str) -> None:
+    """Raise PanasonicAPIError if the message is a cloud-side database failure."""
+    if any(marker in message for marker in _BACKEND_FAILURE_MARKERS):
+        _LOGGER.warning("Panasonic cloud backend failure: %s", message[:100])
+        raise PanasonicAPIError(f"Panasonic cloud backend failure: {message[:100]}")
+
+
 class ApiClient:
     """Pure HTTP API client, responsible only for network request handling"""
     
@@ -280,6 +294,8 @@ class ApiClient:
             if "超量使用" in response_text or "rate" in response_text.lower():
                 raise PanasonicExceedRateLimit("API requests too frequent")
 
+            _raise_if_backend_failure(response_text)
+
             # Invalid CPToken or other parsing error
             raise PanasonicLoginFailed(f"Unable to parse API response: {response_text[:100]}")
         
@@ -303,6 +319,7 @@ class ApiClient:
             raise PanasonicTokenExpired("Token expired, re-authentication required")
         
         else:
+            _raise_if_backend_failure(state_msg)
             _LOGGER.error("API response error: %s", state_msg)
             raise PanasonicLoginFailed(f"API response error: {state_msg}")
     
@@ -323,7 +340,10 @@ class ApiClient:
         """Handle connection error"""
         auth = headers.get("auth")
         device_name = self._get_device_name_from_auth(auth) if auth else "device"
-        raise PanasonicDeviceOffline(f"Cannot connect to '{device_name}': {str(error)}")
+        # A timeout stringifies to "", so name the exception type as well.
+        raise PanasonicDeviceOffline(
+            f"Cannot connect to '{device_name}': {type(error).__name__}: {error}"
+        )
     
     def _get_device_name_from_auth(self, auth: Optional[str]) -> str:
         """Get device name by auth"""

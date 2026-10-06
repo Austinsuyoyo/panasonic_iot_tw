@@ -9,6 +9,7 @@ from .token_manager import TokenManager
 from .device_service import DeviceService
 from .data_processor import DataProcessor
 from .report_service import ReportService
+from ..const import TRANSIENT_FAILURE_TOLERANCE
 from ..exceptions import (
     PanasonicExceedRateLimit,
     PanasonicLoginFailed,
@@ -54,6 +55,7 @@ class SmartApp:
         
         # Device cache
         self._devices_cache = {}
+        self._device_failures: Dict[str, int] = {}
         self._device_list_cache = []
         
         # Special sensor data cache - managed by report service
@@ -210,6 +212,27 @@ class SmartApp:
             # Return cached device list (if available)
             return self._device_list_cache
     
+    def _bridge_transient_device_failures(self, device_data: Dict[str, Dict[str, Any]]) -> None:
+        """Keep a device's last good state through a short run of failed polls.
+
+        The cloud regularly fails a single device for one poll (request
+        timeouts and deviceOffline, mostly the refrigerator), which used to
+        flip all of its entities to unavailable for three minutes.
+        """
+        for device_id, data in device_data.items():
+            if data.get("available"):
+                self._device_failures[device_id] = 0
+                continue
+            failures = self._device_failures.get(device_id, 0) + 1
+            self._device_failures[device_id] = failures
+            previous = self._devices_cache.get(device_id)
+            if previous and previous.get("available") and failures <= TRANSIENT_FAILURE_TOLERANCE:
+                _LOGGER.warning(
+                    "Status fetch for %s failed (%d in a row), keeping last known state",
+                    data.get("nickname") or device_id, failures,
+                )
+                device_data[device_id] = previous
+
     async def get_device_with_info(self, status_codes_dict: Dict[int, List[Union[str, Tuple[str, bool]]]]) -> Dict[str, Dict[str, Any]]:
         """
         Get devices and their status information
@@ -287,6 +310,8 @@ class SmartApp:
                     "status": {},
                     "available": False,
                 }
+
+        self._bridge_transient_device_failures(device_data)
 
         # Update cache
         self._devices_cache = device_data

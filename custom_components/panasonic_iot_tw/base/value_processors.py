@@ -245,13 +245,27 @@ def process_error_code_attributes(value: Any) -> Dict[str, Any]:
 STATUS_FLAG_BIT_WIDTH = 16
 
 
+# The cloud answers 65535 for a register it has no value for. It also slipped
+# into the refrigerator's status word for single polls (2026-09-23, 09-29)
+# between ordinary readings of 30, so it is a "no data" marker, not a reading.
+NO_DATA_REGISTER_VALUE = 65535
+
+
+def raw_register_word(value: Any) -> int:
+    """Return a raw register word, rejecting the cloud's no-data marker."""
+    word = int(value)
+    if word == NO_DATA_REGISTER_VALUE:
+        raise ValueError("register returned the no-data marker")
+    return word
+
+
 def process_status_flag_bits(value: Any) -> Dict[str, Any]:
     """Break a packed status word into its individual bits.
 
     The meaning of each bit is still unknown, so they are published as-is:
     correlating a bit with an appliance event is what identifies it.
     """
-    packed = int(value)
+    packed = raw_register_word(value)
     attrs: Dict[str, Any] = {
         "raw_value": packed,
         "binary": f"0b{packed:0{STATUS_FLAG_BIT_WIDTH}b}",

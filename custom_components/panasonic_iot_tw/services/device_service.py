@@ -66,8 +66,11 @@ class DeviceService:
             # trigger re-authentication instead of masking them as UpdateFailed.
             raise
         except Exception as e:
+            # Propagate: an empty list here used to be reported as a successful
+            # poll with zero devices, which blanked every entity without a
+            # reason in the log (seen with DNS timeouts, 2026-10-06).
             ErrorHandler.handle_coordinator_error(e, "get device list")
-            return []
+            raise
     
     async def get_device_status(
         self, 

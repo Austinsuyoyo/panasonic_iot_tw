@@ -8,6 +8,44 @@ and versions follow the calendar scheme `YYYY.M.PATCH` used by Home Assistant.
 
 ## [Unreleased]
 
+### Added
+
+- Diagnostic sensors recording the raw words of the washer (0x72, 0x73,
+  0x75), the dryer (0x71–0x75) and the refrigerator's door register (0x66),
+  so the vendor app's still-undecoded alerts can be matched against history.
+
+### Changed
+
+- A short cloud outage no longer flips entities to unavailable. Up to two
+  consecutive failed polls — for the whole account or for one appliance —
+  keep the last known state; the third marks them unavailable as before.
+  Across 17 days of logs, 61 of 7,719 polls failed and nearly all of them
+  for a single poll.
+
+### Fixed
+
+- An outage of the cloud's own database no longer counts as an
+  authentication failure. The cloud answers with SQL Server connection or
+  handshake-timeout errors several times a day; these were treated like a
+  rejected login, so a long enough outage could raise a needless
+  re-authentication prompt. They are now retried like any other server
+  error.
+- A failed device-list request (for example a DNS timeout) was reported as
+  a successful poll with zero devices, blanking every entity with no reason
+  in the log. It is now a failed update with the actual error.
+- Request timeouts are logged with their exception type instead of an
+  empty message.
+- The cloud's 65535 "no data" marker is no longer recorded as a reading by
+  the raw register sensors.
+
+**新增**洗衣機/乾衣機/冰箱門的原始暫存器診斷 sensor,用來比對 App 尚未解碼的通知。
+**變更**:雲端短暫失敗不再讓實體變 unavailable——整個帳號或單一家電連續失敗
+2 輪內沿用上次的狀態,第 3 輪才標為 unavailable(17 天紀錄中 7,719 輪僅 61 輪失敗,
+幾乎都只持續一輪)。**修正**:Panasonic 雲端資料庫故障(SQL Server 連線失敗/交握
+逾時)不再被當成認證失敗計數、誤跳「重新驗證」;取得裝置清單失敗(如 DNS 逾時)
+不再被當成「成功但 0 台裝置」而讓全部實體無故消失;請求逾時的 log 會寫出例外類型;
+原始暫存器 sensor 不再把雲端的 65535「無資料」標記當成讀數記錄。
+
 ## [2026.8.0] - 2026-08-29
 
 ### Added

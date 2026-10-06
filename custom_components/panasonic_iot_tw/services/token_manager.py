@@ -11,6 +11,7 @@ from ..exceptions import (
     PanasonicTokenExpired,
     PanasonicLoginFailed,
     PanasonicExceedRateLimit,
+    PanasonicAPIError,
 )
 from ..base import ErrorHandler
 
@@ -145,8 +146,15 @@ class TokenManager:
                     "cp_token": self._cp_token,
                 }
 
-            except (PanasonicLoginFailed, PanasonicExceedRateLimit, PanasonicTokenExpired):
-                # These are expected exceptions from lower layers, re-raise without additional logging
+            except (
+                PanasonicLoginFailed,
+                PanasonicExceedRateLimit,
+                PanasonicTokenExpired,
+                PanasonicAPIError,
+            ):
+                # Expected exceptions from lower layers, re-raise without additional
+                # logging. PanasonicAPIError is a server-side failure, so it must not
+                # be turned into a login failure (which counts towards reauth).
                 raise
             except Exception as e:
                 # Unexpected errors

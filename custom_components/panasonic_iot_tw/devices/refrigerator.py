@@ -163,7 +163,7 @@ class RefrigeratorDevice(BaseDevice):
                 command_type=self.STATUS_FLAGS_COMMAND,
                 name="狀態位元",
                 sensor_key="status_flags",
-                value_processor=value_processors.safe_int,
+                value_processor=value_processors.raw_register_word,
                 extra_state_processor=value_processors.process_status_flag_bits,
                 entity_category=EntityCategory.DIAGNOSTIC,
                 translation_key="refrigerator_status_flags"
@@ -177,7 +177,7 @@ class RefrigeratorDevice(BaseDevice):
                 command_type=self.DOOR_STATUS_COMMAND,
                 name="門暫存器 0x66",
                 sensor_key="door_register",
-                value_processor=value_processors.safe_int,
+                value_processor=value_processors.raw_register_word,
                 extra_state_processor=value_processors.process_status_flag_bits,
                 entity_category=EntityCategory.DIAGNOSTIC,
                 translation_key="refrigerator_door_register"

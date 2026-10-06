@@ -15,6 +15,7 @@ from .const import (
     DEFAULT_NAME,
     DEFAULT_UPDATE_INTERVAL,
     DEVICE_STATUS_CODES,
+    TRANSIENT_FAILURE_TOLERANCE,
 )
 from .exceptions import (
     PanasonicLoginFailed,
@@ -51,6 +52,7 @@ class PanasonicCoordinator(DataUpdateCoordinator[Dict[str, Dict[str, Any]]]):
         self.smart_app = smart_app
         self._auth_failure_count = 0
         self._first_auth_failure: Optional[datetime] = None
+        self._consecutive_failures = 0
         update_interval = entry.options.get(
             CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL
         )
@@ -97,13 +99,32 @@ class PanasonicCoordinator(DataUpdateCoordinator[Dict[str, Dict[str, Any]]]):
             PanasonicTokenExpired,
             PanasonicRefreshTokenNotFound,
         ) as err:
-            raise self._classify_auth_failure(err) from err
+            failure = self._classify_auth_failure(err)
+            if isinstance(failure, ConfigEntryAuthFailed):
+                raise failure from err
+            return self._last_good_or_raise(failure, err)
         except Exception as err:
-            raise UpdateFailed(
-                f"Error communicating with Panasonic service: {err}"
-            ) from err
+            return self._last_good_or_raise(
+                UpdateFailed(f"Error communicating with Panasonic service: {err}"),
+                err,
+            )
 
+        self._consecutive_failures = 0
         self._auth_failure_count = 0
         self._first_auth_failure = None
         _LOGGER.debug("Coordinator received data with %d devices", len(data))
         return data
+
+    def _last_good_or_raise(
+        self, failure: UpdateFailed, err: Exception
+    ) -> Dict[str, Dict[str, Any]]:
+        """Bridge a short outage with the last good data, else raise."""
+        self._consecutive_failures += 1
+        if self.data and self._consecutive_failures <= TRANSIENT_FAILURE_TOLERANCE:
+            _LOGGER.warning(
+                "Update failed (%d in a row), keeping last known state: %s",
+                self._consecutive_failures,
+                err,
+            )
+            return self.data
+        raise failure from err

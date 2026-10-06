@@ -39,6 +39,12 @@ CONF_UPDATE_INTERVAL = "update_interval"
 
 DEFAULT_UPDATE_INTERVAL = 180
 
+# Nearly every cloud failure lasts a single poll: 61 of 7,719 polls failed
+# between 2026-09-19 and 10-06 (cloud SQL timeouts, DNS timeouts, request
+# timeouts), and the longest run was 4 polls. Keep serving the last good state
+# for this many consecutive failed polls before entities go unavailable.
+TRANSIENT_FAILURE_TOLERANCE = 2
+
 # ============================================================================
 # Device Status Codes
 # ============================================================================
