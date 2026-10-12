@@ -8,6 +8,8 @@ and versions follow the calendar scheme `YYYY.M.PATCH` used by Home Assistant.
 
 ## [Unreleased]
 
+## [2026.10.0] - 2026-10-12
+
 ### Added
 
 - Diagnostic sensors recording the raw words of the washer (0x72, 0x73,
@@ -172,7 +174,8 @@ First public release. 首次公開發佈。
 遷移),實體可用性改為即時讀取,狀態值改用穩定 slug 並透過翻譯顯示中文;
 指令失敗會在 UI 顯示錯誤,token 不再寫入除錯記錄。
 
-[Unreleased]: https://github.com/Austinsuyoyo/panasonic_iot_tw/compare/v2026.8.0...HEAD
+[Unreleased]: https://github.com/Austinsuyoyo/panasonic_iot_tw/compare/v2026.10.0...HEAD
+[2026.10.0]: https://github.com/Austinsuyoyo/panasonic_iot_tw/releases/tag/v2026.10.0
 [2026.8.0]: https://github.com/Austinsuyoyo/panasonic_iot_tw/releases/tag/v2026.8.0
 [2026.7.2]: https://github.com/Austinsuyoyo/panasonic_iot_tw/releases/tag/v2026.7.2
 [2026.7.1]: https://github.com/Austinsuyoyo/panasonic_iot_tw/releases/tag/v2026.7.1
