@@ -1,6 +1,6 @@
 """Binary sensor platform for Panasonic IoT TW integration."""
 import logging
-from typing import Any, Dict, Optional, Callable
+from typing import Any, Dict, Iterable, Optional, Callable
 
 from homeassistant.components.binary_sensor import (
     BinarySensorEntity,
@@ -43,6 +43,9 @@ class PanasonicBinarySensor(PanasonicEntity, BinarySensorEntity):
         data_source: str = "status",
         bit_mask: Optional[int] = None,
         translation_key: Optional[str] = None,
+        gate_command: Optional[str] = None,
+        gate_allowed: Optional[Iterable[int]] = None,
+        gate_when: Optional[Callable[[Any], bool]] = None,
         **kwargs
     ):
         """Initialize the configurable binary sensor.
@@ -60,12 +63,17 @@ class PanasonicBinarySensor(PanasonicEntity, BinarySensorEntity):
             data_source: Data source ("status" or direct key)
             bit_mask: Bit mask for bitwise operations
             translation_key: Translation key for entity name
+            gate_command: Command type whose value gates this sensor (optional)
+            gate_allowed: Gate values for which this sensor reports a value
+            gate_when: Predicate the gate value must satisfy (optional)
             **kwargs: Additional attributes to set on entity
         """
         # Call parent with common initialization
         super().__init__(
             coordinator, device_key, device_data,
-            sensor_key, name, translation_key, icon, **kwargs
+            sensor_key, name, translation_key, icon,
+            gate_command=gate_command, gate_allowed=gate_allowed, gate_when=gate_when,
+            **kwargs
         )
 
         # Binary sensor-specific attributes
@@ -96,6 +104,9 @@ class PanasonicBinarySensor(PanasonicEntity, BinarySensorEntity):
     @property
     def is_on(self) -> Optional[bool]:
         """Return true if the binary sensor is on."""
+        if not self._is_gate_open():
+            return None
+
         raw_value = self._get_raw_value(self._command_type)
         
         if self._bit_mask is not None:

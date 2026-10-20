@@ -241,6 +241,43 @@
       },
       "dryer_register_75": {
         "name": "Register 0x75"
+      },
+      "washing_machine_current_stage": {
+        "name": "Current Stage",
+        "state": {
+          "prewash": "Prewash",
+          "washing": "Washing",
+          "rinsing": "Rinsing",
+          "spinning": "Spinning",
+          "finished": "Finished"
+        }
+      },
+      "dryer_current_stage": {
+        "name": "Current Stage",
+        "state": {
+          "drying": "Drying",
+          "air_flow": "Air flow",
+          "soft_cooling": "Soft cooling",
+          "finished": "Finished"
+        }
+      },
+      "washing_machine_detergent_amount": {
+        "name": "Detergent Amount",
+        "state": {
+          "none": "None",
+          "less": "Less",
+          "normal": "Normal",
+          "more": "More"
+        }
+      },
+      "washing_machine_softener_amount": {
+        "name": "Softener Amount",
+        "state": {
+          "none": "None",
+          "less": "Less",
+          "normal": "Normal",
+          "more": "More"
+        }
       }
     },
     "binary_sensor": {
@@ -257,13 +294,13 @@
         "name": "Water Tank Full"
       },
       "dryer_drying_status": {
-        "name": "Engineering info - Drying(bit 3)"
+        "name": "Running - Drying"
       },
       "dryer_air_flow_status": {
-        "name": "Engineering info - Air Flow(bit 2)"
+        "name": "Running - Air flow"
       },
       "dryer_soft_cooling_status": {
-        "name": "Engineering info - Soft Cooling(bit 1)"
+        "name": "Running - Soft cooling"
       },
       "dryer_remote_control_allowed": {
         "name": "Remote operation permission",
@@ -273,22 +310,22 @@
         }
       },
       "washing_machine_prewash_status": {
-        "name": "Engineering info - Prewash(bit 7)"
+        "name": "Running - Prewash"
       },
       "washing_machine_washing_status": {
-        "name": "Engineering info - Washing(bit 6)"
+        "name": "Running - Washing"
       },
       "washing_machine_rinsing_status": {
-        "name": "Engineering info - Rinsing(bit 5)"
+        "name": "Running - Rinsing"
       },
       "washing_machine_spinning_status": {
-        "name": "Engineering info - Spinning(bit 4)"
+        "name": "Running - Spinning"
       },
       "washing_machine_detergent_low": {
         "name": "Detergent",
         "state": {
           "on": "Low",
-          "off": "OK"
+          "off": "No warning"
         }
       },
       "washing_machine_remote_control_allowed": {
@@ -303,6 +340,13 @@
         "state": {
           "on": "Left open",
           "off": "OK"
+        }
+      },
+      "washing_machine_softener_low": {
+        "name": "Softener",
+        "state": {
+          "on": "Low",
+          "off": "No warning"
         }
       }
     },

@@ -1,6 +1,6 @@
 """Sensor platform for Panasonic IoT TW integration."""
 import logging
-from typing import Any, Dict, Iterable, Optional, Callable, Set
+from typing import Any, Dict, Iterable, Optional, Callable
 
 from homeassistant.components.sensor import (
     SensorEntity,
@@ -48,6 +48,7 @@ class PanasonicSensor(PanasonicEntity, SensorEntity):
         translation_key: Optional[str] = None,
         gate_command: Optional[str] = None,
         gate_allowed: Optional[Iterable[int]] = None,
+        gate_when: Optional[Callable[[Any], bool]] = None,
         **kwargs
     ):
         """Initialize the configurable sensor.
@@ -69,12 +70,15 @@ class PanasonicSensor(PanasonicEntity, SensorEntity):
             translation_key: Translation key for entity name
             gate_command: Command type whose value gates this sensor (optional)
             gate_allowed: Gate values for which this sensor reports a value
+            gate_when: Predicate the gate value must satisfy (optional)
             **kwargs: Additional attributes to set on entity
         """
         # Call parent with common initialization
         super().__init__(
             coordinator, device_key, device_data,
-            sensor_key, name, translation_key, icon, **kwargs
+            sensor_key, name, translation_key, icon,
+            gate_command=gate_command, gate_allowed=gate_allowed, gate_when=gate_when,
+            **kwargs
         )
 
         # Sensor-specific attributes
@@ -82,8 +86,6 @@ class PanasonicSensor(PanasonicEntity, SensorEntity):
         self._data_source = data_source
         self._value_processor = value_processor or (lambda x: x)  # Keep lambda for identity function
         self._extra_state_processor = extra_state_processor
-        self._gate_command = gate_command
-        self._gate_allowed: Set[int] = set(gate_allowed or ())
 
         # Set sensor-specific entity attributes
         self._attr_device_class = device_class
@@ -153,21 +155,6 @@ class PanasonicSensor(PanasonicEntity, SensorEntity):
             self._current_device.get("available", False)
         )
     
-    def _is_gate_open(self) -> bool:
-        """Return True if the gating status allows this sensor to report a value."""
-        if not self._gate_command:
-            return True
-
-        gate_value = self._get_status(self._gate_command)
-        try:
-            return int(gate_value) in self._gate_allowed
-        except (ValueError, TypeError):
-            _LOGGER.debug(
-                "Gate %s unavailable for %s: %s",
-                self._gate_command, self._attr_unique_id, gate_value
-            )
-            return False
-
     @property
     def native_value(self) -> Any:
         """Return the processed sensor value."""

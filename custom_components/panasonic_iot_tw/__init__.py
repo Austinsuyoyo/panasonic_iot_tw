@@ -72,7 +72,12 @@ async def async_unload_entry(hass: HomeAssistant, entry: PanasonicConfigEntry) -
 async def _async_update_listener(
     hass: HomeAssistant, entry: PanasonicConfigEntry
 ) -> None:
-    """Reload the entry when its options are updated."""
+    """Reload the entry when anything on it changes.
+
+    Note this fires for entry.data updates as well, not only options; push
+    credentials must therefore not be stored in entry.data or every write
+    would restart the integration.
+    """
     await hass.config_entries.async_reload(entry.entry_id)
 
 

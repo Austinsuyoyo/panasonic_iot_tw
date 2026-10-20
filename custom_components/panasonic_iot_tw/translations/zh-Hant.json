@@ -241,6 +241,43 @@
       },
       "dryer_register_75": {
         "name": "暫存器 0x75"
+      },
+      "washing_machine_current_stage": {
+        "name": "目前階段",
+        "state": {
+          "prewash": "預洗",
+          "washing": "洗衣",
+          "rinsing": "洗清",
+          "spinning": "脫水",
+          "finished": "完成"
+        }
+      },
+      "dryer_current_stage": {
+        "name": "目前階段",
+        "state": {
+          "drying": "乾衣",
+          "air_flow": "送風",
+          "soft_cooling": "鬆柔冷卻",
+          "finished": "完成"
+        }
+      },
+      "washing_machine_detergent_amount": {
+        "name": "洗劑投入量",
+        "state": {
+          "none": "無",
+          "less": "較少",
+          "normal": "標準",
+          "more": "較多"
+        }
+      },
+      "washing_machine_softener_amount": {
+        "name": "柔軟劑投入量",
+        "state": {
+          "none": "無",
+          "less": "較少",
+          "normal": "標準",
+          "more": "較多"
+        }
       }
     },
     "binary_sensor": {
@@ -257,13 +294,13 @@
         "name": "水箱滿水"
       },
       "dryer_drying_status": {
-        "name": "工程資訊 - 乾衣(bit 3)"
+        "name": "進行中 - 乾衣"
       },
       "dryer_air_flow_status": {
-        "name": "工程資訊 - 送風(bit 2)"
+        "name": "進行中 - 送風"
       },
       "dryer_soft_cooling_status": {
-        "name": "工程資訊 - 鬆柔冷卻(bit 1)"
+        "name": "進行中 - 鬆柔冷卻"
       },
       "dryer_remote_control_allowed": {
         "name": "遠端操作授權",
@@ -273,22 +310,22 @@
         }
       },
       "washing_machine_prewash_status": {
-        "name": "工程資訊 - 預洗(bit 7)"
+        "name": "進行中 - 預洗"
       },
       "washing_machine_washing_status": {
-        "name": "工程資訊 - 洗衣(bit 6)"
+        "name": "進行中 - 洗衣"
       },
       "washing_machine_rinsing_status": {
-        "name": "工程資訊 - 洗清(bit 5)"
+        "name": "進行中 - 洗清"
       },
       "washing_machine_spinning_status": {
-        "name": "工程資訊 - 脫水(bit 4)"
+        "name": "進行中 - 脫水"
       },
       "washing_machine_detergent_low": {
         "name": "洗衣劑",
         "state": {
           "on": "不足",
-          "off": "充足"
+          "off": "無警示"
         }
       },
       "washing_machine_remote_control_allowed": {
@@ -303,6 +340,13 @@
         "state": {
           "on": "門未關好",
           "off": "正常"
+        }
+      },
+      "washing_machine_softener_low": {
+        "name": "柔軟劑",
+        "state": {
+          "on": "不足",
+          "off": "無警示"
         }
       }
     },

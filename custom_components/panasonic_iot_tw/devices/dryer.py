@@ -10,7 +10,8 @@ from homeassistant.const import UnitOfTime
 from ..base import BaseDevice, value_processors
 from ..const import (
     DRYER_AVAILABLE_STATUS,
-    DRYER_AVAILABLE_CYCLES
+    DRYER_AVAILABLE_CYCLES,
+    DRYER_AVAILABLE_PHASES,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -41,6 +42,7 @@ class DryerDevice(BaseDevice):
     RUNNING_STATUS = 2
     REMAINING_TIME_STATUSES = {1, 2, 3, 4}      # standby / running / reserved
     RESERVED_STATUSES = {3, 4}                  # reservation pending
+    FINISHED_STATUS = 5                         # programme complete
 
     @property
     def device_data(self) -> Dict[str, Any]:
@@ -115,6 +117,21 @@ class DryerDevice(BaseDevice):
                 value_processor=value_processors.create_status_mapping_processor(DRYER_AVAILABLE_CYCLES),
                 translation_key="dryer_cycle_message"
             ),
+            # Which phase is running right now; see the washing machine.
+            self._create_sensor(
+                coordinator,
+                command_type=self.ENGINEERING_INFO_COMMAND,
+                name="目前階段",
+                sensor_key="current_stage",
+                device_class=SensorDeviceClass.ENUM,
+                options=list(DRYER_AVAILABLE_PHASES.values()) + ["finished"],
+                value_processor=value_processors.create_pending_phase_processor(
+                    DRYER_AVAILABLE_PHASES
+                ),
+                gate_command=self.OPERATION_STATUS_COMMAND,
+                gate_allowed=(self.RUNNING_STATUS, self.FINISHED_STATUS),
+                translation_key="dryer_current_stage"
+            ),
             # Undecoded registers kept for the "clean the filter" reminder,
             # which the vendor app raises but no decoded register reflects.
             # 0x75 read 1024 during one such alert and is the main suspect.
@@ -173,34 +190,48 @@ class DryerDevice(BaseDevice):
     def get_binary_sensor_entities(self, coordinator) -> List:
         """Return binary sensor entities for dryer."""
         return [
-            # Engineering info 0x34 - 3 bitwise sensors
+            # Engineering info 0x34 marks the phases that have NOT finished
+            # yet, so these report the phase being run right now instead of
+            # testing their own bit, which stayed set for the whole programme.
             self._create_binary_sensor(
                 coordinator,
                 command_type=self.ENGINEERING_INFO_COMMAND,
-                name="工程資訊 - 乾衣(bit 1)",
+                name="進行中 - 乾衣",
                 sensor_key="drying_status",
                 device_class=BinarySensorDeviceClass.RUNNING,
-                bit_mask=8,
+                value_processor=value_processors.create_current_phase_matcher(
+                    DRYER_AVAILABLE_PHASES, "drying"
+                ),
+                gate_command=self.OPERATION_STATUS_COMMAND,
+                gate_allowed=(self.RUNNING_STATUS, self.FINISHED_STATUS),
                 translation_key="dryer_drying_status",
                 entity_registry_enabled_default=False
             ),
             self._create_binary_sensor(
                 coordinator,
                 command_type=self.ENGINEERING_INFO_COMMAND,
-                name="工程資訊 - 送風(bit 2)",
+                name="進行中 - 送風",
                 sensor_key="air_flow_status",
                 device_class=BinarySensorDeviceClass.RUNNING,
-                bit_mask=4,
+                value_processor=value_processors.create_current_phase_matcher(
+                    DRYER_AVAILABLE_PHASES, "air_flow"
+                ),
+                gate_command=self.OPERATION_STATUS_COMMAND,
+                gate_allowed=(self.RUNNING_STATUS, self.FINISHED_STATUS),
                 translation_key="dryer_air_flow_status",
                 entity_registry_enabled_default=False
             ),
             self._create_binary_sensor(
                 coordinator,
                 command_type=self.ENGINEERING_INFO_COMMAND,
-                name="工程資訊 - 鬆柔冷卻(bit 1)",
+                name="進行中 - 鬆柔冷卻",
                 sensor_key="soft_cooling_status",
                 device_class=BinarySensorDeviceClass.RUNNING,
-                bit_mask=2,
+                value_processor=value_processors.create_current_phase_matcher(
+                    DRYER_AVAILABLE_PHASES, "soft_cooling"
+                ),
+                gate_command=self.OPERATION_STATUS_COMMAND,
+                gate_allowed=(self.RUNNING_STATUS, self.FINISHED_STATUS),
                 translation_key="dryer_soft_cooling_status",
                 entity_registry_enabled_default=False
             ),

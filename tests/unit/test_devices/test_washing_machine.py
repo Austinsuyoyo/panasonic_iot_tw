@@ -72,7 +72,7 @@ class TestWashingMachineDevice:
     def test_get_sensor_entities_count(self, washing_machine_device, mock_coordinator):
         """Test that get_sensor_entities returns correct number of sensors."""
         sensors = washing_machine_device.get_sensor_entities(mock_coordinator)
-        assert len(sensors) == 8  # 2 time + 2 status + error code + 3 raw registers
+        assert len(sensors) == 11  # 2 time + 2 status + stage + 2 dispenser levels + error code + 3 raw registers
 
     def test_get_sensor_entities_types(self, washing_machine_device, mock_coordinator):
         """Test that sensor entities have correct types and properties."""
@@ -82,8 +82,8 @@ class TestWashingMachineDevice:
 
             sensors = washing_machine_device.get_sensor_entities(mock_coordinator)
 
-            # Should create 6 sensors
-            assert mock_sensor_class.call_count == 8
+            # Should create 11 sensors
+            assert mock_sensor_class.call_count == 11
 
             # Check specific sensor configurations
             calls = mock_sensor_class.call_args_list
@@ -112,10 +112,30 @@ class TestWashingMachineDevice:
             assert kwargs['command_type'] == "0x55"
             assert kwargs['sensor_key'] == "cycle_message"
 
+            # Fifth call - current stage, gated on the operation status
+            args, kwargs = calls[4]
+            assert kwargs['command_type'] == "0x34"
+            assert kwargs['sensor_key'] == "current_stage"
+            assert kwargs['gate_command'] == "0x50"
+            assert kwargs['gate_allowed'] == (2, 5)
+
+            # Sixth and seventh - how much each dispenser slot dispenses
+            args, kwargs = calls[5]
+            assert kwargs['command_type'] == "0x72"
+            assert kwargs['sensor_key'] == "detergent_amount"
+            assert kwargs['value_processor'](512) == "normal"
+            assert kwargs['value_processor'](0) == "none"
+
+            args, kwargs = calls[6]
+            assert kwargs['command_type'] == "0x72"
+            assert kwargs['sensor_key'] == "softener_amount"
+            assert kwargs['value_processor'](3) == "more"
+            assert kwargs['value_processor'](512) == "none"
+
     def test_get_binary_sensor_entities_count(self, washing_machine_device, mock_coordinator):
         """Test that get_binary_sensor_entities returns correct number of sensors."""
         sensors = washing_machine_device.get_binary_sensor_entities(mock_coordinator)
-        assert len(sensors) == 6  # 4 engineering + detergent + remote control
+        assert len(sensors) == 7  # 4 phases + detergent + softener + remote control
 
     def test_get_binary_sensor_entities_types(self, washing_machine_device, mock_coordinator):
         """Test that binary sensor entities have correct configurations."""
@@ -125,8 +145,8 @@ class TestWashingMachineDevice:
 
             sensors = washing_machine_device.get_binary_sensor_entities(mock_coordinator)
 
-            # Should create 5 binary sensors
-            assert mock_sensor_class.call_count == 6
+            # Should create 7 binary sensors
+            assert mock_sensor_class.call_count == 7
 
             calls = mock_sensor_class.call_args_list
 
@@ -137,11 +157,15 @@ class TestWashingMachineDevice:
                 assert kwargs['command_type'] == "0x34"  # Engineering info command
                 assert kwargs['device_class'] == BinarySensorDeviceClass.RUNNING
 
-            # Check bit masks for engineering info
-            assert calls[0][1]['bit_mask'] == 128  # pre_wash
-            assert calls[1][1]['bit_mask'] == 64   # washing
-            assert calls[2][1]['bit_mask'] == 32   # rinse
-            assert calls[3][1]['bit_mask'] == 16   # spin
+            # The phases are decoded from the pending-phase word instead of
+            # testing their own bit, so only one is ever active.
+            for call, phase in zip(
+                engineering_info_calls, ("prewash", "washing", "rinsing", "spinning")
+            ):
+                assert 'bit_mask' not in call[1]
+                assert call[1]['gate_command'] == "0x50"
+                assert call[1]['value_processor'](16) is (phase == "spinning")
+                assert call[1]['value_processor'](112) is (phase == "washing")
 
             # Detergent flag sits between the stage bits and remote control
             args, kwargs = calls[4]
@@ -149,8 +173,14 @@ class TestWashingMachineDevice:
             assert kwargs['sensor_key'] == "detergent_low"
             assert kwargs['bit_mask'] == 0x0100
 
-            # Check remote control sensor (last one)
+            # Softener flag sits next to the detergent flag on 0x71
             args, kwargs = calls[5]
+            assert kwargs['command_type'] == "0x71"
+            assert kwargs['sensor_key'] == "softener_low"
+            assert kwargs['bit_mask'] == 0x0001
+
+            # Check remote control sensor (last one)
+            args, kwargs = calls[6]
             assert kwargs['command_type'] == "0x74"
             assert kwargs['sensor_key'] == "remote_control_allowed"
             # Panel permission is not connectivity; it is a diagnostic flag
@@ -217,20 +247,6 @@ class TestWashingMachineDevice:
             # Should have value_processor for remote control
             assert 'value_processor' in kwargs
 
-    @pytest.mark.parametrize("bit_value,bit_mask,expected_result", [
-        (208, 128, True),   # pre_wash active (208 = 11010000, bit 128 is set)
-        (208, 64, True),    # washing active (208 = 11010000, bit 64 is set)
-        (208, 32, False),   # rinse inactive (208 = 11010000, bit 32 is not set)
-        (208, 16, True),    # spin active (208 = 11010000, bit 16 is set)
-        (0, 128, False),    # all inactive
-        (255, 128, True),   # all active
-    ])
-    def test_bitwise_sensor_logic(self, bit_value, bit_mask, expected_result):
-        """Test the bitwise logic for engineering info sensors."""
-        # This tests the underlying bitwise logic that would be used
-        result = bool(bit_value & bit_mask)
-        assert result == expected_result
-
     def test_translation_keys(self, washing_machine_device, mock_coordinator):
         """Test that all sensors have proper translation keys."""
         with patch('custom_components.panasonic_iot_tw.sensor.PanasonicSensor') as mock_sensor_class, \
@@ -248,6 +264,7 @@ class TestWashingMachineDevice:
             assert sensor_calls[1][1]['translation_key'] == "washing_machine_schedule_remaining_time"
             assert sensor_calls[2][1]['translation_key'] == "washing_machine_operation_status"
             assert sensor_calls[3][1]['translation_key'] == "washing_machine_cycle_message"
+            assert sensor_calls[4][1]['translation_key'] == "washing_machine_current_stage"
 
             # Reset mock
             mock_binary_sensor_class.reset_mock()
@@ -262,6 +279,7 @@ class TestWashingMachineDevice:
                 "washing_machine_rinsing_status",
                 "washing_machine_spinning_status",
                 "washing_machine_detergent_low",
+                "washing_machine_softener_low",
                 "washing_machine_remote_control_allowed"
             ]
 

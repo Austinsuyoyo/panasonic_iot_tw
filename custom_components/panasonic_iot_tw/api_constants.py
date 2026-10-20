@@ -1,7 +1,7 @@
 """
 API constants for Panasonic IoT TW integration.
 
-This file contains all discovered API endpoints from APK analysis.
+This file contains the API endpoints the integration uses.
 - 32 working endpoints verified through testing
 - 1 deprecated endpoint removed (404 errors)
 - HTTP method requirements documented

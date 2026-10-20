@@ -1,6 +1,6 @@
 """Base entity class for all Panasonic entities."""
 import logging
-from typing import Any, Dict, Optional, Callable
+from typing import Any, Dict, Iterable, Optional, Set, Callable
 
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.helpers.entity import DeviceInfo
@@ -23,6 +23,9 @@ class PanasonicEntity(CoordinatorEntity):
         name: str,
         translation_key: Optional[str] = None,
         icon: Optional[str] = None,
+        gate_command: Optional[str] = None,
+        gate_allowed: Optional[Iterable[int]] = None,
+        gate_when: Optional[Callable[[Any], bool]] = None,
         **kwargs
     ):
         """
@@ -37,6 +40,10 @@ class PanasonicEntity(CoordinatorEntity):
             name: Display name for entity (fallback when translation not available)
             translation_key: Translation key for entity name
             icon: Icon for entity
+            gate_command: Command type whose value gates this entity (optional)
+            gate_allowed: Gate values for which this entity reports a value
+            gate_when: Predicate the gate value must satisfy, for gates that are
+                not a fixed set of values (e.g. "this dispenser slot is in use")
             **kwargs: Additional attributes to set on entity
         """
         super().__init__(coordinator)
@@ -45,6 +52,11 @@ class PanasonicEntity(CoordinatorEntity):
         self._device_key = device_key
         self._device_data = device_data
         self._device_id = device_data.get("device_id", "")
+
+        # Gating: an entity stays silent until another register says it applies.
+        self._gate_command = gate_command
+        self._gate_allowed: Set[int] = set(gate_allowed or ())
+        self._gate_when = gate_when
 
         # Setup entity naming
         self._setup_entity_name(name, translation_key)
@@ -124,6 +136,37 @@ class PanasonicEntity(CoordinatorEntity):
             return self._current_device.get("status", {}).get(command_type)
         except (KeyError, TypeError):
             return None
+
+    def _is_gate_open(self) -> bool:
+        """Return True if the gate register allows this entity to report a value.
+
+        A closed gate means the entity has nothing meaningful to say right now:
+        a remaining-time sensor while the appliance is idle, or a tank warning
+        for a dispenser slot that is not in use. Entities return None (unknown)
+        rather than a value that would read as a real measurement.
+        """
+        if not self._gate_command:
+            return True
+
+        gate_value = self._get_status(self._gate_command)
+        if self._gate_when is not None:
+            try:
+                return bool(self._gate_when(gate_value))
+            except (ValueError, TypeError):
+                _LOGGER.debug(
+                    "Gate %s rejected %s for %s",
+                    self._gate_command, gate_value, self._attr_unique_id
+                )
+                return False
+
+        try:
+            return int(gate_value) in self._gate_allowed
+        except (ValueError, TypeError):
+            _LOGGER.debug(
+                "Gate %s unavailable for %s: %s",
+                self._gate_command, self._attr_unique_id, gate_value
+            )
+            return False
 
     def _get_raw_value(self, command_type: str) -> Any:
         """

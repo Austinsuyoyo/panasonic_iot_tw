@@ -31,6 +31,7 @@ DEVICE_TYPE_PURIFIER = 8
 DEVICE_TYPE_ERV = 14
 DEVICE_TYPE_SWITCH = 17
 
+
 # ============================================================================
 # Configuration
 # ============================================================================
@@ -192,7 +193,7 @@ DEVICE_STATUS_CODES = {
         ("0x75", False),  # Unknown / Reserved
         ("0x76", False),  # Unknown / Reserved
         ("0x77", False),  # Unknown / Reserved
-        ("0x78", False),  # Unknown / Reserved
+        ("0x78", False),  # Unknown / Reserved - 65535 when polled
         ("0x79", False),  # Unknown / Reserved
         ("0x7A", False),  # Unknown / Reserved
         ("0x7B", False),  # Unknown / Reserved
@@ -370,6 +371,14 @@ DRYER_AVAILABLE_STATUS = {
     8: "error"
 }
 
+# Engineering info register 0x34: see WASHING_MACHINE_AVAILABLE_PHASES. The
+# dryer's programme uses three phases and ran 12 -> 4 while drying.
+DRYER_AVAILABLE_PHASES = {
+    8: "drying",
+    4: "air_flow",
+    2: "soft_cooling",
+}
+
 DRYER_AVAILABLE_CYCLES = {
     0: "cotton_linen",
     13: "large_items",
@@ -431,6 +440,30 @@ WASHING_MACHINE_AVAILABLE_STATUS = {
     4: "reserved",
     5: "finished",
     8: "error"
+}
+
+# Dispenser levels (register 0x72): the app's own picker offers these four.
+# The app labels the underlying setting 投入洗劑量 (每30公升) - an amount per
+# 30 litres that the machine scales by the actual water volume - and picks a
+# brand (一匙靈/白蘭/洗可麗/自訂) whose recommended amount it loads. It never
+# shows the level as millilitres.
+DISPENSER_AMOUNT_LEVELS = {
+    0: "none",
+    1: "less",
+    2: "normal",
+    3: "more",
+}
+
+# Engineering info register 0x34: one bit per phase of the programme, SET
+# while that phase has not finished yet and cleared as it completes. The
+# phase being run is the highest bit still set; the word is 0 once the
+# programme ends. Verified against 22k recorded polls (washer 112 -> 48 -> 16
+# -> 0 while the remaining time fell, dryer 12 -> 4).
+WASHING_MACHINE_AVAILABLE_PHASES = {
+    128: "prewash",
+    64: "washing",
+    32: "rinsing",
+    16: "spinning",
 }
 
 # ============================================================================

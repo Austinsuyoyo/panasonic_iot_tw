@@ -201,7 +201,8 @@ class AirConditionerDevice(BaseDevice):
                 command_type=self.NANOE_COMMAND,
                 name="nanoeX",
                 switch_key="nanoex",
-                icon="mdi:atom"
+                icon="mdi:atom",
+                translation_key="air_conditioner_nanoex"
             ),
             # ECONAVI
             self._create_switch(
@@ -209,7 +210,8 @@ class AirConditionerDevice(BaseDevice):
                 command_type=self.ECONAVI_COMMAND,
                 name="ECONAVI",
                 switch_key="econavi",
-                icon="mdi:leaf"
+                icon="mdi:leaf",
+                translation_key="air_conditioner_econavi"
             ),
             # Buzzer
             self._create_switch(
@@ -218,7 +220,8 @@ class AirConditionerDevice(BaseDevice):
                 name="操作提示音",
                 switch_key="buzzer",
                 icon="mdi:volume-high",
-                entity_category=EntityCategory.CONFIG
+                entity_category=EntityCategory.CONFIG,
+                translation_key="air_conditioner_buzzer"
             ),
             # Turbo mode
             self._create_switch(
@@ -226,7 +229,8 @@ class AirConditionerDevice(BaseDevice):
                 command_type=self.TURBO_COMMAND,
                 name="急速模式",
                 switch_key="turbo",
-                icon="mdi:clock-fast"
+                icon="mdi:clock-fast",
+                translation_key="air_conditioner_turbo"
             ),
             # Self clean
             self._create_switch(
@@ -243,7 +247,8 @@ class AirConditionerDevice(BaseDevice):
                 command_type=self.SLEEP_MODE_COMMAND,
                 name="舒眠模式",
                 switch_key="sleep",
-                icon="mdi:sleep"
+                icon="mdi:sleep",
+                translation_key="air_conditioner_sleep"
             ),
             # Mold prevention
             self._create_switch(
