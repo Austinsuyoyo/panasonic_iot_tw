@@ -8,6 +8,50 @@ and versions follow the calendar scheme `YYYY.M.PATCH` used by Home Assistant.
 
 ## [Unreleased]
 
+## [2026.10.1] - 2026-10-21
+
+### Added
+
+- A 目前階段 / Current Stage sensor for the washer and the dryer. Register
+  0x34 keeps one bit per phase of the running programme that has *not*
+  finished, clearing each bit as that phase completes, so the phase in
+  progress is the highest bit still set. Verified across recorded
+  programmes: the washer walks 112 → 48 → 16 → 0 and the dryer 12 → 4.
+- A 柔軟劑不足 / Softener sensor for the washer. Register 0x71 carries the
+  detergent warning in its high byte and the softener warning in its low
+  byte, so 0x0101 means both tanks are low.
+- 洗劑投入量 / 柔軟劑投入量 sensors showing what each dispenser slot is set
+  to dispense, as the app's own levels 無 / 較少 / 標準 / 較多.
+
+### Changed
+
+- The per-phase binary sensors tested their own bit, which stays set for the
+  whole programme, so several phases read as active at once — 79% of washer
+  and 92% of dryer running polls. They now report the phase being run and
+  are mutually exclusive.
+- The tank warnings are gated on their dispenser slot being in use. A slot
+  set to 無 reports unknown instead of claiming the tank is fine, which is
+  also what the app does.
+
+### Fixed
+
+- The debug log no longer prints the gateway serial, the per-appliance device
+  id (Auth) or the saved home location (LatLng/City/Area). Header masking
+  also compared names case-sensitively, so CPToken/Auth often slipped
+  through.
+- Five air-conditioner switches had no translation_key, so they fell back to
+  a hardcoded name.
+- The dryer's drying sensor said bit 1 where its mask is bit 3, and the
+  washer's stage sensors said 工程模式 where the app and the other devices
+  say 工程資訊.
+
+**新增**洗衣機/乾衣機的「目前階段」sensor,以及洗衣機的「柔軟劑不足」與
+「洗劑投入量/柔軟劑投入量」sensor。**變更**階段 sensor 改為只回報正在進行的
+階段(原本會同時亮起多個階段);水箱警示只在對應的自動投入槽有設定時才回報,
+槽設為「無」時顯示未知而非「沒有警示」。**修正**DEBUG log 不再印出閘道序號、
+家電 device id 與住家座標(header 遮罩也比對大小寫了);五個冷氣開關補上翻譯
+key;乾衣機的 bit 標號與洗衣機的「工程資訊」用詞修正。
+
 ## [2026.10.0] - 2026-10-12
 
 ### Added
