@@ -31,6 +31,15 @@ _LOGGER = logging.getLogger(__name__)
 # Keys whose values are credential material and must never appear in logs.
 # Covers the login payload (MemId/PW/AppToken), the refresh payload
 # (RefreshToken) and the token responses (CPToken/RefreshToken).
+#
+# It also covers two kinds of personally identifying value that show up in
+# successful response bodies (device list, device info, command results):
+#   * device identifiers - ``Auth`` is the device_id and the value sent in the
+#     ``auth`` header, ``GWID``/``GWID2`` are the gateway serials.
+#   * location - the app stores a home location per gateway and the API echoes
+#     ``LatLng``/``City``/``Area`` back in the device list.
+# The diagnostics download already redacts these through TO_REDACT
+# (diagnostics.py); the debug log has to mask them as well.
 _SENSITIVE_KEYS = frozenset({
     "refreshtoken",
     "cptoken",
@@ -39,11 +48,32 @@ _SENSITIVE_KEYS = frozenset({
     "password",
     "token",
     "apptoken",
+    # Device identifiers.
+    "auth",
+    "gwid",
+    "gwid2",
+    "deviceid",
+    "device_id",
+    # Location.
+    "latlng",
+    "lat",
+    "lng",
+    "lon",
+    "latitude",
+    "longitude",
+    "city",
+    "area",
 })
+
+# Header names that carry credential material (``CPToken``/``auth``) or a
+# device identifier (``GWID``). Matched case-insensitively because the client
+# sends lowercase names while other callers may use the API's own spelling.
+_SENSITIVE_HEADERS = frozenset({"cptoken", "auth", "gwid", "gwid2", "pushtoken"})
 
 # Fallback matcher for masking sensitive values in a raw (unparseable) JSON body.
 _SENSITIVE_TEXT_RE = re.compile(
-    r'("[A-Za-z0-9_]*(?:token|password|memid|pw)[A-Za-z0-9_]*"\s*:\s*")([^"]*)(")',
+    r'("[A-Za-z0-9_]*(?:token|password|memid|pw|auth|gwid|latlng|city)'
+    r'[A-Za-z0-9_]*"\s*:\s*")([^"]*)(")',
     re.IGNORECASE,
 )
 
@@ -54,6 +84,14 @@ def _is_sensitive_key(key: Any) -> bool:
     if lowered in _SENSITIVE_KEYS:
         return True
     return "token" in lowered or "password" in lowered
+
+
+def _sanitize_headers(headers: Dict[str, Any]) -> Dict[str, Any]:
+    """Return a copy of request headers with credential values masked."""
+    return {
+        key: ("***" if str(key).lower() in _SENSITIVE_HEADERS else value)
+        for key, value in headers.items()
+    }
 
 
 def _mask_value(value: Any) -> str:
@@ -201,10 +239,9 @@ class ApiClient:
         
         if log:
             # Detailed logging for debugging (sanitize sensitive headers and body)
-            sanitized_headers = {k: ('***' if k in ['cptoken', 'auth'] else v) for k, v in headers.items()}
             _LOGGER.debug(
                 "Making #%s request to %s with headers %s and data %s, proxy: %s",
-                request_id, endpoint, sanitized_headers, _sanitize_data(data), self._proxy
+                request_id, endpoint, _sanitize_headers(headers), _sanitize_data(data), self._proxy
             )
         
         try:

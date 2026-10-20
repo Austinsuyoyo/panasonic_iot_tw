@@ -99,3 +99,87 @@ class TestPayloadSanitization:
 
         assert "ABCDEF123456" not in masked
         assert "trailing" in masked
+
+
+class TestDeviceAndLocationSanitization:
+    """Device ids and home coordinates are personal data, not just credentials.
+
+    ``Auth`` is the device_id (also sent as the ``auth`` header), ``GWID`` is
+    the gateway serial and ``LatLng``/``City``/``Area`` describe where the
+    appliances stand. The diagnostics download redacts them, so the debug log
+    must not print them either.
+    """
+
+    def test_sanitize_data_masks_device_ids_and_location(self):
+        data = {
+            "Auth": "abcdef1234567890",
+            "GWID": "GW-99887766",
+            "LatLng": "25.0330,121.5654",
+            "City": "Taipei",
+            "Area": "Da-an",
+            # Non-identifying fields stay readable so logs remain useful.
+            "NickName": "Panasonic 冰箱",
+            "Model": "NR-F607HX",
+        }
+
+        sanitized = _sanitize_data(data)
+        rendered = str(sanitized)
+
+        for secret in ("abcdef1234567890", "GW-99887766", "25.0330,121.5654"):
+            assert secret not in rendered
+        assert sanitized["NickName"] == "Panasonic 冰箱"
+        assert sanitized["Model"] == "NR-F607HX"
+
+    def test_sanitize_text_masks_device_fields_in_json(self):
+        text = (
+            '{"State":"success","DevInfos":[{"Auth":"abcdef1234567890",'
+            '"GWID":"GW-99887766","LatLng":"25.0330,121.5654","NickName":"冰箱"}]}'
+        )
+
+        masked = _sanitize_text(text)
+
+        assert "abcdef1234567890" not in masked
+        assert "GW-99887766" not in masked
+        assert "25.0330,121.5654" not in masked
+        assert "success" in masked
+
+    def test_sanitize_text_masks_device_fields_in_raw_text(self):
+        text = 'garbage "Auth":"abcdef1234567890" and "GWID":"GW-99887766" trailing'
+
+        masked = _sanitize_text(text)
+
+        assert "abcdef1234567890" not in masked
+        assert "GW-99887766" not in masked
+        assert "trailing" in masked
+
+
+class TestHeaderSanitization:
+    """Every credential/identifier header is masked, matching case-insensitively."""
+
+    def test_all_sensitive_headers_are_masked(self):
+        from custom_components.panasonic_iot_tw.services.api_client import (
+            _sanitize_headers,
+        )
+
+        headers = {
+            "CPToken": "cp-secret",
+            "cptoken": "cp-secret-lower",
+            "auth": "abcdef1234567890",
+            "Auth": "abcdef1234567890",
+            "GWID": "GW-99887766",
+            "PushToken": "fcm-token",
+            "user-agent": "PanasonicApp",
+        }
+
+        masked = _sanitize_headers(headers)
+        rendered = str(masked)
+
+        for secret in (
+            "cp-secret",
+            "cp-secret-lower",
+            "abcdef1234567890",
+            "GW-99887766",
+            "fcm-token",
+        ):
+            assert secret not in rendered
+        assert masked["user-agent"] == "PanasonicApp"
