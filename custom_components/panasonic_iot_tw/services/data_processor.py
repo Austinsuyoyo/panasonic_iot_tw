@@ -56,7 +56,10 @@ class DataProcessor:
             _LOGGER.warning("Device missing Auth field, skipping")
             return None
         
-        # Convert device type to integer for proper lookup
+        # Convert device type to integer for proper lookup.
+        # The app pairs ten types; the ones with no device class here
+        # (23 重量檢知盤, 24 住空間控制器) still convert fine and are skipped
+        # by DeviceFactory with a warning. See const.py for the full list.
         device_type_raw = device.get("DeviceType", 0)
         try:
             device_type = int(device_type_raw) if device_type_raw else 0

@@ -57,6 +57,10 @@ class DeviceFactory:
 
 def register_all_devices():
     """Register all available device classes using data-driven approach."""
+    # Types 23 (重量檢知盤 / Plate) and 24 (住空間控制器 / Controller) are
+    # pair-able in the app but have no class here - see const.py for their
+    # endpoints and why they went unimplemented. Any type without a class here
+    # is skipped by create_device with a warning.
     # Device mappings: (device_type, module_name, class_name)
     device_mappings = [
         (DEVICE_TYPE_AC, "air_conditioner", "AirConditionerDevice"),

@@ -206,3 +206,6 @@ __marimo__/
 /integration/
 # Local agent instructions (not part of the published integration)
 CLAUDE.md
+.opencode/
+# Reverse-engineering workspace: APK, decompiled code, FCM test credentials
+/research/

@@ -19,8 +19,30 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class RefrigeratorDevice(BaseDevice):
-    """Refrigerator device logic."""
-    
+    """Refrigerator device logic.
+
+    The register names below line up with the labels the vendor app shows for
+    this appliance. Three registers are deliberately not polled:
+
+    * ``0x06`` is a quick-freeze setting used by another model family; this
+      appliance exposes quick freezing through 0x56 instead, so leaving 0x06
+      unpolled is correct rather than an omission.
+    * ``0x64`` and ``0x65`` are not read by the app for this model.
+    * ``0x51`` and ``0x66`` are not read by the app at all; both are this
+      integration's own finds and can only be decoded from events.
+
+    The temperature decoding was checked against the app's own arithmetic:
+
+        if raw > 128: raw -= 256        # 0x03, 0x05, 0x58
+
+    which is exactly what ``process_signed_temperature`` does here, including
+    the boundary at 128. Another model family encodes the negative half as
+    ``32768 - raw``; no reading of this appliance reaches it.
+
+    Live cross-check: 0x03 = 237 -> -19.0 C, 0x05 = 2 -> 2.0 C,
+    0x58 = 253 -> -3.0 C.
+    """
+
     # Command mappings according to user specification
     FREEZER_TEMP_SETTING_COMMAND = "0x00"           # Freezer temperature setting (Low/Medium/High) Select
     REFRIGERATOR_TEMP_SETTING_COMMAND = "0x01"      # Refrigerator temperature setting (Low/Medium/High) Select  
@@ -158,6 +180,8 @@ class RefrigeratorDevice(BaseDevice):
             # the ice was removed, so the meaning is still unconfirmed. Logged
             # as a plain number so Home Assistant records its history and the
             # next ice-box event can be read off the timeline.
+            # The vendor app never reads 0x51 for this model, so it holds no
+            # clue to decode against; this register is our own find.
             self._create_sensor(
                 coordinator,
                 command_type=self.STATUS_FLAGS_COMMAND,
@@ -172,6 +196,8 @@ class RefrigeratorDevice(BaseDevice):
             # door-open notification on 2026-08-31 even though the appliance was
             # being polled, so the whole word is recorded to tell a missed poll
             # apart from the alarm living somewhere other than this register.
+            # As with 0x51, the vendor app never reads 0x66 for this model, so
+            # the word has to be decoded from events rather than from the app.
             self._create_sensor(
                 coordinator,
                 command_type=self.DOOR_STATUS_COMMAND,

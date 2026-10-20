@@ -31,6 +31,26 @@ DEVICE_TYPE_PURIFIER = 8
 DEVICE_TYPE_ERV = 14
 DEVICE_TYPE_SWITCH = 17
 
+# The app knows more device types than it offers for pairing, and more than
+# this integration implements. Its pairing list (40 model-family entries)
+# offers exactly ten:
+#
+#   1 冷氣 · 2 冰箱 · 3 洗衣機 · 4 除濕機 · 6 乾衣機
+#   8 空氣清淨機 · 14 全熱交換器 · 17 開關
+#   23 重量檢知盤 · 24 住空間控制器
+#
+# Two of those have no device class here, because no appliance of either kind
+# was available to verify against:
+#
+#   23 重量檢知盤 (Plate) - endpoints PlateGetMode / PlateGetWeight /
+#      PlateSetMode, app pairing flow 16.
+#   24 住空間控制器 (Controller) - endpoint ControllerUserSetting, app pairing
+#      flow 30.
+#
+# The app also names types this version never pairs, so they cannot be added
+# without a newer app to verify against: 5 SmartTV, 7 WaterBoiler, 9 Cooker,
+# 10 WaterDispenser, 11 InductionCooker, 12 DishDryrer, 13 Microwave, 15 Fan,
+# 16 WashingMachineLong.
 
 # ============================================================================
 # Configuration
@@ -193,6 +213,11 @@ DEVICE_STATUS_CODES = {
         ("0x75", False),  # Unknown / Reserved
         ("0x76", False),  # Unknown / Reserved
         ("0x77", False),  # Unknown / Reserved
+        # The app reads one bit of 0x78 per slot (bit0 / bit1 / bit2 picked by
+        # an index) but never asks the cloud for it on this model. Polled once
+        # on 2026-10-19 to check: the appliance answers 65535, the same
+        # not-supported sentinel 0x0E and 0x19 return, so 0x78 is confirmed
+        # unavailable for this fridge and stays unpolled.
         ("0x78", False),  # Unknown / Reserved - 65535 when polled
         ("0x79", False),  # Unknown / Reserved
         ("0x7A", False),  # Unknown / Reserved
