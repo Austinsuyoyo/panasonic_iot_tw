@@ -8,6 +8,19 @@ and versions follow the calendar scheme `YYYY.M.PATCH` used by Home Assistant.
 
 ## [Unreleased]
 
+## [2026.10.2] - 2026-10-24
+
+### Fixed
+
+- The log no longer prints the per-appliance device id (Auth) or the
+  refrigerator's gateway serial. 2026.10.1 masked what the API client logs,
+  but twelve log lines outside it still wrote them verbatim — the
+  refrigerator's INFO lines did so on every startup.
+
+**修正**log 不再印出家電 device id(Auth)與冰箱閘道序號。2026.10.1 只遮罩了
+API client 自己的 log,其他 12 處 log(包含冰箱每次啟動都會印的 INFO 訊息)
+仍會原文寫出。
+
 ## [2026.10.1] - 2026-10-21
 
 ### Added
@@ -218,7 +231,9 @@ First public release. 首次公開發佈。
 遷移),實體可用性改為即時讀取,狀態值改用穩定 slug 並透過翻譯顯示中文;
 指令失敗會在 UI 顯示錯誤,token 不再寫入除錯記錄。
 
-[Unreleased]: https://github.com/Austinsuyoyo/panasonic_iot_tw/compare/v2026.10.0...HEAD
+[Unreleased]: https://github.com/Austinsuyoyo/panasonic_iot_tw/compare/v2026.10.2...HEAD
+[2026.10.2]: https://github.com/Austinsuyoyo/panasonic_iot_tw/compare/v2026.10.1...v2026.10.2
+[2026.10.1]: https://github.com/Austinsuyoyo/panasonic_iot_tw/compare/v2026.10.0...v2026.10.1
 [2026.10.0]: https://github.com/Austinsuyoyo/panasonic_iot_tw/releases/tag/v2026.10.0
 [2026.8.0]: https://github.com/Austinsuyoyo/panasonic_iot_tw/releases/tag/v2026.8.0
 [2026.7.2]: https://github.com/Austinsuyoyo/panasonic_iot_tw/releases/tag/v2026.7.2
