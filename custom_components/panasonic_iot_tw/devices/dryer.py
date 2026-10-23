@@ -55,7 +55,7 @@ class DryerDevice(BaseDevice):
             # When operation status is 0, sensors should be unavailable
             if operation_status == 0:
                 data["available"] = False
-                _LOGGER.debug("Dryer device %s sensors unavailable: operation status = 0", self.device_key)
+                _LOGGER.debug("Dryer device %s sensors unavailable: operation status = 0", value_processors.mask_value(self.device_key))
             else:
                 # Keep original availability status when operation status is not 0
                 data["available"] = self._device_data.get("available", False)

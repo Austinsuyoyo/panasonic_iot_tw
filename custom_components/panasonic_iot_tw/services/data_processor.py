@@ -2,6 +2,8 @@
 import logging
 from typing import Dict, List, Any, Optional
 
+from ..base.value_processors import mask_value
+
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -115,7 +117,7 @@ class DataProcessor:
                 processed_status["available"] = False
             
         except Exception as e:
-            _LOGGER.error("Error occurred while processing device %s status: %s", device_id, e)
+            _LOGGER.error("Error occurred while processing device %s status: %s", mask_value(device_id), e)
             processed_status["available"] = False
         
         return processed_status

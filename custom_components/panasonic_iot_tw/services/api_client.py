@@ -17,6 +17,7 @@ from ..api_constants import (
     RATE_LIMIT_MAX_DELAY,
     EXCEPTION_MESSAGES,
 )
+from ..base.value_processors import mask_value
 from ..exceptions import (
     PanasonicAPIError,
     PanasonicBaseException,
@@ -94,19 +95,11 @@ def _sanitize_headers(headers: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-def _mask_value(value: Any) -> str:
-    """Mask a sensitive value, keeping a short prefix so logs stay useful."""
-    text = str(value)
-    if len(text) <= 4:
-        return "****"
-    return text[:4] + "****"
-
-
 def _sanitize_data(data: Any) -> Any:
     """Recursively copy a payload with sensitive values masked."""
     if isinstance(data, dict):
         return {
-            k: (_mask_value(v) if _is_sensitive_key(k) else _sanitize_data(v))
+            k: (mask_value(v) if _is_sensitive_key(k) else _sanitize_data(v))
             for k, v in data.items()
         }
     if isinstance(data, (list, tuple)):
@@ -120,7 +113,7 @@ def _sanitize_text(text: str) -> str:
         parsed = json.loads(text)
     except (ValueError, TypeError):
         return _SENSITIVE_TEXT_RE.sub(
-            lambda m: m.group(1) + _mask_value(m.group(2)) + m.group(3),
+            lambda m: m.group(1) + mask_value(m.group(2)) + m.group(3),
             text,
         )
     return json.dumps(_sanitize_data(parsed), ensure_ascii=False)

@@ -183,3 +183,20 @@ class TestHeaderSanitization:
         ):
             assert secret not in rendered
         assert masked["user-agent"] == "PanasonicApp"
+
+
+class TestDeviceIdLogging:
+    """Device ids are the cloud Auth value and must be masked outside ApiClient too."""
+
+    @pytest.mark.asyncio
+    async def test_unknown_device_command_masks_device_id(self, caplog):
+        import logging
+
+        from custom_components.panasonic_iot_tw.services.smart_app import SmartApp
+
+        caplog.set_level(logging.DEBUG)
+        app = SmartApp(Mock(), "user", "pw")
+
+        assert await app.set_device_command("abcdef1234567890", "0x00", 1) is False
+        assert "abcdef1234567890" not in caplog.text
+        assert "abcd****" in caplog.text

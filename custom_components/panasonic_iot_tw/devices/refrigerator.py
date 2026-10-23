@@ -351,7 +351,7 @@ class RefrigeratorDevice(BaseDevice):
                 return special_sensors
             
             # Create special sensors - they will show unavailable until data is fetched
-            _LOGGER.info("Creating special sensors for device %s", device_gwid)
+            _LOGGER.info("Creating special sensors for device %s", value_processors.mask_value(device_gwid))
             
             # Energy consumption sensor
             special_sensors.append(self._create_sensor(
@@ -391,9 +391,9 @@ class RefrigeratorDevice(BaseDevice):
             ))
             
             if special_sensors:
-                _LOGGER.info("Created %s special sensors for refrigerator %s", len(special_sensors), device_gwid)
+                _LOGGER.info("Created %s special sensors for refrigerator %s", len(special_sensors), value_processors.mask_value(device_gwid))
             else:
-                _LOGGER.info("No special sensor data available for refrigerator %s", device_gwid)
+                _LOGGER.info("No special sensor data available for refrigerator %s", value_processors.mask_value(device_gwid))
                 
         except Exception as e:
             _LOGGER.error("Error creating special sensors for refrigerator: %s", e)

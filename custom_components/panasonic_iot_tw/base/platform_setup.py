@@ -6,6 +6,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from ..devices.device_factory import DeviceFactory, register_all_devices
+from .value_processors import mask_value
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -47,7 +48,7 @@ class PlatformSetupHelper:
             device_type = device_data.get("device_type")
             device_name = device_data.get("nickname", "Unknown")
 
-            _LOGGER.debug("Processing device %s: %s (type=%s)", device_key, device_name, device_type)
+            _LOGGER.debug("Processing device %s: %s (type=%s)", mask_value(device_key), device_name, device_type)
 
             # Create device instance using factory
             device = DeviceFactory.create_device(coordinator, device_key, device_data)

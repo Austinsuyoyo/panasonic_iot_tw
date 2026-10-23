@@ -5,6 +5,14 @@ from typing import Any, Dict, Callable, List, Optional
 _LOGGER = logging.getLogger(__name__)
 
 
+def mask_value(value: Any) -> str:
+    """Mask a sensitive value, keeping a short prefix so logs stay useful."""
+    text = str(value)
+    if len(text) <= 4:
+        return "****"
+    return text[:4] + "****"
+
+
 # ============================================================================
 # Boolean Processors
 # ============================================================================

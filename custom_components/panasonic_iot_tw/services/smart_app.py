@@ -9,6 +9,7 @@ from .token_manager import TokenManager
 from .device_service import DeviceService
 from .data_processor import DataProcessor
 from .report_service import ReportService
+from ..base.value_processors import mask_value
 from ..const import TRANSIENT_FAILURE_TOLERANCE
 from ..exceptions import (
     PanasonicExceedRateLimit,
@@ -229,7 +230,7 @@ class SmartApp:
             if previous and previous.get("available") and failures <= TRANSIENT_FAILURE_TOLERANCE:
                 _LOGGER.warning(
                     "Status fetch for %s failed (%d in a row), keeping last known state",
-                    data.get("nickname") or device_id, failures,
+                    data.get("nickname") or mask_value(device_id), failures,
                 )
                 device_data[device_id] = previous
 
@@ -304,7 +305,7 @@ class SmartApp:
             except Exception as exc:
                 # One device's status fetch failed; keep others and mark this one
                 # unavailable rather than aborting the whole update.
-                _LOGGER.warning("Failed to fetch status for device %s: %s", device_id, exc)
+                _LOGGER.warning("Failed to fetch status for device %s: %s", mask_value(device_id), exc)
                 device_data[device_id] = {
                     **device,
                     "status": {},
@@ -342,13 +343,13 @@ class SmartApp:
         Returns:
             Whether successful
         """
-        _LOGGER.debug("Setting device %s command: %s = %s", device_id, command_type, value)
+        _LOGGER.debug("Setting device %s command: %s = %s", mask_value(device_id), command_type, value)
         self._operation_count += 1
 
         # Resolve the device from the cache by device_id
         device = self._devices_cache.get(device_id)
         if device is None:
-            _LOGGER.error("Device %s does not exist", device_id)
+            _LOGGER.error("Device %s does not exist", mask_value(device_id))
             return False
 
         raw_device = device.get("raw_data", {})
@@ -362,9 +363,9 @@ class SmartApp:
         )
 
         if success:
-            _LOGGER.debug("Device %s command set successfully", device_id)
+            _LOGGER.debug("Device %s command set successfully", mask_value(device_id))
         else:
-            _LOGGER.warning("Device %s command set failed", device_id)
+            _LOGGER.warning("Device %s command set failed", mask_value(device_id))
 
         return success
     
