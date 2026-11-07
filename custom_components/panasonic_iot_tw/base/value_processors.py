@@ -59,33 +59,7 @@ def process_signed_temperature(value: Any) -> float:
 
 def process_temperature_command(value: float) -> int:
     """Convert temperature to device command (handles negative)."""
-    device_value = int(value)
-    if device_value < 0:
-        device_value = device_value + 256
-    return device_value
-
-
-def process_climate_temperature(value: Any) -> float:
-    """Process climate temperature (0.1°C units to Celsius)."""
-    return float(value) / 10.0
-
-
-def process_climate_temperature_command(value: float) -> int:
-    """Process temperature command (Celsius to 0.1°C units)."""
-    return int(value * 10)
-
-
-def process_signed_climate_temperature(value: Any) -> float:
-    """Process signed climate temperature with conversion."""
-    temp_int = int(value)
-    if temp_int > 128:
-        temp_int = temp_int - 256
-    return float(temp_int) / 10.0
-
-
-def process_signed_climate_temperature_command(value: float) -> int:
-    """Process signed temperature command with conversion."""
-    device_value = int(value * 10)
+    device_value = round(value)
     if device_value < 0:
         device_value = device_value + 256
     return device_value
@@ -140,12 +114,6 @@ def process_integer_number(value: Any) -> float:
     return float(int(value))
 
 
-def process_signed_temperature_number(value: Any) -> float:
-    """Process signed temperature value for number entities."""
-    temp_int = int(value)
-    if temp_int > 128:
-        temp_int = temp_int - 256
-    return float(temp_int)
 
 
 # ============================================================================

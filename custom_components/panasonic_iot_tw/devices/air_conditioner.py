@@ -10,6 +10,7 @@ from homeassistant.helpers.entity import EntityCategory
 from ..base import BaseDevice, value_processors
 from ..const import (
     CLIMATE_AVAILABLE_FAN_MODE,
+    CLIMATE_AVAILABLE_MODE,
     CLIMATE_AVAILABLE_SWING_MODE
 )
 
@@ -45,13 +46,9 @@ class AirConditionerDevice(BaseDevice):
     PM25_COMMAND = "0x37"              # PM2.5                         Sensor
     
     # Mode mappings
-    MODE_MAPPING = {
-        0: "cool",
-        1: "dry", 
-        2: "fan_only",
-        3: "auto",
-        4: "heat",
-    }
+    # Derived from the climate entity's table so both report the same mode for
+    # a 0x01 value; OFF is left out because it is the power register, not 0x01.
+    MODE_MAPPING = {m["mappingCode"]: m["key"].value for m in CLIMATE_AVAILABLE_MODE if m["mappingCode"] >= 0}
     
     def __init__(self, coordinator, device_key: str, device_data: Dict[str, Any]):
         """Initialize air conditioner device."""
@@ -359,7 +356,6 @@ class AirConditionerDevice(BaseDevice):
                 target_temp_command=self.TARGET_TEMP_COMMAND,
                 current_temp_command=self.CURRENT_TEMP_COMMAND,
                 fan_mode_command=self.FAN_COMMAND,
-                hvac_mode_mapping=self.MODE_MAPPING,
                 min_temp=16.0,
                 max_temp=30.0,
                 temp_step=1.0,

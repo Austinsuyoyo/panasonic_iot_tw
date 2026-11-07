@@ -3,6 +3,7 @@ import logging
 from typing import Any, Dict, List, Optional, Callable
 
 from homeassistant.components.climate import (
+    ATTR_HVAC_MODE,
     ClimateEntity,
     ClimateEntityFeature,
     HVACMode,
@@ -57,7 +58,7 @@ class PanasonicClimate(PanasonicEntity, ClimateEntity):
         max_temp: float = 30.0,
         temp_step: float = 1.0,
         temp_unit: str = UnitOfTemperature.CELSIUS,
-        hvac_mode_mapping: Optional[Dict] = None,
+        hvac_mode_mapping: Optional[List[Dict[str, Any]]] = None,
         fan_mode_mapping: Optional[Dict] = None,
         swing_mode_mapping: Optional[Dict] = None,
         temp_processor: Optional[Callable[[Any], float]] = None,
@@ -112,8 +113,10 @@ class PanasonicClimate(PanasonicEntity, ClimateEntity):
         self._swing_mode_command = swing_mode_command
         
         # Processors
-        self._temp_processor = temp_processor or value_processors.process_climate_temperature
-        self._temp_command_processor = temp_command_processor or value_processors.process_climate_temperature_command
+        # Whole degrees: the official CommandList gives the AC's 0x03 as a
+        # 16-30 range in degrees, and its 0x04 sensor reads the same way
+        self._temp_processor = temp_processor or value_processors.process_signed_temperature
+        self._temp_command_processor = temp_command_processor or value_processors.process_temperature_command
         
         # Mode mappings
         self._hvac_mode_mapping = hvac_mode_mapping or CLIMATE_AVAILABLE_MODE
@@ -124,26 +127,31 @@ class PanasonicClimate(PanasonicEntity, ClimateEntity):
         self._reverse_fan_mode_mapping = self._create_reverse_mapping(self._fan_mode_mapping)
         self._reverse_swing_mode_mapping = self._create_reverse_mapping(self._swing_mode_mapping)
         
-        # Create HVAC mode mappings (handle list of dict format)
+        # Create HVAC mode mappings from a list of {"key", "mappingCode"} dicts;
+        # a non-dict entry raises here, an entry missing either key is ignored
         self._hvac_code_to_mode: Dict[int, HVACMode] = {}
         self._hvac_mode_to_code: Dict[HVACMode, int] = {}
-        if isinstance(self._hvac_mode_mapping, list):
-            for mode_info in self._hvac_mode_mapping:
-                code = mode_info.get("mappingCode")
-                mode = mode_info.get("key")
-                if code is not None and mode is not None:
-                    self._hvac_code_to_mode[code] = mode
-                    self._hvac_mode_to_code[mode] = code
+        for mode_info in self._hvac_mode_mapping:
+            code = mode_info.get("mappingCode")
+            mode = mode_info.get("key")
+            if code is not None and mode is not None:
+                self._hvac_code_to_mode[code] = mode
+                self._hvac_mode_to_code[mode] = code
         
-        # Climate features
-        self._attr_supported_features = supported_features or (
-            ClimateEntityFeature.TARGET_TEMPERATURE |
-            ClimateEntityFeature.FAN_MODE |
-            ClimateEntityFeature.SWING_MODE
-        )
+        # Climate features: only advertise controls backed by a command, or HA
+        # shows controls that silently do nothing
+        if supported_features is None:
+            supported_features = ClimateEntityFeature.TURN_ON | ClimateEntityFeature.TURN_OFF
+            if target_temp_command:
+                supported_features |= ClimateEntityFeature.TARGET_TEMPERATURE
+            if fan_mode_command:
+                supported_features |= ClimateEntityFeature.FAN_MODE
+            if swing_mode_command:
+                supported_features |= ClimateEntityFeature.SWING_MODE
+        self._attr_supported_features = supported_features
         
         # Temperature settings
-        self._attr_temperature_unit = temp_unit
+        self._attr_native_temperature_unit = temp_unit
         self._attr_min_temp = min_temp
         self._attr_max_temp = max_temp
         self._attr_target_temperature_step = temp_step
@@ -151,8 +159,8 @@ class PanasonicClimate(PanasonicEntity, ClimateEntity):
         # Available modes
         if hvac_modes:
             self._attr_hvac_modes = hvac_modes
-        elif self._hvac_mode_mapping:
-            self._attr_hvac_modes = [mode["key"] for mode in self._hvac_mode_mapping]
+        elif self._hvac_mode_to_code:
+            self._attr_hvac_modes = list(self._hvac_mode_to_code)
         else:
             self._attr_hvac_modes = [HVACMode.OFF, HVACMode.AUTO]
             
@@ -176,7 +184,7 @@ class PanasonicClimate(PanasonicEntity, ClimateEntity):
         return self._available_with_command(self._power_command)
     
     @property
-    def current_temperature(self) -> Optional[float]:
+    def native_current_temperature(self) -> Optional[float]:
         """Return the current temperature."""
         return self._get_conditional_processed_value(
             self._current_temp_command,
@@ -184,17 +192,21 @@ class PanasonicClimate(PanasonicEntity, ClimateEntity):
         )
     
     @property
-    def target_temperature(self) -> Optional[float]:
+    def native_target_temperature(self) -> Optional[float]:
         """Return the target temperature."""
         return self._get_conditional_processed_value(
             self._target_temp_command,
             self._temp_processor
         )
     
+    def _power(self) -> Optional[int]:
+        """Power register as an int; DeviceGetInfo reports every status as a string."""
+        return self._get_conditional_processed_value(self._power_command, value_processors.safe_int)
+
     @property
     def hvac_mode(self) -> HVACMode:
         """Return current HVAC mode."""
-        power = self._get_status(self._power_command)
+        power = self._power()
         
         if power == 0:
             return HVACMode.OFF
@@ -225,7 +237,9 @@ class PanasonicClimate(PanasonicEntity, ClimateEntity):
         return self._get_mapped_value(self._swing_mode_command, self._swing_mode_mapping)
     
     async def async_set_temperature(self, **kwargs) -> None:
-        """Set new target temperature."""
+        """Set new target temperature, switching mode first when the call names one."""
+        if (hvac_mode := kwargs.get(ATTR_HVAC_MODE)) is not None:
+            await self.async_set_hvac_mode(hvac_mode)
         if not self._target_temp_command:
             return
             
@@ -239,15 +253,18 @@ class PanasonicClimate(PanasonicEntity, ClimateEntity):
                     "Invalid temperature %s for %s (entity_id: %s): %s", temp, self._attr_name, self._attr_unique_id, e
                 )
     
+    async def async_turn_on(self) -> None:
+        """Send only the power command; HA's default would also switch the mode to heat."""
+        await self._send_command(self._power_command, 1)
+
     async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
         """Set new HVAC mode."""
         if hvac_mode == HVACMode.OFF:
             # Turn off the device
             await self._send_command(self._power_command, 0)
         else:
-            # First turn on the device if it's off
-            current_power = self._get_status(self._power_command)
-            if current_power == 0:
+            # Power on unless the unit is known to be on
+            if self._power() != 1:
                 await self._send_command(self._power_command, 1)
             
             # Set the mode if mode command is available
