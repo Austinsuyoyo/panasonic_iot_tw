@@ -8,6 +8,8 @@ and versions follow the calendar scheme `YYYY.M.PATCH` used by Home Assistant.
 
 ## [Unreleased]
 
+## [2026.11.0] - 2026-11-07
+
 ### Changed
 
 - **Breaking:** Home Assistant 2026.11.0 or newer is required. The climate
@@ -44,17 +46,17 @@ and versions follow the calendar scheme `YYYY.M.PATCH` used by Home Assistant.
 **變更(不相容)**需要 Home Assistant 2026.11.0 或更新版本。climate 實體改用
 2026.11 新增的原生溫度 API,測試改用只支援 2026.11 起的官方
 `pytest-homeassistant` 套件。請先升級 Home Assistant,再更新整合。**修正**冷氣的
-climate 實體建立時會崩潰(模式對照表的格式傳錯),climate 平台因此 setup 失敗，
-所有冷氣都沒有 climate 實體;模式代碼沒有改變。climate 實體恢復後，底下從未執行過的
-程式另外修正:溫度改用整數度(官方 App 指令表定義 0x03 為 16-30 度;原本除以 10,
-26°C 會顯示成 2.6°C、25°C 會送出 250);關機中的冷氣顯示為 off,對關機中的冷氣
-選模式會先開機(電源狀態是字串，原本拿來和數字比較);`climate.set_temperature`
-帶 `hvac_mode` 時也會切換模式，華氏設定值改為四捨五入到整數 °C(原本直接截斷);沒有擺動指令就不顯示擺動
-控制;支援 `climate.turn_on` / `climate.turn_off`,開機只送電源指令
-(HA 預設還會把模式切到暖氣)。某台家電的實體建立失敗時，改為跳過該台並記錄錯誤;以前
-會讓整個平台失效，例如一台裝置的 sensor 定義出錯，所有家電的 sensor 都會消失。
-climate 平台每次 HA 啟動都會記錄 current_temperature / target_temperature 棄用
-警告的問題也已修正，舊名稱在 2027.11 會失效。
+climate 實體建立時會崩潰(模式對照表的格式傳錯),climate 平台因此 setup 失敗，所有
+冷氣都沒有 climate 實體;模式代碼沒有改變。climate 實體恢復後，底下從未執行過的程
+式另外修正:溫度改用整數度(官方 App 指令表定義 0x03 為 16-30 度;原本除以 10,因此
+26°C 會顯示成 2.6°C、25°C 會送出 250);關機中的冷氣顯示為 off,對關機中的冷氣選模式會先
+開機(電源狀態是字串，原本拿來和數字比較);`climate.set_temperature`
+帶 `hvac_mode` 時也會切換模式，華氏設定值改為四捨五入到整數 °C(原本直接截斷);沒有擺
+動指令就不顯示擺動控制;支援 `climate.turn_on` / `climate.turn_off`,開機只送電源
+指令(HA 預設還會把模式切到暖氣)。某台家電的實體建立失敗時，改為跳過該台並記錄錯
+誤;以前會讓整個平台失效，例如一台裝置的 sensor 定義出錯，所有家電的 sensor 都會
+消失。climate 平台每次 HA 啟動都會記錄 current_temperature / target_temperature
+棄用警告的問題也已修正，舊名稱在 2027.11 會失效。
 
 ## [2026.10.2] - 2026-10-24
 
@@ -279,7 +281,8 @@ First public release. 首次公開發佈。
 遷移),實體可用性改為即時讀取,狀態值改用穩定 slug 並透過翻譯顯示中文;
 指令失敗會在 UI 顯示錯誤,token 不再寫入除錯記錄。
 
-[Unreleased]: https://github.com/Austinsuyoyo/panasonic_iot_tw/compare/v2026.10.2...HEAD
+[Unreleased]: https://github.com/Austinsuyoyo/panasonic_iot_tw/compare/v2026.11.0...HEAD
+[2026.11.0]: https://github.com/Austinsuyoyo/panasonic_iot_tw/compare/v2026.10.2...v2026.11.0
 [2026.10.2]: https://github.com/Austinsuyoyo/panasonic_iot_tw/compare/v2026.10.1...v2026.10.2
 [2026.10.1]: https://github.com/Austinsuyoyo/panasonic_iot_tw/compare/v2026.10.0...v2026.10.1
 [2026.10.0]: https://github.com/Austinsuyoyo/panasonic_iot_tw/releases/tag/v2026.10.0
