@@ -29,9 +29,7 @@ Enabled platforms: `climate`, `humidifier`, `sensor`, `binary_sensor`, `switch`,
 
 ## Requirements
 
-- **Home Assistant** — a recent release. **2026.3 or newer** is recommended so
-  the integration's bundled brand icon is displayed natively; the integration
-  still works on older versions, just without the icon.
+- **Home Assistant 2026.11 or newer.**
 - **Panasonic Smart App account** with registered devices.
 - **Internet access** to `https://ems2.panasonic.com.tw`.
 
@@ -112,10 +110,11 @@ version, the integration version, and the device model.
 ## Development
 
 ```bash
+# Set up the test environment (Python 3.14; pins the minimum supported HA)
+python3.14 -m venv venv
+./venv/bin/pip install -r tests/requirements.txt
 # Unit tests (offline, no credentials needed)
 ./venv/bin/pytest tests/unit
-# or set up a fresh environment first:
-pip install -r tests/requirements.txt
 ```
 
 Integration tests hit the **real** Panasonic API and require valid credentials

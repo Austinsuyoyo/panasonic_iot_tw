@@ -1,6 +1,6 @@
 """Unit tests for config entry migration (v1 -> v2)."""
 import pytest
-from pytest_homeassistant_custom_component.common import MockConfigEntry
+from pytest_homeassistant.common import MockConfigEntry
 
 from custom_components.panasonic_iot_tw import async_migrate_entry
 from custom_components.panasonic_iot_tw.const import (

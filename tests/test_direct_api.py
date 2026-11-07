@@ -2,19 +2,8 @@
 """
 Real API test script - standalone version
 
-Why is this script needed?
-
-Because pytest-homeassistant-custom-component forcibly enables socket
-blocking, tests that require a real network connection cannot be run
-through pytest.
-
-This script can be run directly, without depending on pytest, avoiding
-the socket restriction.
-
-Future plan:
-   Once https://github.com/MatthewFlamm/pytest-homeassistant-custom-component/pull/218
-   is merged, these tests will be folded into tests/integration/test_real_api.py,
-   and this file can be deleted.
+Predates tests/integration/test_real_api.py running under pytest, which
+now covers the same calls; this script still runs without pytest.
 
 Usage:
   python tests/test_direct_api.py
@@ -24,8 +13,7 @@ Environment variables:
   PANASONIC_PASSWORD - Panasonic password
 
 Related documents:
-  - tests/integration/README.md - full integration plan description
-  - tests/integration/test_real_api.py - pytest-format tests (pending activation)
+  - tests/integration/test_real_api.py - the pytest version of these tests
 """
 import asyncio
 import aiohttp

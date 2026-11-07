@@ -3,6 +3,7 @@ import sys
 import os
 import asyncio
 import aiohttp
+import logging
 from pathlib import Path
 from typing import Dict, Any, Optional, List
 
@@ -14,6 +15,46 @@ import pytest
 from unittest.mock import AsyncMock, Mock, patch
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+
+
+# Wording of Home Assistant's frame.report_usage and deprecation helpers
+_HA_USAGE_REPORT_MARKERS = (
+    "Detected that custom integration",
+    "provides the deprecated",
+    "stop working in Home Assistant",
+)
+
+
+class _UsageReportCollector(logging.Handler):
+    def __init__(self):
+        super().__init__(logging.WARNING)
+        self.reports = []
+
+    def emit(self, record):
+        message = record.getMessage()
+        if any(marker in message for marker in _HA_USAGE_REPORT_MARKERS):
+            self.reports.append(message)
+
+
+@pytest.fixture(autouse=True)
+def _fail_on_ha_deprecation():
+    """Fail any test during which Home Assistant reports deprecated API usage.
+
+    Home Assistant logs these reports instead of raising, so without this a
+    deprecation only surfaces in a user's log after they upgrade. Being a
+    conftest autouse fixture, it wraps the test and the fixtures the test
+    requests, hass included, but not pytest-homeassistant's own autouse
+    fixtures. HA reports each frame-detected usage once per process, so a
+    report first raised outside this window is not seen again. A plain
+    handler instead of caplog keeps the root logger at its level
+    (pytest-homeassistant's caplog switches it to DEBUG).
+    """
+    collector = _UsageReportCollector()
+    root = logging.getLogger()
+    root.addHandler(collector)
+    yield
+    root.removeHandler(collector)
+    assert not collector.reports, collector.reports
 
 
 # Allow network connections for integration tests

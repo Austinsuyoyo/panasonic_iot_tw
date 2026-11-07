@@ -28,8 +28,7 @@ Home Assistant 原生實體。本整合為 `cloud_polling`（雲端輪詢）類�
 
 ## 系統需求
 
-- **Home Assistant** — 建議使用 **2026.3 或更新版本**，整合內建的品牌圖示才會原生
-  顯示；較舊版本仍可正常運作，只是不會顯示圖示。
+- **Home Assistant 2026.11 或更新版本。**
 - **Panasonic Smart App 帳號**，且已註冊設備。
 - 可連線到 `https://ems2.panasonic.com.tw` 的 **網際網路連線**。
 
@@ -102,10 +101,11 @@ logger:
 ## 開發
 
 ```bash
+# 建立測試環境（Python 3.14；固定在最低支援的 HA 版本）
+python3.14 -m venv venv
+./venv/bin/pip install -r tests/requirements.txt
 # 單元測試（離線，不需要憑證）
 ./venv/bin/pytest tests/unit
-# 或先建立乾淨的環境：
-pip install -r tests/requirements.txt
 ```
 
 整合測試會連線 **真實的** Panasonic API，需透過環境變數提供有效憑證

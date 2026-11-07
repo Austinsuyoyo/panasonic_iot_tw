@@ -1,6 +1,12 @@
 """Integration tests configuration - allows network connections"""
+import socket
+
 import pytest
 import pytest_socket
+
+# Captured at import time, before pytest-homeassistant's per-test setup
+# replaces them with resolvers that refuse every non-local host name.
+_REAL_RESOLVERS = (socket.getaddrinfo, socket.gethostbyname, socket.gethostbyname_ex)
 
 
 @pytest.hookimpl(trylast=True)
@@ -8,14 +14,19 @@ def pytest_runtest_setup():
     """Allow integration tests to use real network connections.
 
     Uses trylast=True to ensure this hook runs after pytest-homeassistant.
-    pytest-homeassistant does two things: disable_socket() swaps out
-    socket.socket, and socket_allow_hosts(["127.0.0.1"]) additionally
-    intercepts socket.connect. Calling enable_socket() alone only undoes
-    the former; connections are still blocked by the host allowlist,
-    so _remove_restrictions() must also be called to restore connect.
+    pytest-homeassistant does three things: disable_socket() swaps out
+    socket.socket, socket_allow_hosts(["127.0.0.1"]) additionally
+    intercepts socket.connect, and the socket module's resolvers raise
+    "DNS resolution disabled in tests". Calling enable_socket() alone only
+    undoes the first; _remove_restrictions() restores connect, and the
+    saved resolvers restore DNS.
     """
+    if _REAL_RESOLVERS[0].__module__ != "socket":
+        # Fail only these tests, not the whole session's collection
+        pytest.fail("socket resolvers were already patched when this conftest was imported; cannot restore DNS")
     pytest_socket.enable_socket()
     pytest_socket._remove_restrictions()
+    socket.getaddrinfo, socket.gethostbyname, socket.gethostbyname_ex = _REAL_RESOLVERS
 
 
 @pytest.fixture(autouse=True)

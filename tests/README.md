@@ -7,7 +7,7 @@
 ### 1. 建立虛擬環境
 ```bash
 cd /path/to/panasonic_iot_tw
-python3 -m venv venv
+python3.14 -m venv venv   # pytest-homeassistant 需要 Python 3.14
 source venv/bin/activate  # Linux/Mac
 # 或 venv\Scripts\activate  # Windows
 ```
@@ -83,23 +83,14 @@ pytest standalone/test_smartapp_standalone.py -v
 ```
 
 ### 真實 API 測試 (integration/)
-需要真實 Panasonic IoT API 憑證的整合測試。
-
-**⚠️ 當前狀態**：由於 `pytest-homeassistant-custom-component` 的 socket 阻擋限制，目前**無法透過 pytest** 執行真實 API 測試。
-
-**當前解決方案**：使用獨立測試腳本
+需要真實 Panasonic IoT API 憑證的整合測試。`integration/conftest.py` 只在這個目錄解除 `pytest-homeassistant` 的網路與 DNS 阻擋；沒有設定憑證時，這些測試會自動略過。
 
 ```bash
 # 設定環境變數
 export PANASONIC_ACCOUNT='your_account@example.com'
 export PANASONIC_PASSWORD='your_password'
 
-# 執行真實 API 測試（獨立腳本）
-python tests/test_direct_api.py
-```
-
-**未來整合**：等待 [PR #218](https://github.com/MatthewFlamm/pytest-homeassistant-custom-component/pull/218) 合併後，可透過 pytest 執行：
-```bash
+# 執行真實 API 測試
 pytest -m live_api -v
 ```
 
@@ -145,7 +136,7 @@ which python
 
 **2. 缺少依賴**
 ```bash
-pip install -r tests/requirements-minimal.txt
+pip install -r tests/requirements.txt
 ```
 
 **3. 測試失敗**

@@ -2,19 +2,13 @@
 """
 Real API integration tests
 
-Current status: due to socket-blocking restrictions in
-pytest-homeassistant-custom-component, these tests currently cannot run.
-Use tests/test_direct_api.py instead.
-
-Future integration: once
-https://github.com/MatthewFlamm/pytest-homeassistant-custom-component/pull/218
-is merged, these tests will be able to run normally through pytest.
-
 These tests connect to the real Panasonic IoT API and require valid
-account credentials.
+account credentials; without them they are skipped. tests/integration/
+conftest.py lifts pytest-homeassistant's network and DNS block for this
+directory only.
 
-How to run (future):
-  # Skip real API tests (default)
+How to run:
+  # Without credentials the real API tests are skipped
   pytest
 
   # Run real API tests (requires environment variables)

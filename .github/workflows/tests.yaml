@@ -1,0 +1,40 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # minimum: the pinned release in tests/requirements.txt (= hacs.json).
+        # latest: the newest release, so the nightly run flags a new Home
+        # Assistant deprecation or break before users upgrade into it.
+        homeassistant: [minimum, latest]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+      - name: Install the minimum supported Home Assistant
+        if: matrix.homeassistant == 'minimum'
+        run: pip install -r tests/requirements.txt
+      - name: Install the latest Home Assistant
+        if: matrix.homeassistant == 'latest'
+        # Ask PyPI for the newest release and pin it, so a release that needs
+        # a newer Python fails here instead of pip quietly picking an older one
+        run: |
+          latest=$(curl -fsSL https://pypi.org/pypi/pytest-homeassistant/json | jq -r .info.version)
+          pip install "pytest-homeassistant==$latest"
+      - name: Run the offline tests
+        working-directory: tests
+        run: pytest -m "not live_api" unit standalone

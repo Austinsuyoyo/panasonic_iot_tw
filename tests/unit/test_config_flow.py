@@ -4,7 +4,7 @@ from unittest.mock import patch
 import pytest
 from homeassistant import config_entries, data_entry_flow
 from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
-from pytest_homeassistant_custom_component.common import MockConfigEntry
+from pytest_homeassistant.common import MockConfigEntry
 
 from custom_components.panasonic_iot_tw.config_flow import ConfigFlow, InvalidAuth
 from custom_components.panasonic_iot_tw.const import (
@@ -12,12 +12,6 @@ from custom_components.panasonic_iot_tw.const import (
     CONF_UPDATE_INTERVAL,
     DOMAIN,
 )
-
-@pytest.fixture(autouse=True)
-def _enable(enable_custom_integrations):
-    """Enable the custom integration for flow tests."""
-    yield
-
 
 @pytest.fixture(autouse=True)
 def _mock_setup_entry():

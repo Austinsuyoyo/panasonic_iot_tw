@@ -2,113 +2,15 @@
 
 這個目錄包含需要連接真實 Panasonic IoT API 的測試。
 
-## ⚠️ 當前狀態：無法透過 pytest 執行
+## 運作方式
 
-**重要**: 由於 `pytest-homeassistant-custom-component` 強制啟用 socket 阻擋，**目前無法透過 pytest 執行真實 API 測試**。
+`pytest-homeassistant` 預設會阻擋所有對外連線：它換掉 `socket.socket`、只允許連到 `127.0.0.1`,並讓 DNS 解析直接失敗。`conftest.py` 用 `trylast` 的 `pytest_runtest_setup` hook,只在這個目錄把三者都還原，所以單元測試仍然離線。
 
-### 問題說明
+沒有設定 `PANASONIC_ACCOUNT` / `PANASONIC_PASSWORD` 時，所有測試會自動略過。
 
-`pytest-homeassistant-custom-component` 套件在 `pytest_runtest_setup()` hook 中強制執行：
-```python
-pytest_socket.socket_allow_hosts(["127.0.0.1"])
-pytest_socket.disable_socket(allow_unix_socket=True)
-```
+`tests/test_direct_api.py` 是 pytest 能跑這些測試之前的獨立腳本，不需要 pytest。
 
-這會阻擋所有外部網路連線，導致真實 API 測試失敗。
-
-相關追蹤：
-- [Issue #154](https://github.com/MatthewFlamm/pytest-homeassistant-custom-component/issues/154) - SocketBlockedError 問題
-- [PR #218](https://github.com/MatthewFlamm/pytest-homeassistant-custom-component/pull/218) - **將 pytest-socket 改為可選依賴**
-
-### 當前解決方案
-
-使用獨立測試腳本 **`tests/test_direct_api.py`**：
-
-```bash
-# 設定環境變數
-export PANASONIC_ACCOUNT='your_account@example.com'
-export PANASONIC_PASSWORD='your_password'
-
-# 執行真實 API 測試
-python tests/test_direct_api.py
-```
-
-輸出範例：
-```
-🧪 Panasonic IoT TW 真實 API 測試
-執行測試:
-  ✅ test_login
-     Token: XXXXXXXX-XXXX-XXXX-...
-  ✅ test_get_devices
-     找到 3 個裝置
-  ✅ test_device_info
-     裝置: Panasonic 冰箱 (NR-D611XGS)
-
-測試結果: 3 passed, 0 failed
-```
-
----
-
-## 🔮 未來整合計畫
-
-### 當 PR #218 合併後
-
-一旦 [PR #218](https://github.com/MatthewFlamm/pytest-homeassistant-custom-component/pull/218) 合併，將 pytest-socket 改為可選依賴，這些測試就能透過 pytest 執行。
-
-#### 整合步驟
-
-1. **更新依賴**
-   ```bash
-   # requirements.txt
-   pytest-homeassistant-custom-component>=0.14.0  # 假設版本
-   ```
-
-2. **配置 pytest**
-
-   `integration/conftest.py` 已經準備好，使用 `@pytest.hookimpl(trylast=True)` 覆蓋 socket 限制：
-   ```python
-   from pytest_socket import enable_socket
-
-   @pytest.hookimpl(trylast=True)
-   def pytest_runtest_setup():
-       enable_socket()  # 允許網路連接
-   ```
-
-3. **執行測試**
-   ```bash
-   # 執行真實 API 測試
-   pytest -m live_api -v
-
-   # 或執行所有測試（包含 mock 和真實 API）
-   pytest
-   ```
-
-4. **遷移 test_direct_api.py**
-
-   將獨立腳本的測試整合進 `test_real_api.py`，然後刪除 `test_direct_api.py`。
-
----
-
-## 📋 測試文件狀態
-
-### 當前文件
-
-- ✅ **`tests/test_direct_api.py`** - 獨立腳本，可執行（3 個測試）
-  - `test_login` - 登入功能
-  - `test_get_devices` - 取得裝置列表
-  - `test_device_info` - 驗證裝置資訊
-
-- ⏸️ **`test_real_api.py`** - pytest 格式，因 socket 阻擋無法執行（6 個測試）
-  - `TestRealAPILogin.test_login_success` - 登入成功
-  - `TestRealAPILogin.test_login_with_invalid_credentials` - 錯誤憑證
-  - `TestRealAPIDevices.test_get_devices` - 裝置列表
-  - `TestRealAPIDevices.test_get_device_status` - 裝置狀態
-  - `TestRealAPICommands.test_send_command` - 控制命令（skip）
-  - `TestRealAPITokenManagement.test_token_refresh` - Token 刷新
-
----
-
-## 🧪 執行測試（未來可用）
+## 🧪 執行測試
 
 ### 方式 1: 執行所有測試（包含真實 API）
 
@@ -160,6 +62,11 @@ pytest -m "not live_api" -v
 
 ### TestRealAPITokenManagement - Token 管理
 - ✅ `test_token_refresh` - Token 刷新測試
+
+### TestRealAPIFridgeRegisters - 冰箱暫存器
+- ✅ `test_dump_fridge_registers` - 印出冰箱所有暫存器現況
+- ✅ `test_door_bit_is_readable` - 門狀態位元可讀
+- ✅ `test_status_flags_readable` - 狀態旗標可讀
 
 ## 🔍 測試輸出範例
 
