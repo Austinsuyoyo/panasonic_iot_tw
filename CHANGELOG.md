@@ -8,6 +8,54 @@ and versions follow the calendar scheme `YYYY.M.PATCH` used by Home Assistant.
 
 ## [Unreleased]
 
+### Changed
+
+- **Breaking:** Home Assistant 2026.11.0 or newer is required. The climate
+  entity now uses the native temperature API that 2026.11 introduced, and
+  the tests moved to the official `pytest-homeassistant` package, which only
+  exists from 2026.11. Update Home Assistant before updating the integration.
+
+### Fixed
+
+- Air conditioners: the climate entity crashed while being created, because
+  it was handed the HVAC mode table in the wrong shape, so the climate
+  platform failed to set up and no air conditioner had a climate entity.
+  The mode codes are unchanged.
+- Air conditioners: with the entity back, the climate code under it had
+  never run and needed these fixes:
+  - Temperatures are whole degrees, as the official app's command list
+    defines 0x03 (a 16-30 range in degrees). The inherited code divided by
+    10, so 26 °C would have shown as 2.6 °C and 25 °C been sent as 250.
+  - A powered-off unit shows as off, and choosing a mode on it powers it on
+    first. The power status arrives as a string and was compared to a number.
+  - `climate.set_temperature` with an `hvac_mode` switches the mode too, and
+    a Fahrenheit setpoint is rounded to the nearest whole °C, not truncated.
+  - No swing control without a swing command.
+  - `climate.turn_on` / `climate.turn_off` are supported. Turning on sends
+    only the power command; Home Assistant's default would also have
+    switched the mode to heat.
+- An appliance whose entities fail to build is skipped with an error in the
+  log. Before, it took that platform down for every appliance, e.g. a broken
+  sensor definition on one device removed the sensors of all of them.
+- The climate platform no longer logs "provides the deprecated
+  current_temperature / target_temperature" on every Home Assistant start,
+  even without an air conditioner. The old names stop working in 2027.11.
+
+**變更(不相容)**需要 Home Assistant 2026.11.0 或更新版本。climate 實體改用
+2026.11 新增的原生溫度 API,測試改用只支援 2026.11 起的官方
+`pytest-homeassistant` 套件。請先升級 Home Assistant,再更新整合。**修正**冷氣的
+climate 實體建立時會崩潰(模式對照表的格式傳錯),climate 平台因此 setup 失敗，
+所有冷氣都沒有 climate 實體;模式代碼沒有改變。climate 實體恢復後，底下從未執行過的
+程式另外修正:溫度改用整數度(官方 App 指令表定義 0x03 為 16-30 度;原本除以 10,
+26°C 會顯示成 2.6°C、25°C 會送出 250);關機中的冷氣顯示為 off,對關機中的冷氣
+選模式會先開機(電源狀態是字串，原本拿來和數字比較);`climate.set_temperature`
+帶 `hvac_mode` 時也會切換模式，華氏設定值改為四捨五入到整數 °C(原本直接截斷);沒有擺動指令就不顯示擺動
+控制;支援 `climate.turn_on` / `climate.turn_off`,開機只送電源指令
+(HA 預設還會把模式切到暖氣)。某台家電的實體建立失敗時，改為跳過該台並記錄錯誤;以前
+會讓整個平台失效，例如一台裝置的 sensor 定義出錯，所有家電的 sensor 都會消失。
+climate 平台每次 HA 啟動都會記錄 current_temperature / target_temperature 棄用
+警告的問題也已修正，舊名稱在 2027.11 會失效。
+
 ## [2026.10.2] - 2026-10-24
 
 ### Fixed

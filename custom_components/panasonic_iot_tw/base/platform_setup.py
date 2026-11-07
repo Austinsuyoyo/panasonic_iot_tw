@@ -56,7 +56,12 @@ class PlatformSetupHelper:
                 # Get entities from device using the specified getter method
                 getter = getattr(device, entity_getter_name, None)
                 if getter:
-                    device_entities = getter(coordinator)
+                    try:
+                        device_entities = getter(coordinator)
+                    except Exception:  # noqa: BLE001
+                        # One broken device must not take every other appliance down with it
+                        _LOGGER.exception("Failed to create %s entities for %s", platform_name, device_name)
+                        continue
                     entities.extend(device_entities)
                     _LOGGER.debug("Created %s %s entities for %s", len(device_entities), platform_name, device_name)
             else:

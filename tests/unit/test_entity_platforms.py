@@ -14,6 +14,7 @@ import pytest
 from homeassistant.components.climate import ClimateEntityFeature
 from homeassistant.config_entries import ConfigEntryState
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity import Entity
 from homeassistant.util.unit_system import US_CUSTOMARY_SYSTEM
 from pytest_homeassistant.common import MockConfigEntry
@@ -21,8 +22,10 @@ from pytest_homeassistant.common import MockConfigEntry
 import custom_components.panasonic_iot_tw as integration
 from custom_components.panasonic_iot_tw.const import (
     DEVICE_TYPE_AC,
+    DEVICE_TYPE_REFRIGERATOR,
     DOMAIN,
 )
+from custom_components.panasonic_iot_tw.devices.air_conditioner import AirConditionerDevice
 from custom_components.panasonic_iot_tw.devices.device_factory import (
     DeviceFactory,
     register_all_devices,
@@ -87,6 +90,19 @@ async def test_every_device_type_sets_up_cleanly(hass: HomeAssistant, caplog):
     errors = [r.getMessage() for r in caplog.records if r.levelno >= logging.ERROR]
     assert not errors, errors
     assert hass.states.async_entity_ids("climate")
+
+
+async def test_one_broken_device_keeps_the_platform_for_the_others(hass: HomeAssistant):
+    """A getter that raises skips that device; otherwise HA drops the whole platform."""
+    with patch.object(AirConditionerDevice, "get_sensor_entities", side_effect=TypeError("boom")):
+        entry, _ = await _setup(hass, [_device(DEVICE_TYPE_AC), _device(DEVICE_TYPE_REFRIGERATOR)])
+
+    sensors = {
+        e.unique_id.split("_")[0]
+        for e in er.async_entries_for_config_entry(er.async_get(hass), entry.entry_id)
+        if e.domain == "sensor"
+    }
+    assert sensors == {"dev-2"}
 
 
 @pytest.mark.parametrize(("power", "expected_state"), [("1", "cool"), ("0", "off")])
